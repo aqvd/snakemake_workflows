@@ -1,2 +1,2 @@
 # snakemake_workflows
-werrflows for NGS using snakemake
+workflows for NGS using snakemake
