@@ -19,7 +19,7 @@ def tryMkdir(path):
 	except FileExistsError:
 		pass
 
-[tryMkdir(p) for p in (DATADIR,RESDIR, LOGDIR)]
+[tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, RESDIR+"/fastQC")]
 
 ## Genome bowtie2 index prefixes paths
 genome_path = {
@@ -109,11 +109,9 @@ rule fastQC:
 		LOGDIR + "/fastQC_{fq_base}.log"
 	threads:
 		get_resource("fastQC", "threads")
-	run:
-		command="fastqc -o {Resdir} -t {Threads} {Input} &> {Log}".format(
-				Resdir=RESDIR, Threads=Treads, Input=input.fq, Log=log)
-		
-		shell(command)
+	shell:
+		"fastqc --outdir {}/fastQC --threads {{threads}} {{input.fq}} \
+		|& tee {{log}}".format(RESDIR)
 
 rule fastQScreen:
 	input:
@@ -125,13 +123,11 @@ rule fastQScreen:
 		LOGDIR + "/fastQC_{fq_base}.log"
 	threads:
 		get_resource("fastQScreen", "threads")
-	run:
-		command="fastq_screen --threads {Threads} --aligner bowtie2 \
-		--outdir {Resdir}/fastQScreen {Input} > \
-		>(tee -a {Log}) 2>&1".format(Threads=threads, Resdir=RESDIR,
-		Input=input.fq, Log=log)
+	shell:
+		"fastq_screen --threads {{threads}} --aligner bowtie2 \
+		--conf /home/aquevedo/opt/FastQ-Screen-0.14.1/fastq_screen.conf \
+		--outdir {}/fastQScreen {{input.fq}} |& tee {{log}}".format(RESDIR)
 		
-		shell(command)
 
 rule bowtie2_align:
 	input:
@@ -153,8 +149,8 @@ rule bowtie2_align:
 	run:
 		reads=",".join(input.fq),
 		shell("bowtie2 -x {params.genomeIndex} -U {reads} \
-			-p {threads} --time	--no-unal -S {output.sam} > \
-			>(tee -a {output.stats}) 2> >(tee -a {log} >&2)" )
+			-p {threads} --time	--no-unal -S {output.sam} \
+			|& tee {output.stats}")
 
 rule sort_sam:
 	input:
@@ -173,7 +169,7 @@ rule sort_sam:
 		'gatk SortSam --java-options "-Xmx{resources.mem}M" \
 		-I {input.sam} \
 		-O {output.sorted_bam} \
-		-SORT_ORDER coordinate > >(tee -a {log}) 2>&1'
+		--SORT_ORDER coordinate |& tee {log}'
 	## Picard raises Abort trap 6 error
 		# "java -jar -Xmx4096M -$PICARD SortSam \
 		# -I {input.sam} \
@@ -192,21 +188,35 @@ rule remove_duplicates:
 		mem=get_resource("gatk", "mem"),
 		walltime=get_resource("gatk","walltime")
 	log:
-		LOGDIR + "/picard/markDup_{sample}.log"
+		LOGDIR + "/gatk/markDup_{sample}.log"
 	shell:
 		'gatk MarkDuplicates --java-options "-Xmx{resources.mem}M" \
 		-I {input.sorted_bam} \
 		-O {output.nodup_bam} \
-		-M {output.metrics} > >(tee -a {log}) 2>&1'
-	## Picard raises Abort trap 6 error
-		# shell("java -jar -Xmx4096M $PICARD MarkDuplicates \
-		# -I {input.sorted_bam} \
-		# -O {output.nodup_bam} \
-		# -M {output.metrics} > >(tee -a {log}) 2>&1")
+		-M {output.metrics} |& tee {log}'
+
+
+rule index_bam:
+	input:
+		DATADIR + "/align/{sample}_final.bam"
+	output:
+		DATADIR + "/align/{sample}_final.bam.bai"
+	threads: 1
+
+	resources:
+		mem=get_resource("gatk", "mem"),
+		walltime=get_resource("gatk","walltime")
+	log:
+		LOGDIR + "/gatk/index_{sample}.log"
+	shell:
+		'gatk BuildBamIndex --java-options "-Xmx{resources.mem}M" \
+		-I {input} |& tee {log}'
+
 
 rule create_bigWig:
 	input:
 		nodup_bam=DATADIR + "/align/{sample}_final.bam"
+		bam_index=DATADIR + "/align/{sample}_final.bam.bai"
 	output:
 		bw=RESDIR + "/bw/{sample}_RPKM.bw"
 	params:
@@ -214,20 +224,15 @@ rule create_bigWig:
 			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
 	threads:
 		get_resource("create_bigWig", "threads")
+	conda:
+		"envs/deeptools.yaml"
 	resources:
-        #mem=get_resource("create_bigWig","mem"),
-        #walltime=get_resource("create_bigwig","walltime")
+        mem=get_resource("create_bigWig","mem"),
+        walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
 	shell:
-		'conda activate deeptools &&\
-		samtools index {input.nodup_bam} && \
-		bamCoverage --effectiveGenomeSize {params.genomeSize} \
-		--normalizeUsing RPKM -b {input.nodup_bam} -o {output.bw} \
-		conda deactivate &&'
-
-
-
-
-
-
+		'bamCoverage --effectiveGenomeSize {params.genomeSize} \
+		--normalizeUsing RPKM -p {threads} \
+		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} &&\
+		conda deactivate'
