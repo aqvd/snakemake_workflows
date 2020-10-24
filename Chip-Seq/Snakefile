@@ -135,7 +135,6 @@ rule bowtie2_align:
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
 		sam=temp(DATADIR + "/align/{sample}.sam"),
-		#sam=DATADIR + "/align/{sample}.sam",
 		stats=DATADIR + "/align/stats/bowtie2stats_{sample}.txt"
 	params:
 		## with logical indexing retrieve the same PATH_genome n times, 
@@ -166,15 +165,13 @@ rule sort_sam:
 		mem=get_resource("gatk","mem"),
 		walltime=get_resource("gatk","walltime")
 	shell:
-		'gatk SortSam --java-options "-Xmx{resources.mem}M" \
+		'''
+		gatk SortSam --java-options "-Xmx{resources.mem}M" \
 		-I {input.sam} \
 		-O {output.sorted_bam} \
-		--SORT_ORDER coordinate |& tee {log}'
-	## Picard raises Abort trap 6 error
-		# "java -jar -Xmx4096M -$PICARD SortSam \
-		# -I {input.sam} \
-		# -O {output.sorted_bam} \
-		# -SORT_ORDER coordinate > >(tee -a {log}) 2>&1"
+		--SORT_ORDER coordinate |& tee {log}
+		'''
+
 
 rule remove_duplicates:
 	input:
@@ -190,11 +187,12 @@ rule remove_duplicates:
 	log:
 		LOGDIR + "/gatk/markDup_{sample}.log"
 	shell:
-		'gatk MarkDuplicates --java-options "-Xmx{resources.mem}M" \
+		'''
+		gatk MarkDuplicates --java-options "-Xmx{resources.mem}M" \
 		-I {input.sorted_bam} \
 		-O {output.nodup_bam} \
-		-M {output.metrics} |& tee {log}'
-
+		-M {output.metrics} |& tee {log}
+		'''
 
 rule index_bam:
 	input:
@@ -209,8 +207,10 @@ rule index_bam:
 	log:
 		LOGDIR + "/gatk/index_{sample}.log"
 	shell:
-		'gatk BuildBamIndex --java-options "-Xmx{resources.mem}M" \
-		-I {input} |& tee {log}'
+		'''
+		gatk BuildBamIndex --java-options "-Xmx{resources.mem}M" \
+		-I {input} |& tee {log}
+		'''
 
 
 rule create_bigWig:
@@ -232,7 +232,8 @@ rule create_bigWig:
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
 	shell:
-		'bamCoverage --effectiveGenomeSize {params.genomeSize} \
+		'''
+		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing RPKM -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} &&\
-		conda deactivate'
+		'''
