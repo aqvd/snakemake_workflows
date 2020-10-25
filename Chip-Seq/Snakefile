@@ -109,7 +109,7 @@ rule all:
 		## .bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
 			sample=data.Samples[(data.PATH_genome_cal!="") & 
-								(data.Protein!="Input")].unique())
+								(data.Protein!="input")].unique())
 
 rule QC_only:
 	input:
@@ -209,10 +209,10 @@ rule calculate_scaled:
 		stats=DATADIR + "/align/stats/{sample}.txt",
 		calStats=DATADIR + "/align/stats/{sample}_calibration.txt",
 		# stats of alignment for Input samples
-		inputStats=lambda wildcards:expand(DATADIR+"/align/stats/{sample}.txt", 
-			sample=data.Input[data.Samples==wildcards.sample].values[0]),
-		inputCalStats=lambda wildcards:expand(DATADIR + "/align/stats/{sample}_calibration.txt",
-			sample=data.Input[data.Samples==wildcards.sample].values[0])
+		inputStats=lambda wildcards: expand(DATADIR+"/align/stats/{input_stats}.txt", 
+			input_stats=data.Input[data.Samples==wildcards.sample].values[0]),
+		inputCalStats=lambda wildcards: expand(DATADIR+"/align/stats/{input_stats}_calibration.txt",
+			input_stats=data.Input[data.Samples==wildcards.sample].values[0])
 	output:
 		DATADIR + "/align/{sample}_ORI_factor.txt"
 	shell:
@@ -300,7 +300,7 @@ rule create_bigWig:
 		"envs/deeptools.yaml"
 	resources:
 		mem=get_resource("create_bigWig","mem"),
-    	walltime=get_resource("create_bigwig","walltime")
+		walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
 	shell:
