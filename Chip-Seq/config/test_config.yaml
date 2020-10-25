@@ -3,7 +3,7 @@ datadir: "/storage/scratch01/users/aquevedo/snakemakeTest/data"
 resdir: "/storage/scratch01/users/aquevedo/snakemakeTest/res"
 logdir: "/storage/scratch01/users/aquevedo/snakemakeTest/log"
 
-tableName: "test_table.tsv"
+tableName: "config/test_table.tsv"
 
 rules:
     default:

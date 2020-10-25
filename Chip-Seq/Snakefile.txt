@@ -68,8 +68,8 @@ def get_resource(rule,resource):
     except KeyError:
         return config["rules"]["default"]["res"][resource]
 
-## 
-ruleorder: bowtie_mapping_calibrated > bowtie_mapping
+## ## Rules priority
+ruleorder: bowtie2_calibrated_mapping > bowtie2_align 
 
 rule all:
 	input:
@@ -88,11 +88,15 @@ rule all:
 		## .sam bowtie2 alignments
 		expand(DATADIR+"/align/{sample}.sam", 
 			sample=data.Samples.unique()),
-		## bowtie2 alignments for calibrated Chip-Seq
+		## bowtie2 mapping stats 
+		expand(DATADIR + "/align/stats/{sample}.txt",
+			sample=data.Samples.unique()),
+		## bowtie2 maping againtst calibraton genome stats
 		expand(DATADIR+"/align/stats/{sample}_calibration.txt",
 			sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
 		## Calibration factors
-		DATADIR + "/align/{sample}_ORI_factor.txt"
+		expand(DATADIR + "/align/{sample}_ORI_factor.txt",
+			sample=data.Samples[data.Input != ""].unique()),
 		## .bam alignment files sorted and without duplicates
 		expand(DATADIR+"/align/{sample}_final.bam", 
 			sample=data.Samples.unique()),
@@ -169,7 +173,7 @@ rule bowtie2_align:
 		reads=",".join(input.fq),
 		shell("bowtie2 -x {params.genomeIndex} -U {reads} \
 			-p {threads} --time	--no-unal -S {output.sam} \
-			|& tee {log}")
+			|& tee {output.stats}")
 
 rule bowtie2_calibrated_mapping:
 	input:
@@ -203,13 +207,13 @@ rule calculate_scaled:
 			sample=data.Input[data.Samples==wildcards.sample].values[0])
 	output:
 		DATADIR + "/align/{sample}_ORI_factor.txt"
-    shell:
-	    "n1=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.stats});"
-	    "n2=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.calStats});"
-	    "n3=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputStats});"
-	    "n4=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputCalStats});"
-	    'n=$(echo "($n4 * $n1) / ($n2 * $n3)" | bc -l);'
-	    "echo $n > {output}"		
+	shell:
+		"n1=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.stats});"
+		"n2=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.calStats});"
+		"n3=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputStats});"
+		"n4=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputCalStats});"
+		'n=$(echo "($n4 * $n1) / ($n2 * $n3)" | bc -l);'
+		"echo $n > {output}"		
 
 rule sort_sam:
 	input:
