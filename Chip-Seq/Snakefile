@@ -299,7 +299,7 @@ rule create_bigWig:
 	conda:
 		"envs/deeptools.yaml"
 	resources:
-    	mem=get_resource("create_bigWig","mem"),
+		mem=get_resource("create_bigWig","mem"),
     	walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
