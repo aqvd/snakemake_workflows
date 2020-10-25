@@ -94,7 +94,7 @@ rule all:
 		## bowtie2 maping againtst calibraton genome stats
 		expand(DATADIR+"/align/stats/{sample}_calibration.txt",
 			sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
-		## Calibration factors
+		## Calibration factors. Only for chip samples with input to compare
 		expand(DATADIR + "/align/{sample}_ORI_factor.txt",
 			sample=data.Samples[data.Input != ""].unique()),
 		## .bam alignment files sorted and without duplicates
@@ -105,7 +105,11 @@ rule all:
 			sample=data.Samples.unique()),
 		## .bw files RPKM normalized
 		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
-			sample=data.Samples.unique())
+			sample=data.Samples.unique()),
+		## .bw files scaled (CPM * scaleFactor)
+		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+			sample=data.Samples[(data.PATH_genome_cal!="") & 
+								(data.Protein!="Input")].unique())
 
 rule QC_only:
 	input:
@@ -167,6 +171,8 @@ rule bowtie2_align:
 			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0])
 	threads:
 		get_resource("bowtie2", "threads")
+	resources:
+		get_resource("bowtie2", "mem")	
 	log:
 		LOGDIR + "/bowtie2_{sample}.log"
 	run:
@@ -187,6 +193,8 @@ rule bowtie2_calibrated_mapping:
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0])
 	threads:
 		get_resource("bowtie2", "threads")
+	resources:
+		get_resource("bowtie2", "mem")	
 	log:
 		LOGDIR + "/bowtie2_calibration_{sample}.log"
 	run:
@@ -291,14 +299,43 @@ rule create_bigWig:
 	conda:
 		"envs/deeptools.yaml"
 	resources:
-        	mem=get_resource("create_bigWig","mem"),
-        	walltime=get_resource("create_bigwig","walltime")
+    	mem=get_resource("create_bigWig","mem"),
+    	walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
 	shell:
 		'''
-		bamCoverage -h;
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing RPKM -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''
+
+rule create_bigWig_scaled:
+	input:
+		nodup_bam=DATADIR + "/align/{sample}_final.bam",
+		bam_index=DATADIR + "/align/{sample}_final.bai",
+		scaleFactor=DATADIR + "/align/{sample}_ORI_factor.txt"
+	output:
+		bw=RESDIR + "/bw/{sample}_RPKM_scaled.bw"
+	params:
+		genomeSize= lambda wildcards: expand("{genome_size}", 
+			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
+	threads:
+		get_resource("create_bigWig", "threads")
+	conda:
+		"envs/deeptools.yaml"
+	resources:
+    	mem=get_resource("create_bigWig","mem"),
+    	walltime=get_resource("create_bigwig","walltime")
+	log:
+		LOGDIR + "/deeptols/bamCoverage_{sample}_scaled.log"
+	shell:
+		'''
+		n=$(cat input.scaleFactor);
+		bamCoverage --effectiveGenomeSize {params.genomeSize} \
+		--normalizeUsing CPM --scaleFactor $n -p {threads} \
+		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
+		'''			
+
+
+

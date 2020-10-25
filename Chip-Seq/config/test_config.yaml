@@ -3,34 +3,30 @@ datadir: "/storage/scratch01/users/aquevedo/snakemakeTest/data"
 resdir: "/storage/scratch01/users/aquevedo/snakemakeTest/res"
 logdir: "/storage/scratch01/users/aquevedo/snakemakeTest/log"
 
-tableName: "config/test_table.tsv"
+tableName: "config/table_siNipbl_cluster.tsv"
 
 rules:
     default:
         res:
             threads: 1
             mem: 8000 #in MB
-            walltime: 480
-    
+            walltime: 480   
     fastQC:
         res:
-            threads: 8
-    
+            threads: 8   
     fastQScreen:
         res:
-            threads: 12
-
+            threads: 15
     bowtie2:
         res:
             threads: 20
-
+            mem: 10000
     gatk:
         res:
             mem: 4096 #in MB
-            walltime: 60
-
+            walltime: 30
     create_bigWig:
         res:
-            mem: 4096
+            mem: 8000
             threads: 20
 
