@@ -1,0 +1,33 @@
+resdir: "/storage/scratch01/users/aquevedo/snakemakeTest/res"
+logdir: "/storage/scratch01/users/aquevedo/snakemakeTest/log"
+datadir: "/storage/scratch01/users/aquevedo"
+
+rules:
+    default:
+        res:
+            threads: 1
+            mem: 8000 #in MB
+            walltime: 480
+    
+    fastQC:
+        res:
+            threads: 8
+    
+    fastQScreen:
+        res:
+            threads: 12
+
+    bowtie2:
+        res:
+            threads: 20
+
+    gatk:
+        res:
+            mem: 4096 #in MB
+            walltime: 60
+
+    create_bigWig:
+        res:
+            mem: 4096
+            threads: 20
+

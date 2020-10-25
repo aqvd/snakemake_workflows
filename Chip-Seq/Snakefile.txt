@@ -4,7 +4,7 @@ import numpy as np
 import glob
 
 ## write .yaml configuration filename
-configfile: "test_config.yaml"
+configfile: "config/test_config.yaml"
 
 FASTQDIR=config["fastqdir"]
 DATADIR=config["datadir"]
@@ -43,12 +43,21 @@ genome_size={"mm9":2620345972,
 ## Read experiment data
 data = pd.read_csv(TABLE_NAME,sep="\t")
 ## Add extra cols for salecting the appropriate wildcards path to files
-data["Samples"] = data.Protein +"_"+data.Condition+"_"+data.Rep 
-data["PATH_genome"] = [genome_path[i] for i in data.Genome] 
-data["Genome_size"] = [genome_size[i] for i in data.Genome]
-data["PATH_genome_cal"] = [genome_path[i] for i in data.Norm]
-data["PATH_refSeq_genes"] = [refSeq_genes_path[i] for i in data.Genome]
 
+data["Samples"] = data.Protein +"_"+data.Condition+"_"+ data.Rep 
+# Match each sample reads with appropriate input to calculate calibration factor
+data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)].values[0] \
+                 if Prot != "input" \
+                 else "" \
+                 for Prot,Cond in zip(data.Protein,data.Condition)  ]
+
+data["PATH_genome"] = [genome_path[i] for i in data.Genome] 
+
+data["Genome_size"] = [genome_size[i] for i in data.Genome]
+
+data["PATH_genome_cal"] = [genome_path[i] for i in data.Norm]
+
+data["PATH_refSeq_genes"] = [refSeq_genes_path[i] for i in data.Genome]
 ## Remove .fastq.gz to use basename with expand() in rule "all"
 data["fqBasename"] = [f.replace(".fastq.gz","") for f in data["File"]]
 
@@ -58,6 +67,9 @@ def get_resource(rule,resource):
         return config["rules"][rule]["res"][resource]
     except KeyError:
         return config["rules"]["default"]["res"][resource]
+
+## 
+ruleorder: bowtie_mapping_calibrated > bowtie_mapping
 
 rule all:
 	input:
@@ -73,11 +85,19 @@ rule all:
 		## fastQ Screen contamination control
 		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique()),
-		## .bam bowtie2 alignments
+		## .sam bowtie2 alignments
 		expand(DATADIR+"/align/{sample}.sam", 
 			sample=data.Samples.unique()),
+		## bowtie2 alignments for calibrated Chip-Seq
+		expand(DATADIR+"/align/stats/{sample}_calibration.txt",
+			sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
+		## Calibration factors
+		DATADIR + "/align/{sample}_ORI_factor.txt"
 		## .bam alignment files sorted and without duplicates
 		expand(DATADIR+"/align/{sample}_final.bam", 
+			sample=data.Samples.unique()),
+		## Indexed .bai alignments
+		expand(DATADIR + "/align/{sample}_final.bai",
 			sample=data.Samples.unique()),
 		## .bw files RPKM normalized
 		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
@@ -135,7 +155,7 @@ rule bowtie2_align:
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
 		sam=temp(DATADIR + "/align/{sample}.sam"),
-		stats=DATADIR + "/align/stats/bowtie2stats_{sample}.txt"
+		stats=DATADIR + "/align/stats/{sample}.txt"
 	params:
 		## with logical indexing retrieve the same PATH_genome n times, 
 		## get the first.
@@ -149,7 +169,47 @@ rule bowtie2_align:
 		reads=",".join(input.fq),
 		shell("bowtie2 -x {params.genomeIndex} -U {reads} \
 			-p {threads} --time	--no-unal -S {output.sam} \
+			|& tee {log}")
+
+rule bowtie2_calibrated_mapping:
+	input:
+		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
+			fq_file=data.File[data.Samples==wildcards.sample].values)
+	output:
+		sam=temp(DATADIR + "/align/{sample}_calibration.sam"),
+		stats= DATADIR + "/align/stats/{sample}_calibration.txt"
+	params:
+		calGenIx = lambda wildcards: expand("{calGenome}",
+			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0])
+	threads:
+		get_resource("bowtie2", "threads")
+	log:
+		LOGDIR + "/bowtie2_calibration_{sample}.log"
+	run:
+		reads=",".join(input.fq),
+		shell("bowtie2 -x {params.calGenIx} -U {reads} \
+			-p {threads} --time	--no-unal -S {output.sam} \
 			|& tee {output.stats}")
+
+rule calculate_scaled:
+	input:
+		# stats of alignment for Chip samples
+		stats=DATADIR + "/align/stats/{sample}.txt",
+		calStats=DATADIR + "/align/stats/{sample}_calibration.txt",
+		# stats of alignment for Input samples
+		inputStats=lambda wildcards:expand(DATADIR+"/align/stats/{sample}.txt", 
+			sample=data.Input[data.Samples==wildcards.sample].values[0]),
+		inputCalStats=lambda wildcards:expand(DATADIR + "/align/stats/{sample}_calibration.txt",
+			sample=data.Input[data.Samples==wildcards.sample].values[0])
+	output:
+		DATADIR + "/align/{sample}_ORI_factor.txt"
+    shell:
+	    "n1=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.stats});"
+	    "n2=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.calStats});"
+	    "n3=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputStats});"
+	    "n4=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputCalStats});"
+	    'n=$(echo "($n4 * $n1) / ($n2 * $n3)" | bc -l);'
+	    "echo $n > {output}"		
 
 rule sort_sam:
 	input:
@@ -198,7 +258,7 @@ rule index_bam:
 	input:
 		DATADIR + "/align/{sample}_final.bam"
 	output:
-		DATADIR + "/align/{sample}_final.bam.bai"
+		DATADIR + "/align/{sample}_final.bai"
 	threads: 1
 
 	resources:
@@ -215,8 +275,8 @@ rule index_bam:
 
 rule create_bigWig:
 	input:
-		nodup_bam=DATADIR + "/align/{sample}_final.bam"
-		bam_index=DATADIR + "/align/{sample}_final.bam.bai"
+		nodup_bam=DATADIR + "/align/{sample}_final.bam",
+		bam_index=DATADIR + "/align/{sample}_final.bai"
 	output:
 		bw=RESDIR + "/bw/{sample}_RPKM.bw"
 	params:
@@ -233,7 +293,8 @@ rule create_bigWig:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
 	shell:
 		'''
+		bamCoverage -h;
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing RPKM -p {threads} \
-		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} &&\
+		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''
