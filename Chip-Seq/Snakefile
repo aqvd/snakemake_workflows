@@ -172,7 +172,7 @@ rule bowtie2_align:
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
-		get_resource("bowtie2", "mem")	
+		mem=get_resource("bowtie2", "mem")	
 	log:
 		LOGDIR + "/bowtie2_{sample}.log"
 	run:
@@ -194,7 +194,7 @@ rule bowtie2_calibrated_mapping:
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
-		get_resource("bowtie2", "mem")	
+		mem=get_resource("bowtie2", "mem")	
 	log:
 		LOGDIR + "/bowtie2_calibration_{sample}.log"
 	run:
@@ -326,7 +326,7 @@ rule create_bigWig_scaled:
 		"envs/deeptools.yaml"
 	resources:
 		mem=get_resource("create_bigWig","mem"),
-    	walltime=get_resource("create_bigwig","walltime")
+		walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}_scaled.log"
 	shell:
