@@ -208,10 +208,10 @@ rule calculate_scaled:
 	output:
 		DATADIR + "/align/{sample}_ORI_factor.txt"
 	shell:
-		"n1=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.stats});"
-		"n2=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.calStats});"
-		"n3=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputStats});"
-		"n4=$(awk 'BEGIN{{s=0}} /aligned exactly 1 time/{{ s+= $1}} /aligned >1 times/{{s += $1}} END{{print s}}' {input.inputCalStats});"
+		"n1=$(awk -f scripts/get_aligned_reads.awk {input.stats});"
+		"n2=$(awk -f scripts/get_aligned_reads.awk {input.calStats});"
+		"n3=$(awk -f scripts/get_aligned_reads.awk {input.inputStats});"
+		"n4=$(awk -f scripts/get_aligned_reads.awk {input.inputCalStats});"
 		'n=$(echo "($n4 * $n1) / ($n2 * $n3)" | bc -l);'
 		"echo $n > {output}"		
 
