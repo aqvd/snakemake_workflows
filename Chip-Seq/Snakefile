@@ -353,7 +353,7 @@ rule macs2_callpeak:
 			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
 	output:
 		pred=RESDIR+'/macs/{sample}_predictd.txt',
-		peaks=RESDIR + '/macs/{sample}_peaks.narrowPeak'
+		peaks=RESDIR + '/macs/{sample}_peaks.xls'
 	threads:
 		get_resource("macs2", "threads")
 	resources:
@@ -363,10 +363,45 @@ rule macs2_callpeak:
 		LOGDIR + "/macs/{sample}.log"
 	run:
 		OUTDIR=RESDIR+'/macs'
-		shell(
-		'scripts/macs2_callPeaks.sh {{input.treatBam}} {{input.inputBam}} hs \
-		{{widcards.sample}} {outDir}'.format(outDir=OUTDIR)
-		)
+		command='scripts/macs2_callPeaks.sh {{input.treatBam}} {{input.inputBam}} hs \
+		{{widcards.sample}} {outDir} &> {{log}}'.format(outDir=OUTDIR)
+		shell(command)
+
+rule compute_matrix:
+	input:
+		bw=lambda wildcards: expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+			sample=data.Samples.unique()),
+		regions=lambda wildcards: expand("{RefSeq}",
+		RefSeq=data.PATH_refSeq_genes[data.Samples=wildcards.samples].values[0])
+	output:
+		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
+		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
+	threads:
+		get_resource("compute_matrix", "threads")
+	conda:
+		"envs/deeptools.yaml"
+	resources:
+		mem=get_resource("compute_matrix", "mem"),
+		walltime=get_resource("compute_matrix", "walltime")
+	run:
+		bwFiles=" ".join(input.bw)
+		labels=" ".join(data.Samples.unique())
+		command='computeMatrix reference-point --referencePoint TSS \
+			--upstream 5000 --downstream 5000 \
+			--binSize 20 \
+			--sortRegions descend \
+			--sortUsing mean \
+			--missingDataAsZero \
+			--samplesLabel {Labels} \
+			--p {Threads} \
+			--outFileName {MatrixName} \
+			--outFileSortedRegions {sortRegFile}'.format(
+			Labels=labels,
+			MatrixName=RESDIR + "/deeptools/matrix_all_samples.gz",
+			SortRegFile=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed",
+			Threads=threads)
+		shell(command)
+
 
 
 

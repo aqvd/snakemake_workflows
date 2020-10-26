@@ -34,4 +34,9 @@ rules:
             threads: 15
             mem: 6000
             walltime: 30
+    compute_matrix:
+        res:
+            threads: 20
+            mem: 8000
+            walltime: 60
 
