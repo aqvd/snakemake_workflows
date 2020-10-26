@@ -114,7 +114,7 @@ rule all:
 		expand(RESDIR + '/macs/{sample}_predictd.txt',
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 peak files
-		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
+		expand(RESDIR + '/macs/{sample}_peaks.xls',
 			sample=data.Samples[data.Protein!="input"].unique())
 
 rule QC_only:
