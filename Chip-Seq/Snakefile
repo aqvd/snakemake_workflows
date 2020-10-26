@@ -365,6 +365,7 @@ rule macs2_callpeak:
 		OUTDIR=RESDIR+'/macs'
 		command='scripts/macs2_callPeaks.sh {{input.treatBam}} {{input.inputBam}} hs \
 		{{widcards.sample}} {outDir} &> {{log}}'.format(outDir=OUTDIR)
+		print("========="+ command)
 		shell(command)
 
 # rule compute_matrix:
