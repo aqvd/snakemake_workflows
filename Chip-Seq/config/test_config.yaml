@@ -16,10 +16,10 @@ rules:
             threads: 8   
     fastQScreen:
         res:
-            threads: 15
+            threads: 12
     bowtie2:
         res:
-            threads: 20
+            threads: 15
             mem: 10000
     gatk:
         res:
@@ -31,7 +31,7 @@ rules:
             threads: 20
     macs2:
         res:
-            threads: 15
+            threads: 2
             mem: 6000
             walltime: 30
     compute_matrix:

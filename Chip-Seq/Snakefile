@@ -367,40 +367,40 @@ rule macs2_callpeak:
 		{{widcards.sample}} {outDir} &> {{log}}'.format(outDir=OUTDIR)
 		shell(command)
 
-rule compute_matrix:
-	input:
-		bw=lambda wildcards: expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-			sample=data.Samples.unique()),
-		regions=lambda wildcards: expand("{RefSeq}",
-		RefSeq=data.PATH_refSeq_genes[data.Samples=wildcards.samples].values[0])
-	output:
-		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
-		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
-	threads:
-		get_resource("compute_matrix", "threads")
-	conda:
-		"envs/deeptools.yaml"
-	resources:
-		mem=get_resource("compute_matrix", "mem"),
-		walltime=get_resource("compute_matrix", "walltime")
-	run:
-		bwFiles=" ".join(input.bw)
-		labels=" ".join(data.Samples.unique())
-		command='computeMatrix reference-point --referencePoint TSS \
-			--upstream 5000 --downstream 5000 \
-			--binSize 20 \
-			--sortRegions descend \
-			--sortUsing mean \
-			--missingDataAsZero \
-			--samplesLabel {Labels} \
-			--p {Threads} \
-			--outFileName {MatrixName} \
-			--outFileSortedRegions {sortRegFile}'.format(
-			Labels=labels,
-			MatrixName=RESDIR + "/deeptools/matrix_all_samples.gz",
-			SortRegFile=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed",
-			Threads=threads)
-		shell(command)
+# rule compute_matrix:
+# 	input:
+# 		bw=lambda wildcards: expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+# 			sample=data.Samples.unique()),
+# 		regions=lambda wildcards: expand("{RefSeq}",
+# 		RefSeq=data.PATH_refSeq_genes[data.Samples==wildcards.samples].values[0])
+# 	output:
+# 		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
+# 		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
+# 	threads:
+# 		get_resource("compute_matrix", "threads")
+# 	conda:
+# 		"envs/deeptools.yaml"
+# 	resources:
+# 		mem=get_resource("compute_matrix", "mem"),
+# 		walltime=get_resource("compute_matrix", "walltime")
+# 	run:
+# 		bwFiles=" ".join(input.bw)
+# 		labels=" ".join(data.Samples.unique())
+# 		command='computeMatrix reference-point --referencePoint TSS \
+# 			--upstream 5000 --downstream 5000 \
+# 			--binSize 20 \
+# 			--sortRegions descend \
+# 			--sortUsing mean \
+# 			--missingDataAsZero \
+# 			--samplesLabel {Labels} \
+# 			--p {Threads} \
+# 			--outFileName {MatrixName} \
+# 			--outFileSortedRegions {sortRegFile}'.format(
+# 			Labels=labels,
+# 			MatrixName=RESDIR + "/deeptools/matrix_all_samples.gz",
+# 			SortRegFile=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed",
+# 			Threads=threads)
+# 		shell(command)
 
 
 
