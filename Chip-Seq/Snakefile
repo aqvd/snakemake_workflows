@@ -364,13 +364,9 @@ rule macs2_callpeak:
 	run:
 		OUTDIR=RESDIR+'/macs'
 		shell(
-			'FragLen=$(scripts/predict_fragment.sh {{input.treatBam}} hs \
-			{{widcards.sample}} {outDir}) && \
-			macs2 callpeak -t {{input.treatBam}} -c {{input.inputBam}} \
-			--gsize hs --nomodel --extsize $FragLen \
-			--name {{wildcards.sample}} --outdir {outDir}'.format(
-				outDir=RESDIR + "/macs")
-			)
+		'scripts/macs2_callPeaks.sh {{input.treatBam}} {{input.inputBam}} hs \
+		{{widcards.sample}} {outDir}'.format(outDir=OUTDIR)
+		)
 
 
 
