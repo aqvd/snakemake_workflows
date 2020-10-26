@@ -109,7 +109,13 @@ rule all:
 		## .bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
 			sample=data.Samples[(data.PATH_genome_cal!="") & 
-								(data.Protein!="input")].unique())
+								(data.Protein!="input")].unique()),
+		## Macs2 fragment prediction
+		expand(RESDIR + '/macs/{sample}_predictd.txt',
+			sample=data.Samples[data.Protein!="input"].unique()),
+		## Macs2 peak files
+		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
+			sample=data.Samples[data.Protein!="input"].unique())
 
 rule QC_only:
 	input:
@@ -209,9 +215,11 @@ rule calculate_scaled:
 		stats=DATADIR + "/align/stats/{sample}.txt",
 		calStats=DATADIR + "/align/stats/{sample}_calibration.txt",
 		# stats of alignment for Input samples
-		inputStats=lambda wildcards: expand(DATADIR+"/align/stats/{input_stats}.txt", 
+		inputStats=lambda wildcards: expand(
+			DATADIR+"/align/stats/{input_stats}.txt", 
 			input_stats=data.Input[data.Samples==wildcards.sample].values[0]),
-		inputCalStats=lambda wildcards: expand(DATADIR+"/align/stats/{input_stats}_calibration.txt",
+		inputCalStats=lambda wildcards: expand(
+			DATADIR+"/align/stats/{input_stats}_calibration.txt",
 			input_stats=data.Input[data.Samples==wildcards.sample].values[0])
 	output:
 		DATADIR + "/align/{sample}_ORI_factor.txt"
@@ -220,7 +228,7 @@ rule calculate_scaled:
 		"n2=$(awk -f scripts/get_aligned_reads.awk {input.calStats});"
 		"n3=$(awk -f scripts/get_aligned_reads.awk {input.inputStats});"
 		"n4=$(awk -f scripts/get_aligned_reads.awk {input.inputCalStats});"
-		'n=$(echo "($n4 * $n1) / ($n2 * $n3)" | bc -l);'
+		'n=$(python -c "print(($n4 * $n1) / ($n2 * $n3))");'
 		"echo $n > {output}"		
 
 rule sort_sam:
@@ -331,11 +339,38 @@ rule create_bigWig_scaled:
 		LOGDIR + "/deeptols/bamCoverage_{sample}_scaled.log"
 	shell:
 		'''
-		n=$(cat input.scaleFactor);
+		n=$(cat {input.scaleFactor});
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing CPM --scaleFactor $n -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''			
+
+rule macs2_callpeak:
+	input:
+		treatBam= DATADIR + '/align/{sample}_final.bam',
+		inputBam= lambda wildcards: expand(
+					DATADIR+'/align/{inputSample}_final.bam',
+			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
+	output:
+		pred=RESDIR+'/macs/{sample}_predictd.txt',
+		peaks=RESDIR + '/macs/{sample}_peaks.narrowPeak'
+	threads:
+		get_resource("macs2", "threads")
+	resources:
+		mem=get_resource("macs2", "mem"),
+		walltime=get_resource("macs2", "walltime")
+	log:
+		LOGDIR + "/macs/{sample}.log"
+	run:
+		OUTDIR=RESDIR+'/macs'
+		shell(
+			'FragLen=$(scripts/predict_fragment.sh {{input.treatBam}} hs \
+			{{widcards.sample}} {outDir}) && \
+			macs2 callpeak -t {{input.treatBam}} -c {{input.inputBam}} \
+			--gsize hs --nomodel --extsize $FragLen \
+			--name {{wildcards.sample}} --outdir {outDir}'.format(
+				outDir=RESDIR + "/macs")
+			)
 
 
 

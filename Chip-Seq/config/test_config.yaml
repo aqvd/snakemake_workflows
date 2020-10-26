@@ -24,9 +24,14 @@ rules:
     gatk:
         res:
             mem: 4096 #in MB
-            walltime: 30
+            walltime: 15
     create_bigWig:
         res:
             mem: 8000
             threads: 20
+    macs2:
+        res:
+            threads: 15
+            mem: 6000
+            walltime: 30
 
