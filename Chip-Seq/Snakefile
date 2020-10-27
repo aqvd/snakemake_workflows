@@ -378,8 +378,8 @@ rule macs2_callpeak:
 matrixFiles = data.Samples[data.Protein != 'input'].unique()
 
 # Remove Rep extension "Prot_Cond_Rep" from matrixFiles to generate labels
-matrixLabels = np.array([re.sub("_S.+$","",f) for f in matrixFiles.copy()])
-matrixLabels = " ".join(matrixLabels)
+#matrixLabels = np.array([re.sub("_S.+$","",f) for f in matrixFiles.copy()])
+matrixLabels = " ".join(matrixFiles)
 
 rule compute_matrix:
 	input:
