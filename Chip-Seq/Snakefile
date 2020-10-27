@@ -401,12 +401,12 @@ rule compute_matrix:
 			--p {THREADS} \
 			--outFileName {OUTMATRIX} \
 			--outFileSortedRegions {OUTREGIONS}'.format(
-				BW=input.bw,
-				REGIONS=input.regions,
+				BW={input.bw},
+				REGIONS={input.regions},
 				Labels=matrixLabels,
-				THREADS=threads,
-				OUTMATRIX=output.matrix,
-				OUTREGIONS=output.sortRegions)
+				THREADS={threads},
+				OUTMATRIX={output.matrix},
+				OUTREGIONS={output.sortRegions})
 	conda:
 		"envs/deeptools.yaml"
 	resources:
