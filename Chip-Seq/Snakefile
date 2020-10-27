@@ -2,6 +2,7 @@ import os
 import  pandas as pd
 import numpy as np
 import glob
+import re
 
 ## write .yaml configuration filename
 configfile: "config/test_config.yaml"
@@ -368,12 +369,14 @@ rule macs2_callpeak:
 		print("=========\n"+ command + "\n=========" )
 		shell(command)
 
+## For rule compute matrix we need to generate lists with filenames and labels
+matrixFiles = data.Samples[data.Protein != 'input'].unique()
+matrixLabels = [re.sub("_S.+$","",f) for f in matrixFiles]
+
 rule compute_matrix:
 	input:
-		bw=expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-				  sample=[ data.Samples[i] if data.Protein[i] != "input" 
-							for i in range(len(data.Samples)) ]
-				 ),
+		bw=expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
+				  MatFile=matrixFiles
 		regions=refSeq_genes_path["hg19"]
 	output:
 		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
@@ -381,17 +384,6 @@ rule compute_matrix:
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
-		bwFiles=" ".join( expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-				 		sample=[ data.Samples[i] if data.Protein[i] != "input" 
-								for i in range(len(data.Samples)) ]
-				 				)
-						),
-
-		labels=" ".join(expand("{Label}", 
-						Label = [ data.Samples[i] if data.Protein[i] != "input" 
-									for i in range(len(data.Samples)) ]
-							   )
-						),
 		command='computeMatrix reference-point --referencePoint TSS \
 			--upstream 5000 --downstream 5000 \
 			--binSize 20 \
@@ -401,7 +393,7 @@ rule compute_matrix:
 			--samplesLabel {Labels} \
 			--p {Threads} \
 			--outFileName {MatrixName} \
-			--outFileSortedRegions {sortRegFile}'.format(Labels=labels,
+			--outFileSortedRegions {sortRegFile}'.format(Labels=matrixLabels,
 			MatrixName=RESDIR+"/deeptools/matrix_all_samples.gz",
 			SortRegFile=RESDIR+"deeptools/regions_all_samples_TSS_sorted.bed",
 			Threads=threads)
