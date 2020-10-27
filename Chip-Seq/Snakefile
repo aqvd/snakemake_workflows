@@ -378,7 +378,7 @@ rule macs2_callpeak:
 matrixFiles = data.Samples[data.Protein != 'input'].unique()
 
 matrixLabels = data.Samples[data.Protein != 'input'].unique()
-matrixLabels = [re.sub("_S.+$","",f) for f in matrixFiles]
+matrixLabels = [re.sub("_S.+$","",f) for f in matrixLabels]
 
 
 rule compute_matrix:
