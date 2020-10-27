@@ -380,6 +380,8 @@ matrixFiles = data.Samples[data.Protein != 'input'].unique()
 matrixLabels = data.Samples[data.Protein != 'input'].unique()
 matrixLabels = [re.sub("_S.+$","",f) for f in matrixLabels]
 
+print(">>>>>>>>" + matrixFiles)
+print("--------" + matrixLabels)
 
 rule compute_matrix:
 	input:
