@@ -121,7 +121,7 @@ rule all:
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## deeptools computeMatrix out files. TSS scaled
 		RESDIR + "/deeptools/matrix_all_samples.gz",
-		RESdir + "/deeptools/regions_all_samples_TSS_sorted.bed"
+		RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
 	input:
