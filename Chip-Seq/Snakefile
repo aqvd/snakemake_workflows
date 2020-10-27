@@ -380,8 +380,8 @@ rule compute_matrix:
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
-		bwFiles=" ".join(input.bw)
-		labels=" ".join(data.Samples.unique())
+		bwFiles=" ".join(input.bw),
+		labels=" ".join(data.Samples.unique()),
 		command='computeMatrix reference-point --referencePoint TSS \
 			--upstream 5000 --downstream 5000 \
 			--binSize 20 \
