@@ -370,18 +370,28 @@ rule macs2_callpeak:
 
 rule compute_matrix:
 	input:
-		bw=lambda wildcards: expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-			sample=data.Samples.unique()),
-		regions=lambda wildcards: expand("{RefSeq}",
-		RefSeq=data.PATH_refSeq_genes[data.Samples==wildcards.samples].values[0])
+		bw=expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+				  sample=[ data.Samples[i] if data.Protein[i] != "input" 
+							for i in range(len(data.Samples)) ]
+				 ),
+		regions=refSeq_genes_path["hg19"]
 	output:
 		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
 		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
-		bwFiles=" ".join(input.bw),
-		labels=" ".join(data.Samples.unique()),
+		bwFiles=" ".join( expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+				 		sample=[ data.Samples[i] if data.Protein[i] != "input" 
+								for i in range(len(data.Samples)) ]
+				 				)
+						),
+
+		labels=" ".join(expand("{Label}", 
+						Label = [ data.Samples[i] if data.Protein[i] != "input" 
+									for i in range(len(data.Samples)) ]
+							   )
+						),
 		command='computeMatrix reference-point --referencePoint TSS \
 			--upstream 5000 --downstream 5000 \
 			--binSize 20 \
