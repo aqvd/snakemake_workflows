@@ -120,8 +120,8 @@ rule all:
 		expand(RESDIR + '/macs/{sample}_peaks.xls',
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## deeptools computeMatrix out files. TSS scaled
-		"/deeptools/matrix_all_samples.gz",
-		"/deeptools/regions_all_samples_TSS_sorted.bed"
+		RESDIR + "/deeptools/matrix_all_samples.gz",
+		RESdir + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
 	input:
@@ -390,6 +390,8 @@ rule compute_matrix:
 		get_resource("compute_matrix", "threads")
 	params:
 		command='computeMatrix reference-point --referencePoint TSS \
+			--scoreFileName {{input.bw}} \
+			----regionsFileName {{input.regions}} \
 			--upstream 5000 --downstream 5000 \
 			--binSize 20 \
 			--sortRegions descend \
