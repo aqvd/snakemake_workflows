@@ -380,9 +380,6 @@ matrixFiles = data.Samples[data.Protein != 'input'].unique()
 matrixLabels = data.Samples[data.Protein != 'input'].unique()
 matrixLabels = np.array([re.sub("_S.+$","",f) for f in matrixLabels])
 
-print(">>>>>>>>" + matrixFiles)
-print("--------" + str(matrixLabels))
-
 rule compute_matrix:
 	input:
 		bw = expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
@@ -403,7 +400,7 @@ rule compute_matrix:
 	shell:
 		'computeMatrix reference-point --referencePoint TSS \
 			--scoreFileName {input.bw} \
-			----regionsFileName {params.regions} \
+			--regionsFileName {params.regions} \
 			--upstream 5000 --downstream 5000 \
 			--binSize 20 \
 			--sortRegions descend \
