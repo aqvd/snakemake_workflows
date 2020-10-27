@@ -391,7 +391,7 @@ rule compute_matrix:
 		get_resource("compute_matrix", "threads")
 	params:
 		regions = refSeq_genes_path["hg19"],
-		labels = matrixLabels
+		labels = " ".join(matrixLabels)
 	conda:
 		"envs/deeptools.yaml"
 	resources:
