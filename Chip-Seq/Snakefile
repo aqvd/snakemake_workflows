@@ -376,7 +376,10 @@ rule macs2_callpeak:
 
 ## For rule compute matrix we need to generate lists with filenames and labels
 matrixFiles = data.Samples[data.Protein != 'input'].unique()
+
+matrixLabels = data.Samples[data.Protein != 'input'].unique()
 matrixLabels = [re.sub("_S.+$","",f) for f in matrixFiles]
+
 
 rule compute_matrix:
 	input:
