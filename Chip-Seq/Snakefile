@@ -86,6 +86,7 @@ rule all:
 		## fastQ Screen contamination control
 		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique()),
+
 		## .sam bowtie2 alignments
 		#expand(DATADIR+"/align/{sample}.sam", 
 		#	sample=data.Samples.unique()),
@@ -108,6 +109,7 @@ rule all:
 		#expand(RESDIR+"/bw/{sample}_RPKM.bw", 
 		#	sample=data.Samples.unique()),
 		## .bw files scaled (CPM * scaleFactor)
+
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
 			sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique()),
@@ -116,7 +118,10 @@ rule all:
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 peak files
 		expand(RESDIR + '/macs/{sample}_peaks.xls',
-			sample=data.Samples[data.Protein!="input"].unique())
+			sample=data.Samples[data.Protein!="input"].unique()),
+		## deeptools computeMatrix out files. TSS scaled
+		"/deeptools/matrix_all_samples.gz",
+		"/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
 	input:
@@ -375,12 +380,12 @@ matrixLabels = [re.sub("_S.+$","",f) for f in matrixFiles]
 
 rule compute_matrix:
 	input:
-		bw=expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
-				  MatFile=matrixFiles
-		regions=refSeq_genes_path["hg19"]
+		bw = expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
+				  MatFile=matrixFiles),
+		regions = refSeq_genes_path["hg19"]
 	output:
-		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
-		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
+		matrix = RESDIR + "/deeptools/matrix_all_samples.gz",
+		sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
@@ -391,12 +396,10 @@ rule compute_matrix:
 			--sortUsing mean \
 			--missingDataAsZero \
 			--samplesLabel {Labels} \
-			--p {Threads} \
-			--outFileName {MatrixName} \
-			--outFileSortedRegions {sortRegFile}'.format(Labels=matrixLabels,
-			MatrixName=RESDIR+"/deeptools/matrix_all_samples.gz",
-			SortRegFile=RESDIR+"deeptools/regions_all_samples_TSS_sorted.bed",
-			Threads=threads)
+			--p {{threads}} \
+			--outFileName {{output.matrix}} \
+			--outFileSortedRegions {{output.sortRegions}}'.format(
+				Labels=matrixLabels)
 	conda:
 		"envs/deeptools.yaml"
 	resources:
