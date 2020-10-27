@@ -408,7 +408,7 @@ rule compute_matrix:
 			--sortUsing mean \
 			--missingDataAsZero \
 			--samplesLabel {params.labels} \
-			--p {threads} \
+			--numberOfProcessors {threads} \
 			--outFileName {output.matrix} \
 			--outFileSortedRegions {output.sortRegions}'
 
