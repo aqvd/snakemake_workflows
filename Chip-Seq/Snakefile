@@ -386,14 +386,15 @@ print("--------" + str(matrixLabels))
 rule compute_matrix:
 	input:
 		bw = expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
-				  MatFile=matrixFiles),
-		regions = refSeq_genes_path["hg19"],
-		labels = matrixLabels
+				  MatFile=matrixFiles)
 	output:
 		matrix = RESDIR + "/deeptools/matrix_all_samples.gz",
 		sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
+	params:
+		regions = refSeq_genes_path["hg19"],
+		labels = matrixLabels
 	conda:
 		"envs/deeptools.yaml"
 	resources:
@@ -402,13 +403,13 @@ rule compute_matrix:
 	shell:
 		'computeMatrix reference-point --referencePoint TSS \
 			--scoreFileName {input.bw} \
-			----regionsFileName {input.regions} \
+			----regionsFileName {params.regions} \
 			--upstream 5000 --downstream 5000 \
 			--binSize 20 \
 			--sortRegions descend \
 			--sortUsing mean \
 			--missingDataAsZero \
-			--samplesLabel {input.labels} \
+			--samplesLabel {params.labels} \
 			--p {threads} \
 			--outFileName {output.matrix} \
 			--outFileSortedRegions {output.sortRegions}'
