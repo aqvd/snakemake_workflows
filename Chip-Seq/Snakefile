@@ -86,26 +86,26 @@ rule all:
 		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique()),
 		## .sam bowtie2 alignments
-		expand(DATADIR+"/align/{sample}.sam", 
-			sample=data.Samples.unique()),
+		#expand(DATADIR+"/align/{sample}.sam", 
+		#	sample=data.Samples.unique()),
 		## bowtie2 mapping stats 
-		expand(DATADIR + "/align/stats/{sample}.txt",
-			sample=data.Samples.unique()),
+		#expand(DATADIR + "/align/stats/{sample}.txt",
+		#	sample=data.Samples.unique()),
 		## bowtie2 maping againtst calibraton genome stats
-		expand(DATADIR+"/align/stats/{sample}_calibration.txt",
-			sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
+		#expand(DATADIR+"/align/stats/{sample}_calibration.txt",
+		#	sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
 		## Calibration factors. Only for chip samples with input to compare
-		expand(DATADIR + "/align/{sample}_ORI_factor.txt",
-			sample=data.Samples[data.Input != ""].unique()),
+		#expand(DATADIR + "/align/{sample}_ORI_factor.txt",
+		#	sample=data.Samples[data.Input != ""].unique()),
 		## .bam alignment files sorted and without duplicates
-		expand(DATADIR+"/align/{sample}_final.bam", 
-			sample=data.Samples.unique()),
+		#expand(DATADIR+"/align/{sample}_final.bam", 
+		#	sample=data.Samples.unique()),
 		## Indexed .bai alignments
-		expand(DATADIR + "/align/{sample}_final.bai",
-			sample=data.Samples.unique()),
+		#expand(DATADIR + "/align/{sample}_final.bai",
+		#	sample=data.Samples.unique()),
 		## .bw files RPKM normalized
-		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
-			sample=data.Samples.unique()),
+		#expand(RESDIR+"/bw/{sample}_RPKM.bw", 
+		#	sample=data.Samples.unique()),
 		## .bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
 			sample=data.Samples[(data.PATH_genome_cal!="") & 
@@ -178,7 +178,7 @@ rule bowtie2_align:
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
-		mem=get_resource("bowtie2", "mem")	
+		mem_mb=get_resource("bowtie2", "mem_mb")	
 	log:
 		LOGDIR + "/bowtie2_{sample}.log"
 	run:
@@ -200,7 +200,7 @@ rule bowtie2_calibrated_mapping:
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
-		mem=get_resource("bowtie2", "mem")	
+		mem_mb=get_resource("bowtie2", "mem_mb")	
 	log:
 		LOGDIR + "/bowtie2_calibration_{sample}.log"
 	run:
@@ -242,11 +242,11 @@ rule sort_sam:
 	threads: 
 		1
 	resources:
-		mem=get_resource("gatk","mem"),
+		mem_mb=get_resource("gatk","mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	shell:
 		'''
-		gatk SortSam --java-options "-Xmx{resources.mem}M" \
+		gatk SortSam --java-options "-Xmx{resources.mem_mb}M" \
 		-I {input.sam} \
 		-O {output.sorted_bam} \
 		--SORT_ORDER coordinate |& tee {log}
@@ -262,13 +262,13 @@ rule remove_duplicates:
 	threads: 
 		1
 	resources:
-		mem=get_resource("gatk", "mem"),
+		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
 		LOGDIR + "/gatk/markDup_{sample}.log"
 	shell:
 		'''
-		gatk MarkDuplicates --java-options "-Xmx{resources.mem}M" \
+		gatk MarkDuplicates --java-options "-Xmx{resources.mem_mb}M" \
 		-I {input.sorted_bam} \
 		-O {output.nodup_bam} \
 		-M {output.metrics} |& tee {log}
@@ -282,13 +282,13 @@ rule index_bam:
 	threads: 1
 
 	resources:
-		mem=get_resource("gatk", "mem"),
+		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
 		LOGDIR + "/gatk/index_{sample}.log"
 	shell:
 		'''
-		gatk BuildBamIndex --java-options "-Xmx{resources.mem}M" \
+		gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
 		-I {input} |& tee {log}
 		'''
 
@@ -307,7 +307,7 @@ rule create_bigWig:
 	conda:
 		"envs/deeptools.yaml"
 	resources:
-		mem=get_resource("create_bigWig","mem"),
+		mem_mb=get_resource("create_bigWig","mem_mb"),
 		walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
@@ -333,7 +333,7 @@ rule create_bigWig_scaled:
 	conda:
 		"envs/deeptools.yaml"
 	resources:
-		mem=get_resource("create_bigWig","mem"),
+		mem_mb=get_resource("create_bigWig","mem_mb"),
 		walltime=get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "/deeptols/bamCoverage_{sample}_scaled.log"
@@ -357,7 +357,7 @@ rule macs2_callpeak:
 	threads:
 		get_resource("macs2", "threads")
 	resources:
-		mem=get_resource("macs2", "mem"),
+		mem_mb=get_resource("macs2", "mem_mb"),
 		walltime=get_resource("macs2", "walltime")
 	log:
 		LOGDIR + "/macs/{sample}.log"
@@ -365,43 +365,43 @@ rule macs2_callpeak:
 		OUTDIR=RESDIR+'/macs'
 		command='scripts/macs2_callPeaks.sh {{input.treatBam}} {{input.inputBam}} hs \
 		{{wildcards.sample}} {outDir} &> {{log}}'.format(outDir=OUTDIR)
-		print("========="+ command)
+		print("=========\n"+ command + "\n=========" )
 		shell(command)
 
-# rule compute_matrix:
-# 	input:
-# 		bw=lambda wildcards: expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-# 			sample=data.Samples.unique()),
-# 		regions=lambda wildcards: expand("{RefSeq}",
-# 		RefSeq=data.PATH_refSeq_genes[data.Samples==wildcards.samples].values[0])
-# 	output:
-# 		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
-# 		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
-# 	threads:
-# 		get_resource("compute_matrix", "threads")
-# 	conda:
-# 		"envs/deeptools.yaml"
-# 	resources:
-# 		mem=get_resource("compute_matrix", "mem"),
-# 		walltime=get_resource("compute_matrix", "walltime")
-# 	run:
-# 		bwFiles=" ".join(input.bw)
-# 		labels=" ".join(data.Samples.unique())
-# 		command='computeMatrix reference-point --referencePoint TSS \
-# 			--upstream 5000 --downstream 5000 \
-# 			--binSize 20 \
-# 			--sortRegions descend \
-# 			--sortUsing mean \
-# 			--missingDataAsZero \
-# 			--samplesLabel {Labels} \
-# 			--p {Threads} \
-# 			--outFileName {MatrixName} \
-# 			--outFileSortedRegions {sortRegFile}'.format(
-# 			Labels=labels,
-# 			MatrixName=RESDIR + "/deeptools/matrix_all_samples.gz",
-# 			SortRegFile=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed",
-# 			Threads=threads)
-# 		shell(command)
+rule compute_matrix:
+	input:
+		bw=lambda wildcards: expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+			sample=data.Samples.unique()),
+		regions=lambda wildcards: expand("{RefSeq}",
+		RefSeq=data.PATH_refSeq_genes[data.Samples==wildcards.samples].values[0])
+	output:
+		matrix= RESDIR + "/deeptools/matrix_all_samples.gz",
+		sortRegions=RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
+	threads:
+		get_resource("compute_matrix", "threads")
+	params:
+		bwFiles=" ".join(input.bw)
+		labels=" ".join(data.Samples.unique())
+		command='computeMatrix reference-point --referencePoint TSS \
+			--upstream 5000 --downstream 5000 \
+			--binSize 20 \
+			--sortRegions descend \
+			--sortUsing mean \
+			--missingDataAsZero \
+			--samplesLabel {Labels} \
+			--p {Threads} \
+			--outFileName {MatrixName} \
+			--outFileSortedRegions {sortRegFile}'.format(Labels=labels,
+			MatrixName=RESDIR+"/deeptools/matrix_all_samples.gz",
+			SortRegFile=RESDIR+"deeptools/regions_all_samples_TSS_sorted.bed",
+			Threads=threads)
+	conda:
+		"envs/deeptools.yaml"
+	resources:
+		mem_mb=get_resource("compute_matrix", "mem_mb"),
+		walltime=get_resource("compute_matrix", "walltime")
+	shell:
+		"{params.command}"
 
 
 
