@@ -373,7 +373,7 @@ rule macs2_callpeak:
 		walltime=get_resource("macs2", "walltime")
 	params:
 		outDir=RESDIR+'/macs',
-		species=get_resource("macs2", "org")
+		species=get_resource("macs2", "species")
 	log:
 		LOGDIR + "/macs/{sample}.log"
 	shell:
