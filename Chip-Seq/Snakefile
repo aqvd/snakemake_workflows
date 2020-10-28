@@ -121,7 +121,7 @@ rule all:
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## deeptools computeMatrix out files. TSS scaled
 		RESDIR + "/deeptools/matrix_all_samples.gz",
-		RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
+		#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
 	input:
@@ -387,7 +387,7 @@ rule compute_matrix:
 				  MatFile=matrixFiles)
 	output:
 		matrix = RESDIR + "/deeptools/matrix_all_samples.gz",
-		sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
+		#sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
@@ -399,18 +399,51 @@ rule compute_matrix:
 		mem_mb=get_resource("compute_matrix", "mem_mb"),
 		walltime=get_resource("compute_matrix", "walltime")
 	shell:
-		'computeMatrix reference-point --referencePoint TSS \
+		'computeMatrix reference-point --referencePoint center \
 			--scoreFileName {input.bw} \
 			--regionsFileName {params.regions} \
-			--upstream 5000 --downstream 5000 \
-			--binSize 20 \
-			--sortRegions descend \
-			--sortUsing mean \
+			--upstream 2500 --downstream 2500 \
+			--binSize 50 \
 			--missingDataAsZero \
 			--samplesLabel {params.labels} \
 			--numberOfProcessors {threads} \
-			--outFileName {output.matrix} \
-			--outFileSortedRegions {output.sortRegions}'
+			--outFileName {output.matrix} '
+
+## We can select by which samples we want to cluster the heatmap
+byProt = get_resource("plot_heatmap", "cluster_by_protein")
+# find indexes where Protein name appears in the filename
+clustBySamp= np.where(np.array([byProt in Samp for Samp in matrixFiles ]))
+# where returns tuple. 1st element is array with indexes. 
+clustBySamp = " ".join(clustBySamp[0].astype(str))
+
+
+# rule plot_heatmap:
+# 	input:
+# 		matrix = RESDIR + "/deeptools/matrix_{whichSamples}.gz"
+# 	output:
+# 		heatmap = RESDIR + "/deeptools/heatmap_{whichSamples}.gz"
+# 	threads:
+# 		get_resource("plot_heatmap", "threads")
+# 	params:
+# 		kmeans=get_resource(kmeans),
+# 		clustSamp=clustBySamp
+# 	resources:
+# 		mem_mb=get_resource("plot_heatmap", "mem_mb"),
+# 		walltime=get_resource("plot_heatmap", "walltime")
+# 	conda:
+# 		"envs/deeptools.yaml"
+# 	shell:
+# 		'plotHeatmap --matrixFile {input.matrix} \
+# 		----outFileName {output.heatmap} \
+# 		--kmeans {params.kmeans} \
+# 		--clusterUsingSamples {} \
+# 		--sortUsingSamples {} \
+# 		--sortUsing mean \
+# 		--colorMap Reds \
+# 		'
+
+
+
 
 
 
