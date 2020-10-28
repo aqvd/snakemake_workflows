@@ -144,8 +144,8 @@ rule all:
 		## .bed file with all unique summits among samples
 		RESDIR + '/macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
-		## look right before rule compute_matrix to see how regionsType is get.
-		RESDIR + "/deeptools/matrix_all_samples" + regionsType + ".gz",
+		## look right before rule all to see how regionsType is obtained.
+		RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
 		#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
@@ -413,7 +413,7 @@ rule unique_summits:
 	params:
 		summitsBed=lambda wildcards,input: " ".join(input.summits)
 	log:
-		LOGDIR + LOGDIR + "/macs/unique_summits.log"
+		LOGDIR + "/macs/unique_summits.log"
 	shell:
 		'scripts/all_unique_summits.sh {params.summitsBed}'
 
@@ -428,7 +428,7 @@ rule compute_matrix:
 		bw = expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
 				  MatFile=matrixFiles)
 	output:
-		matrix = RESDIR + "/deeptools/matrix_all_samples"+regionsType+".gz",
+		matrix = RESDIR + "/deeptools/matrix_all_samples_"+regionsType+".gz",
 		#sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
