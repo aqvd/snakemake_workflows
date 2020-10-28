@@ -423,7 +423,6 @@ rule compute_matrix:
 	params:
 		regions = regionsFile,
 		labels = matrixLabels
-		uniqueSummits = RESDIR + '/macs/summits_unique.bed'
 	conda:
 		"envs/deeptools.yaml"
 	resources:
