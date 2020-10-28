@@ -391,7 +391,7 @@ rule unique_summits:
 		mem_mb=500,
 		walltime=5
 	params:
-		summitsBed=lambda wildcards input: " ".join(input.summits)
+		summitsBed=lambda wildcards,input: " ".join(input.summits)
 	log:
 		LOGDIR + LOGDIR + "/macs/unique_summits.log"
 	shell:
