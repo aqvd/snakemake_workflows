@@ -401,10 +401,15 @@ rule unique_summits:
 
 ## For rule compute matrix we need to generate lists with filenames and labels
 matrixFiles = data.Samples[data.Protein != 'input'].unique()
-
-# Remove Rep extension "Prot_Cond_Rep" from matrixFiles to generate labels
-#matrixLabels = np.array([re.sub("_S.+$","",f) for f in matrixFiles.copy()])
 matrixLabels = " ".join(matrixFiles)
+## Decide if reference are RefSeqGenes or summits from macs2
+regionsType = get_resource("compute_matrix", "regions")
+
+if regionsType == "summits":
+	regionsFile = RESDIR + '/macs/summits_unique.bed'
+else:
+	regionsFile = refSeq_genes_path["hg19"]
+
 
 rule compute_matrix:
 	input:
@@ -416,8 +421,9 @@ rule compute_matrix:
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
-		regions = refSeq_genes_path["hg19"],
+		regions = regionsFile,
 		labels = matrixLabels
+		uniqueSummits = RESDIR + '/macs/summits_unique.bed'
 	conda:
 		"envs/deeptools.yaml"
 	resources:

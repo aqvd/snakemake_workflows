@@ -40,6 +40,8 @@ rules:
             threads: 20
             mem_mb: 8000
             walltime: 60
+            regions: "summits" # summits | genes
+
     plot_heatmap:
         res:
             threads: 10
