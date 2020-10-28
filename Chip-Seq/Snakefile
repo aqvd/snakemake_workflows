@@ -69,6 +69,14 @@ data["PATH_refSeq_genes"] = [refSeq_genes_path[i] for i in data.Genome]
 ## Remove .fastq.gz to use basename with expand() in rule "all"
 data["fqBasename"] = [f.replace(".fastq.gz","") for f in data["File"]]
 
+## Decide if reference are RefSeqGenes or summits from macs2 for compute_matrix
+regionsType = get_resource("compute_matrix", "regions")
+
+if regionsType == "summits":
+	regionsFile = RESDIR + '/macs/summits_unique.bed'
+else:
+	regionsFile = refSeq_genes_path["hg19"]
+
 ## function to parse config.yaml and extract resource parameters
 def get_resource(rule,resource):
     try:
@@ -414,14 +422,6 @@ rule unique_summits:
 ## For rule compute matrix we need to generate lists with filenames and labels
 matrixFiles = data.Samples[data.Protein != 'input'].unique()
 matrixLabels = " ".join(matrixFiles)
-## Decide if reference are RefSeqGenes or summits from macs2
-regionsType = get_resource("compute_matrix", "regions")
-
-if regionsType == "summits":
-	regionsFile = RESDIR + '/macs/summits_unique.bed'
-else:
-	regionsFile = refSeq_genes_path["hg19"]
-
 
 rule compute_matrix:
 	input:
