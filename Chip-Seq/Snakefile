@@ -123,7 +123,7 @@ rule all:
 		expand(RESDIR + '/macs/{sample}_summits.bed',
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
-		RESDIR + 'macs/all_unique_summits.bed',
+		RESDIR + '/macs/all_unique_summits.bed',
 		## deeptools computeMatrix out files. TSS scaled
 		RESDIR + "/deeptools/matrix_all_samples.gz",
 		#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
