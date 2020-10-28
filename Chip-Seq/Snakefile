@@ -117,8 +117,13 @@ rule all:
 		expand(RESDIR + '/macs/{sample}_predictd.txt',
 			sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 peak files
-		expand(RESDIR + '/macs/{sample}_peaks.xls',
+		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
 			sample=data.Samples[data.Protein!="input"].unique()),
+		## Macs2 summits files
+		expand(RESDIR + '/macs/{sample}_summits.bed',
+			sample=data.Samples[data.Protein!="input"].unique()),
+		## .bed file with all unique summits among samples
+		RESDIR + 'macs/all_unique_summits.bed'
 		## deeptools computeMatrix out files. TSS scaled
 		RESDIR + "/deeptools/matrix_all_samples.gz",
 		#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
@@ -359,20 +364,40 @@ rule macs2_callpeak:
 			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
 	output:
 		pred=RESDIR+'/macs/{sample}_predictd.txt',
-		peaks=RESDIR + '/macs/{sample}_peaks.xls'
+		peaks=RESDIR + '/macs/{sample}_peaks.narrowPeak',
+		summits=RESDIR + '/macs/{sample}_summits.bed'
 	threads:
 		get_resource("macs2", "threads")
 	resources:
 		mem_mb=get_resource("macs2", "mem_mb"),
 		walltime=get_resource("macs2", "walltime")
+	params:
+		outDir=RESDIR+'/macs',
+		species=get_resource("macs2", "org")
 	log:
 		LOGDIR + "/macs/{sample}.log"
-	run:
-		OUTDIR=RESDIR+'/macs'
-		command='scripts/macs2_callPeaks.sh {{input.treatBam}} {{input.inputBam}} hs \
-		{{wildcards.sample}} {outDir} &> {{log}}'.format(outDir=OUTDIR)
-		print("=========\n"+ command + "\n=========" )
-		shell(command)
+	shell:
+		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
+		{params.species} {wildcards.sample} {params.outDir} &> {log}'
+
+rule unique_summits:
+	input:
+		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
+			   sample=data.Samples.unique())
+	output:
+		RESDIR + '/macs/all_unique_summits.bed'
+	threads: 1
+	resources:
+		mem_mb=500,
+		walltime=5
+	params:
+		summitsBed=lambda wildcards input: " ".join(input.summits)
+	log:
+		LOGDIR + LOGDIR + "/macs/unique_summits.log"
+	shell:
+		'scripts/all_unique_summits.sh {params.summitsBed}'
+
+
 
 ## For rule compute matrix we need to generate lists with filenames and labels
 matrixFiles = data.Samples[data.Protein != 'input'].unique()

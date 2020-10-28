@@ -1,11 +1,11 @@
 #!/bin/bash
 
-## ./all_summits.sh  summits1.bed summits2.bed [summitsN.bed]
+## ./all_unique_summits.sh  summits1.bed summits2.bed [summitsN.bed]
 ##
-## Generates a file called "all_summits.bed" given a list of summits.bed files
+## Generates a file called "all_unique_summits.bed" given a list of summits.bed files
 ## at the same directory where summits1.bed is located
 
-USAGE="./all_summits.sh  summits1.bed summits2.bed [summitsN.bed] "
+USAGE="./all_unique_summits.sh  summits1.bed summits2.bed [summitsN.bed] "
 
 if [ "$#" == "0" ]
 then
@@ -14,7 +14,7 @@ then
 fi
 
 DIR=$(dirname $1)
-RES="${DIR}/all_summits.txt"
+RES="${DIR}/all_unique_summits.bed"
 
 touch "${RES}"
 
