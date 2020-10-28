@@ -135,8 +135,9 @@ rule all:
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
 		RESDIR + '/macs/summits_unique.bed',
-		## deeptools computeMatrix out files. TSS scaled
-		RESDIR + "/deeptools/matrix_all_samples.gz",
+		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
+		## look right before rule compute_matrix to see how regionsType is get.
+		RESDIR + "/deeptools/matrix_all_samples" + regionsType + ".gz",
 		#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
@@ -427,7 +428,7 @@ rule compute_matrix:
 		bw = expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
 				  MatFile=matrixFiles)
 	output:
-		matrix = RESDIR + "/deeptools/matrix_all_samples.gz",
+		matrix = RESDIR + "/deeptools/matrix_all_samples"+regionsType+".gz",
 		#sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
