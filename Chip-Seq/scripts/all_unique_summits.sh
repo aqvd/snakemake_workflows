@@ -40,11 +40,11 @@ do
 		
 		## intersect first 2 files, get summits for peaks unique in -a
 		bedtools intersect -v -a "${PEAKS}" -b "${PEAKS2}" > int1.tmp
-		echo "REGIONS BEFORE: $(wc -l int1.tmp | sed -E 's/ [a-zA-Z.].+//g' )"
+		echo "REGIONS BEFORE: $(wc -l int1.tmp | sed -E 's/[ a-zA-Z.].+//g')"
 		
 		bedtools intersect -wa -a "${SUMMITS}" -b int1.tmp >> "${RES}"
-		echo "Intersected regions: $(wc -l ${SUMMITS} | sed -E 's/ [a-zA-Z.].+//g')"
-		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/ [a-zA-Z.].+//g')"
+		echo "Intersected regions: $(wc -l ${SUMMITS} | sed -E 's/[ a-zA-Z.].+//g')"
+		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
 		
 		## increase and shift
 		((count+=1))
@@ -61,11 +61,11 @@ do
 
 		
 		## count lines befor and after appending new summits to ${RES}
-		echo "REGIONS BEFORE: $(wc -l ${RES} | sed -E 's/ [a-zA-Z.].+//g')"
+		echo "REGIONS BEFORE: $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
 		cat int2.tmp >> "${RES}"
 		
-		echo "Intersected regions $(wc -l ${SUMMITS} | sed -E 's/ [a-zA-Z.].+//g')"
-		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/ [a-zA-Z.].+//g')"
+		echo "Intersected regions $(wc -l ${SUMMITS} | sed -E 's/[ a-zA-Z.].+//g')"
+		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
 		## increase counter and shift
 		((count+=1))
 		shift 
