@@ -123,7 +123,7 @@ rule all:
 		expand(RESDIR + '/macs/{sample}_summits.bed',
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
-		RESDIR + '/macs/summits_unique.bed',
+		#RESDIR + '/macs/summits_unique.bed',
 		## deeptools computeMatrix out files. TSS scaled
 		RESDIR + "/deeptools/matrix_all_samples.gz",
 		#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
@@ -380,22 +380,22 @@ rule macs2_callpeak:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.sample} {params.outDir} &> {log}'
 
-rule unique_summits:
-	input:
-		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
-			   sample=data.Samples.unique())
-	output:
-		RESDIR + '/macs/summits_unique.bed'
-	threads: 1
-	resources:
-		mem_mb=500,
-		walltime=5
-	params:
-		summitsBed=lambda wildcards,input: " ".join(input.summits)
-	log:
-		LOGDIR + LOGDIR + "/macs/unique_summits.log"
-	shell:
-		'scripts/all_unique_summits.sh {params.summitsBed}'
+# rule unique_summits:
+# 	input:
+# 		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
+# 			   sample=data.Samples.unique())
+# 	output:
+# 		RESDIR + '/macs/summits_unique.bed'
+# 	threads: 1
+# 	resources:
+# 		mem_mb=500,
+# 		walltime=5
+# 	params:
+# 		summitsBed=lambda wildcards,input: " ".join(input.summits)
+# 	log:
+# 		LOGDIR + LOGDIR + "/macs/unique_summits.log"
+# 	shell:
+# 		'scripts/all_unique_summits.sh {params.summitsBed}'
 
 
 
