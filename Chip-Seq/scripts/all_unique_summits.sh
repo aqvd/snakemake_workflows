@@ -1,11 +1,16 @@
 #!/bin/bash
 
-## ./all_unique_summits.sh  summits1.bed summits2.bed [summitsN.bed]
+## ./all_unique_summits.sh 	{sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
+## ./all_unique_summits.sh 	*_summits.bed  
+## Generates a file called "summits_unique.bed" given a list of summits.bed files
+## at the same directory where summits1.bed is located.
 ##
-## Generates a file called "all_unique_summits.bed" given a list of summits.bed files
-## at the same directory where summits1.bed is located
+## For each {sample}_summits.bed a {sample}_peaks.narrowPeak wit the same
+## value of {sample} must exist. 
+## Those files are the output of macs2 predictd
 
-USAGE="./all_unique_summits.sh  summits1.bed summits2.bed [summitsN.bed] "
+USAGE="./all_unique_summits.sh 	{sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
+./all_unique_summits.sh  *_summits.bed  "
 
 if [ "$#" == "0" ]
 then
@@ -14,7 +19,7 @@ then
 fi
 
 DIR=$(dirname $1)
-RES="${DIR}/all_unique_summits.bed"
+RES="${DIR}/summits_unique.bed"
 
 touch "${RES}"
 

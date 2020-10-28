@@ -111,17 +111,17 @@ rule all:
 		## .bw files scaled (CPM * scaleFactor)
 
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-			sample=data.Samples[(data.PATH_genome_cal!="") & 
+				sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique()),
 		## Macs2 fragment prediction
 		expand(RESDIR + '/macs/{sample}_predictd.txt',
-			sample=data.Samples[data.Protein!="input"].unique()),
+				sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 peak files
 		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
-			sample=data.Samples[data.Protein!="input"].unique()),
+				sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 summits files
 		expand(RESDIR + '/macs/{sample}_summits.bed',
-			sample=data.Samples[data.Protein!="input"].unique()),
+				sample=data.Samples[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
 		RESDIR + '/macs/all_unique_summits.bed',
 		## deeptools computeMatrix out files. TSS scaled
@@ -385,7 +385,7 @@ rule unique_summits:
 		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
 			   sample=data.Samples.unique())
 	output:
-		RESDIR + '/macs/all_unique_summits.bed'
+		RESDIR + '/macs/summits_unique.bed'
 	threads: 1
 	resources:
 		mem_mb=500,
