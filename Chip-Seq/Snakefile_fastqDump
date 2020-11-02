@@ -1,0 +1,27 @@
+import pandas as pd
+import glob
+
+FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
+#FASTQDIR="/Users/aqo/Desktop/"
+ACC_FILE="/storage/scratch01/users/aquevedo/SRR_Acc_List.txt"
+
+with open(ACC_FILE, 'r') as f:
+	accessions=[l.rstrip() for l in f.readlines()]
+	f.close()
+
+rule all:
+	input:
+		expand(FASTQDIR + "{SRR}.finished", SRR=accessions)
+
+rule fastq_dump:
+	output:
+		FASTQDIR + "{SRR}.finished"
+	threads: 5
+	params:
+		srr=lambda wildcards: wildcards.SRR,
+		dir=FASTQDIR
+	log:
+		FASTQDIR + 'log/fastqDump/{SRR}.log'
+	shell:
+		'fasterq-dump -v -v --threads {threads} --temp {params.dir} \
+		--outdir {params.dir} {params.srr} && touch {output}'
