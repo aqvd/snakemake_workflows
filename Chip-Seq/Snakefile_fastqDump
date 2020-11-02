@@ -29,12 +29,12 @@ rule fastq_dump:
 	log:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
 	threads: 5
-	run:
-		#'echo {params.srr} {params.Dir} {params.prot} {params.cond} {params.rep} {threads}'
-		filename=FASTQDIR + "_".join([params.prot, params.cond, params.rep, params.srr])
-		shell('fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
-		--outdir {params.Dir} --outfile %s \
-		{params.srr} 2> {log} && touch {output}' % (filename))
+	shell:
+		#'echo {params.srr} {params.Dir} {params.prot}_ params.cond} {params.rep} {threads}'
+		#filename=FASTQDIR + "_".join([params.prot, params.cond, params.rep, params.srr])
+		'fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
+		--outfile {params.prot}_{params.cond}_{params.rep}_{params.srr} \
+		--outdir {params.Dir} {params.srr} 2> {log} && touch {output}'
 		# 'fasterq-dump --log-level 5 --threads {{threads}} --temp {{params.Dir}} \
 		# --outdir {{params.Dir}} --outfile {F} \
 		# {{params.srr}} 2> {{log}} && touch {{output}}'.format(F=filename)
