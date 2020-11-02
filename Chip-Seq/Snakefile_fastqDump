@@ -2,26 +2,39 @@ import pandas as pd
 import glob
 
 FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
-#FASTQDIR="/Users/aqo/Desktop/"
-ACC_FILE="/storage/scratch01/users/aquevedo/SRR_Acc_List.txt"
+ACC_TABLE="/home/aquevedo/SraRunTable_SRP113633.txt"
 
-with open(ACC_FILE, 'r') as f:
-	accessions=[l.rstrip() for l in f.readlines()]
-	f.close()
+FASTQDIR="/Users/aqo/Desktop/"
+ACC_TABLE="/Users/aqo/Desktop/SraRunTable_SRP113633.txt"
+
+data = pd.read_csv(ACC_TABLE,sep=",")
+
+# with open(ACC_FILE, 'r') as f:
+# 	accessions=[l.rstrip() for l in f.readlines()]
+# 	f.close()
 
 rule all:
 	input:
-		expand(FASTQDIR + "{SRR}.finished", SRR=accessions)
+		expand(FASTQDIR + "{SRR}.finished", SRR=data.Run.unique())
 
 rule fastq_dump:
 	output:
 		FASTQDIR + "{SRR}.finished"
-	threads: 5
 	params:
 		srr=lambda wildcards: wildcards.SRR,
-		dir=FASTQDIR
+		Dir=FASTQDIR,
+		prot=lambda wildcards: data.Protein[data.Run == wildcards.SRR].values[0],
+		cond=lambda wildcards: data.Condition[data.Run == wildcards.SRR].values[0],
+		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0]
 	log:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
-	shell:
-		'fasterq-dump -v -v --threads {threads} --temp {params.dir} \
-		--outdir {params.dir} {params.srr} && touch {output}'
+	threads: 5
+	run:
+		#'echo {params.srr} {params.Dir} {params.prot} {params.cond} {params.rep} {threads}'
+		filename=FASTQDIR + "_".join([prot,cond,rep,srr])
+		shell('fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
+		--outdir {params.Dir} --outfile %s \
+		{params.srr} 2> {log} && touch {output}' % (filename))
+		# 'fasterq-dump --log-level 5 --threads {{threads}} --temp {{params.Dir}} \
+		# --outdir {{params.Dir}} --outfile {F} \
+		# {{params.srr}} 2> {{log}} && touch {{output}}'.format(F=filename)
