@@ -31,7 +31,7 @@ rule fastq_dump:
 	threads: 5
 	run:
 		#'echo {params.srr} {params.Dir} {params.prot} {params.cond} {params.rep} {threads}'
-		filename=FASTQDIR + "_".join([{params.prot} {params.cond} {params.rep},{params.srr}])
+		filename=FASTQDIR + "_".join([params.prot, params.cond, params.rep, params.srr])
 		shell('fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
 		--outdir {params.Dir} --outfile %s \
 		{params.srr} 2> {log} && touch {output}' % (filename))
