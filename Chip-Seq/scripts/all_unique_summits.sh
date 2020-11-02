@@ -2,12 +2,14 @@
 
 ## ./all_unique_summits.sh 	{sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
 ## ./all_unique_summits.sh 	*_summits.bed  
+##
 ## Generates a file called "summits_unique.bed" given a list of summits.bed files
-## at the same directory where summits1.bed is located.
+## at the same directory where {sample1}_summits.bed is located.
 ##
 ## For each {sample}_summits.bed a {sample}_peaks.narrowPeak wit the same
 ## value of {sample} must exist. 
-## Those files are the output of macs2 predictd
+## Those files are the output of macs2 callpeak, so macs2 output directory should contain
+## all the files necessary
 
 USAGE="./all_unique_summits.sh 	{sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
 ./all_unique_summits.sh  *_summits.bed  "
