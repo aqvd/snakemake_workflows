@@ -232,7 +232,7 @@ rule bowtie2_alignTo_calGenome:
 	output:
 		sam=DATADIR + "/align/{sample}.sam",
 		unal=DATADIR + "/align/{sample}_calibration_unal.sam",
-        stats= DATADIR + "/align/stats/{sample}_calibration.txt"
+		stats= DATADIR + "/align/stats/{sample}_calibration.txt"
 	params:
 		calGenIx = lambda wildcards: expand("{calGenome}",
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0]),
