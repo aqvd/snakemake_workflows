@@ -4,14 +4,8 @@ import glob
 FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
 ACC_TABLE="/home/aquevedo/SraRunTable_SRP113633.txt"
 
-# FASTQDIR="/Users/aqo/Desktop/"
-# ACC_TABLE="/Users/aqo/Desktop/SraRunTable_SRP113633.txt"
 
 data = pd.read_csv(ACC_TABLE,sep=",")
-
-# with open(ACC_FILE, 'r') as f:
-# 	accessions=[l.rstrip() for l in f.readlines()]
-# 	f.close()
 
 rule all:
 	input:
@@ -30,11 +24,11 @@ rule fastq_dump:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
 	threads: 5
 	shell:
-		#'echo {params.srr} {params.Dir} {params.prot}_ params.cond} {params.rep} {threads}'
-		#filename=FASTQDIR + "_".join([params.prot, params.cond, params.rep, params.srr])
 		'fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
 		--outfile {params.prot}_{params.cond}_{params.rep}_{params.srr} \
-		--outdir {params.Dir} {params.srr} 2> {log} && touch {output}'
-		# 'fasterq-dump --log-level 5 --threads {{threads}} --temp {{params.Dir}} \
-		# --outdir {{params.Dir}} --outfile {F} \
-		# {{params.srr}} 2> {{log}} && touch {{output}}'.format(F=filename)
+		--outdir {params.Dir} {params.srr} 2> {log} && \
+		gzip {params.Dir}/{params.prot}_{params.cond}_{params.rep}_{params.srr} && \
+		touch {output}'
+
+
+

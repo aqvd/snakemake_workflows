@@ -89,7 +89,7 @@ else:
 ##################################################
 
 ## ## Rules priority
-ruleorder: bowtie2_calibrated_mapping > bowtie2_align 
+ruleorder: bowtie2_alignTo_calGenome > bowtie2_alignTo_refGenome 
 
 rule all:
 	input:
@@ -105,7 +105,6 @@ rule all:
 		## fastQ Screen contamination control
 		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique()),
-
 		## .sam bowtie2 alignments
 		#expand(DATADIR+"/align/{sample}.sam", 
 		#	sample=data.Samples.unique()),
@@ -128,7 +127,6 @@ rule all:
 		#expand(RESDIR+"/bw/{sample}_RPKM.bw", 
 		#	sample=data.Samples.unique()),
 		## .bw files scaled (CPM * scaleFactor)
-
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
 				sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique()),
@@ -194,38 +192,19 @@ rule fastQScreen:
 		--outdir {}/fastQScreen {{input.fq}} |& tee {{log}}".format(RESDIR)
 		
 
-rule bowtie2_align:
+rule bowtie2_alignTo_refGenome:
 	input:
 		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
-		sam=temp(DATADIR + "/align/{sample}.sam"),
+		sam=DATADIR + "/align/{sample}_onlyRef.sam",
+		unal=DATADIR + "/align/{sample}_unal.fastq.gz",
 		stats=DATADIR + "/align/stats/{sample}.txt"
 	params:
 		## with logical indexing retrieve the same PATH_genome n times, 
 		## get the first.
 		genomeIndex= lambda wildcards: expand("{genome}",
-			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0])
-	threads:
-		get_resource("bowtie2", "threads")
-	resources:
-		mem_mb=get_resource("bowtie2", "mem_mb")	
-	log:
-		LOGDIR + "/bowtie2_{sample}.log"
-	run:
-		reads=",".join(input.fq),
-		shell("bowtie2 -x {params.genomeIndex} -U {reads} \
-			-p {threads} --time	--no-unal -S {output.sam} \
-			|& tee {output.stats}")
-
-rule bowtie2_calibrated_mapping:
-	input:
-		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
-			fq_file=data.File[data.Samples==wildcards.sample].values)
-	output:
-		sam=temp(DATADIR + "/align/{sample}_calibration.sam"),
-		stats= DATADIR + "/align/stats/{sample}_calibration.txt"
-	params:
+			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0]),
 		calGenIx = lambda wildcards: expand("{calGenome}",
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0])
 	threads:
@@ -233,11 +212,47 @@ rule bowtie2_calibrated_mapping:
 	resources:
 		mem_mb=get_resource("bowtie2", "mem_mb")	
 	log:
+		LOGDIR + "/bowtie2_{sample}.log"
+	run:
+		reads=",".join(input.fq)
+		## {output.unal}: reads that do NOT align to calibration genome
+		## -S /dev/null to discard aligned reads
+		shell("bowtie2 -x {params.calGenIx} -U {reads} \
+			-p {threads} --time	--un-gz {output.unal} -S /dev/null")
+		## -S {output.sam}: reads unique to reference genome.
+		## {output.stats}: align stats of reads unique to human
+		shell("bowtie2 -x {params.genomeIndex} -U {output.unal} \
+			-p {threads} --time	--no-unal -S {output.sam} \
+			|& tee {output.stats}")
+
+rule bowtie2_alignTo_calGenome:
+	input:
+		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
+			fq_file=data.File[data.Samples==wildcards.sample].values)
+	output:
+		sam=DATADIR + "/align/{sample}.sam",
+		unal=DATADIR + "/align/{sample}_calibration_unal.sam",
+        stats= DATADIR + "/align/stats/{sample}_calibration.txt"
+	params:
+		calGenIx = lambda wildcards: expand("{calGenome}",
+			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0]),
+		genomeIndex= lambda wildcards: expand("{genome}",
+			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0])
+	threads:
+		get_resource("bowtie2", "threads")
+	resources:
+		mem_mb=get_resource("bowtie2", "mem_mb")	
+	log:
 		LOGDIR + "/bowtie2_calibration_{sample}.log"
 	run:
-		reads=",".join(input.fq),
-		shell("bowtie2 -x {params.calGenIx} -U {reads} \
-			-p {threads} --time	--no-unal -S {output.sam} \
+		reads=",".join(input.fq)
+		## Get all reads that align to reference genome in {output.sam}
+		## Get reads that do NOT align to rederence in {output.unal}.
+		shell("bowtie2 -x {params.genomeIndex} -U {reads} \
+			-p {threads} --time	--un-gz {output.unal} -S {output.sam}")
+		## {output.stats}: alignemt stats reads unique to calibration genome
+		shell("bowtie2 -x {params.calGenIx} -U {output.unal} \
+			-p {threads} --time	--no-unal -S /dev/null \
 			|& tee {output.stats}")
 
 rule calculate_scaled:
@@ -433,7 +448,7 @@ rule compute_matrix:
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
-		regions = regionsFile,
+		regions = regionsFile, ## View right before rule all
 		labels = matrixLabels
 	conda:
 		"envs/deeptools.yaml"
