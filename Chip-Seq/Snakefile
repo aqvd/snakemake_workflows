@@ -106,17 +106,17 @@ rule all:
 		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique()),
 		## .sam bowtie2 alignments
-		#expand(DATADIR+"/align/{sample}.sam", 
-		#	sample=data.Samples.unique()),
+		expand(DATADIR+"/align/{sample}.sam", 
+			sample=data.Samples.unique()),
 		## bowtie2 mapping stats 
-		#expand(DATADIR + "/align/stats/{sample}.txt",
-		#	sample=data.Samples.unique()),
+		expand(DATADIR + "/align/stats/{sample}.txt",
+			sample=data.Samples.unique()),
 		## bowtie2 maping againtst calibraton genome stats
-		#expand(DATADIR+"/align/stats/{sample}_calibration.txt",
-		#	sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
+		expand(DATADIR+"/align/stats/{sample}_calibration.txt",
+			sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
 		## Calibration factors. Only for chip samples with input to compare
-		#expand(DATADIR + "/align/{sample}_ORI_factor.txt",
-		#	sample=data.Samples[data.Input != ""].unique()),
+		expand(DATADIR + "/align/{sample}_ORI_factor.txt",
+			sample=data.Samples[data.Input != ""].unique()),
 		## .bam alignment files sorted and without duplicates
 		#expand(DATADIR+"/align/{sample}_final.bam", 
 		#	sample=data.Samples.unique()),
