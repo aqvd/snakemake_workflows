@@ -61,7 +61,7 @@ data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)]
 
 # All different Prot_Cond prosibilities to merge replicates
 data["Prot_Cond"] = ["_".join((Prot,Cond)) for Prot,Cond in zip(data.Protein,data.Condition)]
-
+print(data.Prot_Cond.values)
 data["PATH_genome"] = [genome_path[i] for i in data.Genome] 
 
 data["Genome_size"] = [genome_size[i] for i in data.Genome]
