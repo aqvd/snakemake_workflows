@@ -59,6 +59,9 @@ data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)]
                  else "" \
                  for Prot,Cond in zip(data.Protein,data.Condition)  ]
 
+# All different Prot_Cond prosibilities to merge replicates
+data["Prot_Cond"] = ["_".join((Prot,Cond)) for Prot,Cond in zip(data.Protein,data.Condition)]
+
 data["PATH_genome"] = [genome_path[i] for i in data.Genome] 
 
 data["Genome_size"] = [genome_size[i] for i in data.Genome]
@@ -121,27 +124,30 @@ rule all:
 		expand(DATADIR + "/align/{sample}_ORI_factor.txt",
 			sample=data.Samples[data.Input != ""].unique()),
 		## .bam alignment files sorted and without duplicates
-		#expand(DATADIR+"/align/{sample}_final.bam", 
-		#	sample=data.Samples.unique()),
+		expand(DATADIR+"/align/{sample}_final.bam", 
+			sample=data.Samples.unique()),
 		## Indexed .bai alignments
-		#expand(DATADIR + "/align/{sample}_final.bai",
-		#	sample=data.Samples.unique()),
+		expand(DATADIR + "/align/{sample}_final.bai",
+			sample=data.Samples.unique()),
+		## Merged bams 
+		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
+			Prot_Cond=data.Prot_Cond.unique()[0])
 		## .bw files RPKM normalized
-		#expand(RESDIR+"/bw/{sample}_RPKM.bw", 
-		#	sample=data.Samples.unique()),
+		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
+			sample=data.Samples.unique()),
 		## .bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
 				sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique()),
-		## Macs2 fragment prediction
+		## Macs2 fragment prediction for merged bam
 		expand(RESDIR + '/macs/{sample}_predictd.txt',
-				sample=data.Samples[data.Protein!="input"].unique()),
-		## Macs2 peak files
+				sample=data.Prot_Cond[data.Protein!="input"].unique()),
+		## Macs2 peak files merged bam
 		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
-				sample=data.Samples[data.Protein!="input"].unique()),
-		## Macs2 summits files
+				sample=data.Prot_Cond[data.Protein!="input"].unique()),
+		## Macs2 summits files from merged bams
 		expand(RESDIR + '/macs/{sample}_summits.bed',
-				sample=data.Samples[data.Protein!="input"].unique()),
+				sample=data.Prot_Cond[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
 		RESDIR + '/macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
@@ -329,7 +335,6 @@ rule index_bam:
 	output:
 		DATADIR + "/align/{sample}_final.bai"
 	threads: 1
-
 	resources:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
@@ -339,6 +344,38 @@ rule index_bam:
 		'''
 		gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
 		-I {input} |& tee {log}
+		'''
+def Input_merge_bam(*bams):
+    '''
+    Generate formated string for -I option for MergeSamFiles
+    '''
+    input_bams=["-I " + str(b) for b in bams]
+    input_bams=" ".join(input_bams)
+    return input_bams
+
+rule merge_bam:
+	input:
+	## sample replicates have same Protein and Condition
+		nodup_bam=lambda wildcards: expand(DATADIR+"/align/{sample}_final.bam",
+			sample=data.Samples[data.Protein==wildcards.Prot &
+								data.Condition == wildcards.Cond])
+	output:
+	## Get Prot and Cond wildcards from expanded filename  
+		merged_bam =  DATADIR + "/align/{Prot}_{Cond}_final_merged.bam"
+	
+	params:
+		I=lambda wildcards, input: Input_merge_bam(input)
+	threads: 2
+	resources:
+		mem_mb=get_resource("gatk", "mem_mb"),
+		walltime=get_resource("gatk","walltime")
+	log:
+		LOGDIR + "/gatk/mergeSam_{Prot}_{Cond}.log"
+	shell:
+		'''
+		gatk MergeSamFilesjava --java-option -Xmx{resources.mem_mb}M \
+		--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
+		{params.I} --OUTPUT {output.merged_bam}
 		'''
 
 

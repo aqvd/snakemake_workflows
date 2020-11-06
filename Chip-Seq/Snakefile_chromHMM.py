@@ -49,10 +49,10 @@ genome_size={"mm9":2620345972,
 ##################################################
 ## 				READ METADATA					##
 ##################################################
-data = pd.read_csv(TABLE_NAME,sep="\t")
+data = pd.read_csv(TABLE_NAME,sep=",")
 ## Add extra cols for salecting the appropriate wildcards path to files
 
-data["Samples"] = data.Protein+"_"+data.BioProject+"_"+ data.Rep
+data["Samples"] = data.Protein+"_"+data.BioProject+"_"+data.Rep.astype(str)
 # Match each sample reads with appropriate input to calculate calibration factor
 data["Input"] = [ data.Samples[(data.Protein=="input") & (data.BioProject==BP)].values[0] \
                  if Prot != "input" \
@@ -63,9 +63,6 @@ data["PATH_genome"] = [genome_path[i] for i in data.Genome]
 
 data["Genome_size"] = [genome_size[i] for i in data.Genome]
 
-data["PATH_genome_cal"] = [genome_path[i] for i in data.Norm]
-
-data["PATH_refSeq_genes"] = [refSeq_genes_path[i] for i in data.Genome]
 ## Remove .fastq.gz to use basename with expand() in rule "all"
 data["fqBasename"] = [f.replace(".fastq.gz","") for f in data["File"]]
 
@@ -88,8 +85,7 @@ else:
 ##					RULES 						##
 ##################################################
 
-## ## Rules priority
-ruleorder: bowtie2_alignTo_calGenome > bowtie2_alignTo_refGenome 
+## ## Rules priority 
 rule all:
     input:
         ### fastQC quality control
@@ -103,13 +99,16 @@ rule all:
             fq_base=data.fqBasename.unique()),
         ## fastQ Screen contamination control
         expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
-            fq_base=data.fqBasename.unique())
+            fq_base=data.fqBasename.unique()),
         ## .sam bowtie2 alignments. All reads aligning to reference genome
         expand(DATADIR+"/align/{sample}.sam", 
             sample=data.Samples.unique()),
         ## Macs2 peak files
         # expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
         #         sample=data.Samples[data.Protein!="input"].unique())
+        ## Indexes of no dup alignments
+        expand(DATADIR + "/align/{sample}_final.bai",
+            sample=data.Samples.unique())
 
 
 rule fastQC:
@@ -147,7 +146,7 @@ rule bowtie2_alignTo_refGenome:
         fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
             fq_file=data.File[data.Samples==wildcards.sample].values)
     output:
-        sam=tmp(DATADIR + "/align/{sample}.sam")
+        sam=temp(DATADIR + "/align/{sample}.sam")
     params:
         genomeIndex= lambda wildcards: expand("{genome}",
             genome=data.PATH_genome[data.Samples==wildcards.sample].values[0])
@@ -169,7 +168,7 @@ rule sort_sam:
         sorted_bam=temp(DATADIR + "/align/{sample}_sorted.bam")
         #sorted_bam=DATADIR + "/align/{sample}_sorted.bam"
     log:
-        LOGDIR + "/picard/sortSam_{sample}.log"
+        LOGDIR + "/gatk_sortSam_{sample}.log"
     threads: 
         1
     resources:
@@ -196,7 +195,7 @@ rule remove_duplicates:
         mem_mb=get_resource("gatk", "mem_mb"),
         walltime=get_resource("gatk","walltime")
     log:
-        LOGDIR + "/gatk/markDup_{sample}.log"
+        LOGDIR + "/gatk_markDup_{sample}.log"
     shell:
         '''
         gatk MarkDuplicates --java-options "-Xmx{resources.mem_mb}M" \
@@ -216,7 +215,7 @@ rule index_bam:
         mem_mb=get_resource("gatk", "mem_mb"),
         walltime=get_resource("gatk","walltime")
     log:
-        LOGDIR + "/gatk/index_{sample}.log"
+        LOGDIR + "/gatk_index_{sample}.log"
     shell:
         '''
         gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
