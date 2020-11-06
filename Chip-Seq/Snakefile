@@ -350,6 +350,7 @@ rule index_bam:
 		gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
 		-I {input} |& tee {log}
 		'''
+
 def Input_merge_bam(*bams):
     '''
     Generate formated string for -I option for MergeSamFiles
@@ -362,7 +363,7 @@ def Input_merge_bam(*bams):
 rule merge_bam:
 	input:
 	## sample replicates have same Protein and Condition
-		lambda wildcards: expand(DATADIR+"/align/{Samp}_final.bam",Samp=data.Samples[(data.Protein == wildcards.Prot) & (data.Condition == wildcards.Cond)].values)
+		bam=lambda wildcards: expand(DATADIR+"/align/{Samp}_final.bam",Samp=data.Samples[(data.Protein == wildcards.Prot) & (data.Condition == wildcards.Cond)].values)
 	output:
 	## Get Prot and Cond wildcards from expanded filename  
 		DATADIR + "/align/{Prot}_{Cond}_final_merged.bam"
@@ -373,7 +374,7 @@ rule merge_bam:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
-		LOGDIR + "/gatk/mergeSamm_{Prot}_{Cond}.log"
+		LOGDIR + "/gatk/mergeSam_{Prot}_{Cond}.log"
 	shell:
 		'''
 		gatk MergeSamFiles java --java-option -Xmx{resources.mem_mb}M \
