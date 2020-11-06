@@ -8,7 +8,7 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "config/test_config.yaml"
+configfile: "config/config.yaml"
 
 
 ## 
