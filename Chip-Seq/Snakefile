@@ -298,7 +298,7 @@ rule sort_sam:
 		sorted_bam=DATADIR + "/align/{sample}_sorted.bam"
 		#sorted_bam=DATADIR + "/align/{sample}_sorted.bam"
 	log:
-		LOGDIR + "/picard/sortSam_{sample}.log"
+		LOGDIR + "/gatk/sortSam_{sample}.log"
 	threads: 
 		1
 	resources:
@@ -362,10 +362,12 @@ def Input_merge_bam(*bams):
 
 rule merge_bam:
 	input:
-	## sample replicates have same Protein and Condition
-		bam=lambda wildcards: expand(DATADIR+"/align/{Samp}_final.bam",Samp=data.Samples[(data.Protein == wildcards.Prot) & (data.Condition == wildcards.Cond)].values)
+		## sample replicates have same Protein and Condition
+		bam=lambda wildcards: expand(DATADIR+"/align/{Samp}_final.bam",
+		 Samp=data.Samples[(data.Protein == wildcards.Prot) & 
+		 (data.Condition == wildcards.Cond)].values)
 	output:
-	## Get Prot and Cond wildcards from expanded filename  
+		## Get Prot and Cond wildcards from expanded filename  
 		DATADIR + "/align/{Prot}_{Cond}_final_merged.bam"
 	params:
 		I=lambda wildcards, input: Input_merge_bam(input[0])
