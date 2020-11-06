@@ -350,7 +350,7 @@ rule index_bam:
 		-I {input} |& tee {log}
 		'''
 
-def Input_merge_bam(*bams):
+def Input_merge_bam(bams):
     '''
     Generate formated string for -I option for MergeSamFiles
     '''
