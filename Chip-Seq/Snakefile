@@ -135,8 +135,7 @@ rule all:
 		expand(DATADIR + "/align/{sample}_final.bai",
 			sample=data.Samples.unique()),
 		## Merged bams 
-		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
-			Prot_Cond=data.Prot_Cond.unique()),
+		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",	Prot_Cond=data.Prot_Cond.unique()),
 		# ## .bw files RPKM normalized
 		# expand(RESDIR+"/bw/{sample}_RPKM.bw", 
 		# 	sample=data.Samples.unique()),
