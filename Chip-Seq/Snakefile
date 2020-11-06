@@ -373,7 +373,7 @@ rule merge_bam:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
-		LOGDIR + "/gatk/mergeSam_{Prot}_{Cond}.log"
+		LOGDIR + "/gatk/mergeSamm_{Prot}_{Cond}.log"
 	shell:
 		'''
 		gatk MergeSamFiles java --java-option -Xmx{resources.mem_mb}M \
