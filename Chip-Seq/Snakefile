@@ -109,7 +109,7 @@ rule all:
 		# expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 		# 	fq_base=data.fqBasename.unique()),
 		## .sam bowtie2 alignments. All reads aligning to reference genome
-		expand(DATADIR+"/align/{sample}.sam", 
+		expand(DATADIR+"/align/{sample}_all.sam", 
 			sample=data.Samples.unique()),
 		## .sam bowtie2 alignments. Reads unique for reference genome
 		expand(DATADIR+"/align/{sample}_onlyRef.sam", 
@@ -239,7 +239,7 @@ rule bowtie2_alignTo_calGenome:
 		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
-		sam=DATADIR + "/align/{sample}.sam",
+		sam=DATADIR + "/align/{sample}_all.sam",
 		unal=DATADIR + "/align/{sample}_calibration_unal.sam",
 		stats= DATADIR + "/align/stats/{sample}_calibration.txt"
 	params:
