@@ -138,27 +138,27 @@ rule all:
 		## Merged bams 
 		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
 			Prot_Cond=data.Prot_Cond.unique()),
-		# ## .bw files RPKM normalized
-		# expand(RESDIR+"/bw/{sample}_RPKM.bw", 
-		# 	sample=data.Samples.unique()),
-		# ## .bw files scaled (CPM * scaleFactor)
-		# expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
-		# 						(data.Protein!="input")].unique()),
-		# ## Macs2 fragment prediction for merged bam
-		# expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
-		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		# ## Macs2 peak files merged bam
-		# expand(RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
-		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		# ## Macs2 summits files from merged bams
-		# expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
-		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		# ## .bed file with all unique summits among samples
-		# RESDIR + '/macs/summits_unique.bed',
-		# ## deeptools computeMatrix out files. regionsType = "summits" or "genes"
-		# ## look right before rule all to see how regionsType is obtained.
-		# #RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
+		## .bw files RPKM normalized
+		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
+			sample=data.Samples.unique()),
+		## .bw files scaled (CPM * scaleFactor)
+		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+				sample=data.Samples[(data.PATH_genome_cal!="") & 
+								(data.Protein!="input")].unique()),
+		## Macs2 fragment prediction for merged bam
+		expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
+		## Macs2 peak files merged bam
+		expand(RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
+		## Macs2 summits files from merged bams
+		expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
+		## .bed file with all unique summits among samples
+		RESDIR + '/macs/summits_unique.bed',
+		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
+		## look right before rule all to see how regionsType is obtained.
+		RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
 	#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
