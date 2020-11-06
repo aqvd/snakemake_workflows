@@ -357,8 +357,8 @@ rule merge_bam:
 	input:
 	## sample replicates have same Protein and Condition
 		nodup_bam=lambda wildcards: expand(DATADIR+"/align/{sample}_final.bam",
-			sample=data.Samples[data.Protein==wildcards.Prot &
-								data.Condition == wildcards.Cond])
+			sample=data.Samples[(data.Protein==wildcards.Prot) &
+								(data.Condition == wildcards.Cond)])
 	output:
 	## Get Prot and Cond wildcards from expanded filename  
 		merged_bam =  DATADIR + "/align/{Prot}_{Cond}_final_merged.bam"
