@@ -10,10 +10,9 @@ data = pd.read_csv(ACC_TABLE,sep=",")
 rule all:
 	input:
 		expand(FASTQDIR + "{SRR}.finished", SRR=data.Run.unique())
-
 rule fastq_dump:
 	output:
-		FASTQDIR + "{SRR}.finished"
+		FASTQDIR + "{SRR}.finished", # created only if all succeded on time
 	params:
 		srr=lambda wildcards: wildcards.SRR,
 		Dir=FASTQDIR,
