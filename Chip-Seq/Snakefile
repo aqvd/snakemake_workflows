@@ -142,9 +142,9 @@ rule all:
 		# expand(RESDIR+"/bw/{sample}_RPKM.bw", 
 		# 	sample=data.Samples.unique()),
 		## .bw files scaled (CPM * scaleFactor)
-		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
-				sample=data.Samples[(data.PATH_genome_cal!="") & 
-								(data.Protein!="input")].unique()),
+		# expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
+		# 						(data.Protein!="input")].unique()),
 		## Macs2 fragment prediction for merged bam
 		# expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
 		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
