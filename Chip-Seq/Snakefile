@@ -155,7 +155,7 @@ rule all:
 		# expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
 		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
-		RESDIR + '/macs/summits_unique.bed',
+		#RESDIR + '/macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
 		## look right before rule all to see how regionsType is obtained.
 		RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
