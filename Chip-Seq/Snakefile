@@ -140,14 +140,14 @@ rule all:
 				sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique()),
 		## Macs2 fragment prediction for merged bam
-		expand(RESDIR + '/macs/{sample}_predictd.txt',
-				sample=data.Prot_Cond[data.Protein!="input"].unique()),
+		expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 peak files merged bam
-		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
-				sample=data.Prot_Cond[data.Protein!="input"].unique()),
+		expand(RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 summits files from merged bams
-		expand(RESDIR + '/macs/{sample}_summits.bed',
-				sample=data.Prot_Cond[data.Protein!="input"].unique()),
+		expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
 		RESDIR + '/macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
@@ -433,14 +433,14 @@ rule create_bigWig_scaled:
 
 rule macs2_callpeak:
 	input:
-		treatBam= DATADIR + '/align/{sample}_final.bam',
+		treatBam= DATADIR + '/align/{Prot_Cond}_final_merged.bam',
 		inputBam= lambda wildcards: expand(
-					DATADIR+'/align/{inputSample}_final.bam',
-			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
+					DATADIR+'/align/{inputSample}_final_merged.bam',
+			inputSample=data.Input[data.Prot_Cond == wildcards.Prot_Cond].values[0])
 	output:
-		pred=RESDIR+'/macs/{sample}_predictd.txt',
-		peaks=RESDIR + '/macs/{sample}_peaks.narrowPeak',
-		summits=RESDIR + '/macs/{sample}_summits.bed'
+		pred=RESDIR+'/macs/{Prot_Cond}_predictd.txt',
+		peaks=RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
+		summits=RESDIR + '/macs/{Prot_Cond}_summits.bed'
 	threads:
 		get_resource("macs2", "threads")
 	resources:
@@ -450,15 +450,15 @@ rule macs2_callpeak:
 		outDir=RESDIR+'/macs',
 		species=get_resource("macs2", "species")
 	log:
-		LOGDIR + "/macs/{sample}.log"
+		LOGDIR + "/macs/{Prot_Cond}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
-		{params.species} {wildcards.sample} {params.outDir} &> {log}'
+		{params.species} {wildcards.Prot_Cond} {params.outDir} &> {log}'
 
 rule unique_summits:
 	input:
-		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
-			   sample=data.Samples[data.Protein != 'input'].unique())
+		summits=expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
 	output:
 		RESDIR + '/macs/summits_unique.bed'
 	threads: 1
