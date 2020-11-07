@@ -158,7 +158,7 @@ rule all:
 		#RESDIR + '/macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
 		## look right before rule all to see how regionsType is obtained.
-		RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
+		# RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
 	#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
