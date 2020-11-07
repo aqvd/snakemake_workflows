@@ -60,7 +60,7 @@ data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)]
                  for Prot,Cond in zip(data.Protein,data.Condition)  ]
 
 # Input for calling peaks after merging replicates
-data["InputMerged"] = [ DATADIR +"/"+ re.sub("_S[0-9]+$","", ip) if ip != ""
+data["InputMerged"] = [ re.sub("_S[0-9]+$","", ip) if ip != ""
                        else "" for ip in data.Input]
 
 # All different Prot_Cond prosibilities to merge replicates
@@ -585,15 +585,5 @@ rule compute_matrix:
 			--samplesLabel {params.labels} \
 			--numberOfProcessors {threads} \
 			--outFileName {output.matrix} '
-
-
-
-
-
-
-
-
-
-
 
 
