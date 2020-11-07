@@ -380,10 +380,9 @@ rule merge_bam:
 		LOGDIR + "/gatk/mergeSam_{Prot}_{Cond}.log"
 	shell:
 		'''
-		echo "{input.bam}";
-		gatk MergeSamFiles java --java-option -Xmx{resources.mem_mb}M \
+		gatk MergeSamFiles java --java-options "-Xmx{resources.mem_mb}M" \
 		--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-		{params.I} --OUTPUT {output}
+		{params.I} --OUTPUT {output} |& {log}
 		'''
 
 
