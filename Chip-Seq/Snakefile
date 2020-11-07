@@ -185,7 +185,21 @@ rule merge_bams_only:
 		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
 			Prot_Cond=data.Prot_Cond.unique())
 
-rule call_peaks_only:
+rule macs2_notMerged_only:
+	input:
+		## Macs2 fragment prediction
+		expand(RESDIR + '/macs/{sample}_predictd.txt',
+				sample=data.Samples[data.Protein!="input"].unique()),
+		## Macs2 peak files
+		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
+				sample=data.Samples[data.Protein!="input"].unique()),
+		## Macs2 summits files
+		expand(RESDIR + '/macs/{sample}_summits.bed',
+				sample=data.Samples[data.Protein!="input"].unique()),
+		## .bed file with all unique summits among samples
+		RESDIR + '/macs/summits_unique.bed'
+
+rule macs2_merged_only:
 	input:
 		# Macs2 fragment prediction for merged bam
 		expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
@@ -473,12 +487,36 @@ rule create_bigWig_scaled:
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''			
 
-rule macs2_callpeak:
+rule macs2_notMerged_callpeak:
+	input:
+		treatBam= DATADIR + '/align/{sample}_final.bam',
+		inputBam= lambda wildcards: expand(
+					DATADIR+'/align/{inputSample}_final.bam',
+			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
+	output:
+		pred=RESDIR+'/macs/{sample}_predictd.txt',
+		peaks=RESDIR + '/macs/{sample}_peaks.narrowPeak',
+		summits=RESDIR + '/macs/{sample}_summits.bed'
+	threads:
+		get_resource("macs2", "threads")
+	resources:
+		mem_mb=get_resource("macs2", "mem_mb"),
+		walltime=get_resource("macs2", "walltime")
+	params:
+		outDir=RESDIR+'/macs',
+		species=get_resource("macs2", "species")
+	log:
+		LOGDIR + "/macs/{sample}.log"
+	shell:
+		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
+		{params.species} {wildcards.sample} {params.outDir} &> {log}'
+
+rule macs2_merged_callpeak:
 	input:
 		treatBam= DATADIR + '/align/{Prot_Cond}_final_merged.bam',
 		inputBam= lambda wildcards: expand(
 					DATADIR+'/align/{inputSample}_final_merged.bam',
-			inputSample=data.Input[data.Prot_Cond == wildcards.Prot_Cond].values[0])
+			inputSample=data.InputMerged[data.Prot_Cond == wildcards.Prot_Cond].values[0])
 	output:
 		pred=RESDIR+'/macs/{Prot_Cond}_predictd.txt',
 		peaks=RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
