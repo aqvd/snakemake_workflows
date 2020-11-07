@@ -176,6 +176,37 @@ rule QC_only:
 		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique())
 
+rule merge_bams_only:
+	input:
+		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
+			Prot_Cond=data.Prot_Cond.unique())
+
+rule call_peaks_only:
+	input:
+		# Macs2 fragment prediction for merged bam
+		expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
+		## Macs2 peak files merged bam
+		expand(RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
+		## Macs2 summits files from merged bams
+		expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
+		# .bed file with all unique summits among samples
+		RESDIR + '/macs/summits_unique.bed'
+
+rule bw_only:
+	input:
+		# .bw files RPKM normalized or scaled. One per sample. Then merge if heatmap
+		# shows good correlation between samples
+		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
+			sample=data.Samples.unique()),
+		# .bw files scaled (CPM * scaleFactor)
+		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+				sample=data.Samples[(data.PATH_genome_cal!="") & 
+								(data.Protein!="input")].unique()),
+
+
 rule fastQC:
 	input:
 		# .fastq raw reads
@@ -382,7 +413,7 @@ rule merge_bam:
 		'''
 		gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
 		--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-		{params.I} --OUTPUT {output} |& {log}
+		{params.I} --OUTPUT {output} |& tee {log}
 		'''
 
 
