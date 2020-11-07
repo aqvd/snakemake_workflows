@@ -202,16 +202,16 @@ rule macs2_notMerged_only:
 rule macs2_merged_only:
 	input:
 		# Macs2 fragment prediction for merged bam
-		expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
+		expand(RESDIR + '/macs/{Prot_Cond}_merged_predictd.txt',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 peak files merged bam
-		expand(RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
+		expand(RESDIR + '/macs/{Prot_Cond}_merged_peaks.narrowPeak',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 summits files from merged bams
-		expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+		expand(RESDIR + '/macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		# .bed file with all unique summits among samples
-		RESDIR + '/macs/summits_unique.bed'
+		RESDIR + '/macs/merged_summits_unique.bed'
 
 rule bw_only:
 	input:
@@ -518,9 +518,9 @@ rule macs2_merged_callpeak:
 					DATADIR+'/align/{inputSample}_final_merged.bam',
 			inputSample=data.InputMerged[data.Prot_Cond == wildcards.Prot_Cond].values[0])
 	output:
-		pred=RESDIR+'/macs/{Prot_Cond}_predictd.txt',
-		peaks=RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
-		summits=RESDIR + '/macs/{Prot_Cond}_summits.bed'
+		pred=RESDIR+'/macs/{Prot_Cond}_merged_predictd.txt',
+		peaks=RESDIR + '/macs/{Prot_Cond}_merged_peaks.narrowPeak',
+		summits=RESDIR + '/macs/{Prot_Cond}_merged_summits.bed'
 	threads:
 		get_resource("macs2", "threads")
 	resources:
@@ -535,7 +535,7 @@ rule macs2_merged_callpeak:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.Prot_Cond} {params.outDir} &> {log}'
 
-rule unique_summits:
+rule unique_summits_merged:
 	input:
 		summits=expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
 			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
