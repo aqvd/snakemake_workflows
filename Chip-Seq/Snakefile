@@ -523,13 +523,14 @@ rule macs2_merged_callpeak:
 		mem_mb=get_resource("macs2", "mem_mb"),
 		walltime=get_resource("macs2", "walltime")
 	params:
+		fileName=lambda wildcards: str(wildcards.Prot_Cond) + "_merged"
 		outDir=RESDIR+'/macs',
 		species=get_resource("macs2", "species")
 	log:
 		LOGDIR + "/macs/{Prot_Cond}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
-		{params.species} {wildcards.Prot_Cond} {params.outDir} &> {log}'
+		{params.species} {params.filename} {params.outDir} &> {log}'
 
 rule unique_summits_NotMerged:
 	input:
