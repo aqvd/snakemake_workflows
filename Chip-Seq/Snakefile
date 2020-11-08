@@ -530,7 +530,7 @@ rule macs2_merged_callpeak:
 		LOGDIR + "/macs/{Prot_Cond}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
-		{params.species} {params.filename} {params.outDir} &> {log}'
+		{params.species} {params.fileName} {params.outDir} &> {log}'
 
 rule unique_summits_NotMerged:
 	input:
