@@ -523,7 +523,7 @@ rule macs2_merged_callpeak:
 		mem_mb=get_resource("macs2", "mem_mb"),
 		walltime=get_resource("macs2", "walltime")
 	params:
-		fileName=lambda wildcards: str(wildcards.Prot_Cond) + "_merged"
+		fileName=lambda wildcards: str(wildcards.Prot_Cond) + "_merged",
 		outDir=RESDIR+'/macs',
 		species=get_resource("macs2", "species")
 	log:
