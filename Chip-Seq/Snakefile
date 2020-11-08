@@ -196,8 +196,9 @@ rule macs2_notMerged_only:
 		## Macs2 summits files
 		expand(RESDIR + '/macs/{sample}_summits.bed',
 				sample=data.Samples[data.Protein!="input"].unique()),
-		## .bed file with all unique summits among samples
-		RESDIR + '/macs/summits_unique.bed'
+		## After runing script to get unique summits save runtime here
+		RESDIR + '/macs/summits_NotMerged.dateRun'
+
 
 rule macs2_merged_only:
 	input:
@@ -210,8 +211,8 @@ rule macs2_merged_only:
 		## Macs2 summits files from merged bams
 		expand(RESDIR + '/macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		# .bed file with all unique summits among samples
-		RESDIR + '/macs/merged_summits_unique.bed'
+		## After runing script to get unique summits save runtime here
+		RESDIR + '/macs/summits_merged.dateRun'
 
 rule bw_only:
 	input:
@@ -535,12 +536,12 @@ rule macs2_merged_callpeak:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.Prot_Cond} {params.outDir} &> {log}'
 
-rule unique_summits_merged:
+rule unique_summits_notMerged:
 	input:
-		summits=expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
-			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
+		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
+			   sample=data.Samples[data.Protein != 'input'].unique())
 	output:
-		RESDIR + '/macs/summits_unique.bed'
+		RESDIR + '/macs/summits_NotMerged.dateRun'
 	threads: 1
 	resources:
 		mem_mb=500,
@@ -550,7 +551,26 @@ rule unique_summits_merged:
 	log:
 		LOGDIR + "/macs/unique_summits.log"
 	shell:
-		'scripts/all_unique_summits.sh {params.summitsBed}'
+		'scripts/all_unique_summits.sh {params.summitsBed} |& tee {log} && \
+		date > {output}'
+
+rule unique_summits_merged:
+	input:
+		summits=expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
+	output:
+		RESDIR + '/macs/summits_merged.dateRun'
+	threads: 1
+	resources:
+		mem_mb=500,
+		walltime=5
+	params:
+		summitsBed=lambda wildcards,input: " ".join(input.summits)
+	log:
+		LOGDIR + "/macs/unique_summits.log"
+	shell:
+		'scripts/all_unique_summits.sh {params.summitsBed} |& tee {log} && \
+		date > {output}'
 
 
 
