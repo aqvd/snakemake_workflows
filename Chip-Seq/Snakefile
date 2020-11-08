@@ -91,11 +91,6 @@ if regionsType == "summits":
 else:
 	regionsFile = refSeq_genes_path["hg19"]
 
-## PRUEBAS >>>>
-print(data.Prot_Cond.unique())
-aa= expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",	Prot_Cond=data.Prot_Cond.unique())
-print(aa, len(aa))
-## PRUEBAS <<<
 
 ##################################################
 ##					RULES 						##
@@ -103,7 +98,7 @@ print(aa, len(aa))
 
 ## ## Rules priority
 ruleorder: bowtie2_alignTo_calGenome > bowtie2_alignTo_refGenome 
-
+ruleorder: unique_summits_merged > unique_summits_NotMerged
 rule all:
 	input:
 		# ## fastQC quality control
@@ -536,7 +531,7 @@ rule macs2_merged_callpeak:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.Prot_Cond} {params.outDir} &> {log}'
 
-rule unique_summits_notMerged:
+rule unique_summits_NotMerged:
 	input:
 		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
 			   sample=data.Samples[data.Protein != 'input'].unique())
