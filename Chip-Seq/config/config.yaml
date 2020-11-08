@@ -3,7 +3,7 @@ datadir: "/storage/scratch01/users/aquevedo/6Nov-siNipbl-newSnak/data/"
 resdir: "/storage/scratch01/users/aquevedo/6Nov-siNipbl-newSnak/res/"
 logdir: "/storage/scratch01/users/aquevedo/6Nov-siNipbl-newSnak/log/"
 
-tableName: "config/table_siNipbl_cluster.tsv"
+tableName: "config/table_siSA1-2_cluster.txt"
 
 rules:
     default:
@@ -24,11 +24,11 @@ rules:
     gatk:
         res:
             mem_mb: 4096 #in MB
-            walltime: 15
+            walltime: 25
     create_bigWig:
         res:
             mem_mb: 8000
-            threads: 20
+            threads: 30
     macs2:
         res:
             threads: 2
