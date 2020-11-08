@@ -25,7 +25,7 @@ def tryMkdir(path):
 	except FileExistsError:
 		pass
 
-[tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, RESDIR+"/fastQC")]
+[tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, RESDIR + "fastQC")]
 
 ## Genome bowtie2 index prefixes paths
 genome_path = {
@@ -87,7 +87,7 @@ def get_resource(rule,resource):
 regionsType = get_resource("compute_matrix", "regions")
 
 if regionsType == "summits":
-	regionsFile = RESDIR + '/macs/summits_unique.bed'
+	regionsFile = RESDIR + 'macs/summits_unique.bed'
 else:
 	regionsFile = refSeq_genes_path["hg19"]
 
@@ -102,121 +102,121 @@ ruleorder: unique_summits_merged > unique_summits_NotMerged
 rule all:
 	input:
 		# ## fastQC quality control
-		# expand(RESDIR+"/fastQC/{fq_base}_fastqc.html", 
+		# expand(RESDIR + "fastQC/{fq_base}_fastqc.html", 
 		# 	fq_base=data.fqBasename.unique()),
 		# ## fastQC quality control
-		# expand(RESDIR+"/fastQC/{fq_base}_fastqc.zip", 
+		# expand(RESDIR + "fastQC/{fq_base}_fastqc.zip", 
 		# 	fq_base=data.fqBasename.unique()),
 		# ## fastQ Screen contamination control
-		# expand(RESDIR+"/fastQScreen/{fq_base}_screen.txt", 
+		# expand(RESDIR + "fastQScreen/{fq_base}_screen.txt", 
 		# 	fq_base=data.fqBasename.unique()),
 		# ## fastQ Screen contamination control
-		# expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
+		# expand(RESDIR + "fastQScreen/{fq_base}_screen.html", 
 		# 	fq_base=data.fqBasename.unique()),
 		# ## .sam bowtie2 alignments. All reads aligning to reference genome
-		# expand(DATADIR+"/align/{sample}_all.sam", 
+		# expand(DATADIR + "align/{sample}_all.sam", 
 		# 	sample=data.Samples.unique()),
 		# ## .sam bowtie2 alignments. Reads unique for reference genome
-		# expand(DATADIR+"/align/{sample}_onlyRef.sam", 
+		# expand(DATADIR + "align/{sample}_onlyRef.sam", 
 		# 	sample=data.Samples.unique()),
 		# ## bowtie2 mapping stats 
-		# expand(DATADIR + "/align/stats/{sample}.txt",
+		# expand(DATADIR + "align/stats/{sample}.txt",
 		# 	sample=data.Samples.unique()),
 		# ## bowtie2 maping againtst calibraton genome stats
-		# expand(DATADIR+"/align/stats/{sample}_calibration.txt",
+		# expand(DATADIR + "align/stats/{sample}_calibration.txt",
 		# 	sample=data.Samples[ data.PATH_genome_cal != "" ].unique()),
 		# ## Calibration factors. Only for chip samples with input to compare
-		# expand(DATADIR + "/align/{sample}_ORI_factor.txt",
+		# expand(DATADIR + "align/{sample}_ORI_factor.txt",
 		# 	sample=data.Samples[data.Input != ""].unique()),
 		# ## .bam alignment files sorted and without duplicates
-		# expand(DATADIR+"/align/{sample}_final.bam", 
+		# expand(DATADIR + "align/{sample}_final.bam", 
 		# 	sample=data.Samples.unique()),
 		# ## Indexed .bai alignments
-		# expand(DATADIR + "/align/{sample}_final.bai",
+		# expand(DATADIR + "align/{sample}_final.bai",
 		# 	sample=data.Samples.unique()),
 		## Merged bams 
-		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
+		expand(DATADIR + "align/{Prot_Cond}_final_merged.bam",
 			Prot_Cond=data.Prot_Cond.unique()),
 		## .bw files RPKM normalized
-		# expand(RESDIR+"/bw/{sample}_RPKM.bw", 
+		# expand(RESDIR + "bw/{sample}_RPKM.bw", 
 		# 	sample=data.Samples.unique()),
 		## .bw files scaled (CPM * scaleFactor)
-		# expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+		# expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
 		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
 		# 						(data.Protein!="input")].unique()),
 		## Macs2 fragment prediction for merged bam
-		# expand(RESDIR + '/macs/{Prot_Cond}_predictd.txt',
+		# expand(RESDIR + 'macs/{Prot_Cond}_predictd.txt',
 		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		# ## Macs2 peak files merged bam
-		# expand(RESDIR + '/macs/{Prot_Cond}_peaks.narrowPeak',
+		# expand(RESDIR + 'macs/{Prot_Cond}_peaks.narrowPeak',
 		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		# ## Macs2 summits files from merged bams
-		# expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+		# expand(RESDIR + 'macs/{Prot_Cond}_summits.bed',
 		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
-		#RESDIR + '/macs/summits_unique.bed',
+		#RESDIR + 'macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
 		## look right before rule all to see how regionsType is obtained.
-		# RESDIR + "/deeptools/matrix_all_samples_" + regionsType + ".gz",
-	#RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
+		# RESDIR + "deeptools/matrix_all_samples_" + regionsType + ".gz",
+	#RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
 
 rule QC_only:
 	input:
 		### fastQC quality control
-		expand(RESDIR+"/fastQC/{fq_base}_fastqc.html", 
+		expand(RESDIR + "fastQC/{fq_base}_fastqc.html", 
 			fq_base=data.fqBasename.unique()),
 		## fastQC quality control
-		expand(RESDIR+"/fastQC/{fq_base}_fastqc.zip", 
+		expand(RESDIR + "fastQC/{fq_base}_fastqc.zip", 
 			fq_base=data.fqBasename.unique()),
 		## fastQ Screen contamination control
-		expand(RESDIR+"/fastQScreen/{fq_base}_screen.txt", 
+		expand(RESDIR + "fastQScreen/{fq_base}_screen.txt", 
 			fq_base=data.fqBasename.unique()),
 		## fastQ Screen contamination control
-		expand(RESDIR+"/fastQScreen/{fq_base}_screen.html", 
+		expand(RESDIR + "fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique())
 
 rule merge_bams_only:
 	input:
-		expand(DATADIR + "/align/{Prot_Cond}_final_merged.bam",
+		expand(DATADIR + "align/{Prot_Cond}_final_merged.bam",
 			Prot_Cond=data.Prot_Cond.unique())
 
 rule macs2_notMerged_only:
 	input:
 		## Macs2 fragment prediction
-		expand(RESDIR + '/macs/{sample}_predictd.txt',
+		expand(RESDIR + 'macs/{sample}_predictd.txt',
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 peak files
-		expand(RESDIR + '/macs/{sample}_peaks.narrowPeak',
+		expand(RESDIR + 'macs/{sample}_peaks.narrowPeak',
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 summits files
-		expand(RESDIR + '/macs/{sample}_summits.bed',
+		expand(RESDIR + 'macs/{sample}_summits.bed',
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## After runing script to get unique summits save runtime here
-		RESDIR + '/macs/summits_NotMerged.dateRun'
+		RESDIR + 'macs/summits_NotMerged.dateRun'
 
 
 rule macs2_merged_only:
 	input:
 		# Macs2 fragment prediction for merged bam
-		expand(RESDIR + '/macs/{Prot_Cond}_merged_predictd.txt',
+		expand(RESDIR + 'macs/{Prot_Cond}_merged_predictd.txt',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 peak files merged bam
-		expand(RESDIR + '/macs/{Prot_Cond}_merged_peaks.narrowPeak',
+		expand(RESDIR + 'macs/{Prot_Cond}_merged_peaks.narrowPeak',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 summits files from merged bams
-		expand(RESDIR + '/macs/{Prot_Cond}_merged_summits.bed',
+		expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## After runing script to get unique summits save runtime here
-		RESDIR + '/macs/summits_merged.dateRun'
+		RESDIR + 'macs/summits_merged.dateRun'
 
 rule bw_only:
 	input:
 		# .bw files RPKM normalized or scaled. One per sample. Then merge if heatmap
 		# shows good correlation between samples
-		expand(RESDIR+"/bw/{sample}_RPKM.bw", 
+		expand(RESDIR + "bw/{sample}_RPKM.bw", 
 			sample=data.Samples.unique()),
 		# .bw files scaled (CPM * scaleFactor)
-		expand(RESDIR + "/bw/{sample}_RPKM_scaled.bw",
+		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
 				sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique()),
 
@@ -224,12 +224,12 @@ rule bw_only:
 rule fastQC:
 	input:
 		# .fastq raw reads
-		fq=FASTQDIR + '/{fq_base}.fastq.gz'
+		fq=FASTQDIR + '{fq_base}.fastq.gz'
 	output:
-		RESDIR + "/fastQC/{fq_base}_fastqc.html",
-		RESDIR + "/fastQC/{fq_base}_fastqc.zip"
+		RESDIR + "fastQC/{fq_base}_fastqc.html",
+		RESDIR + "fastQC/{fq_base}_fastqc.zip"
 	log:
-		LOGDIR + "/fastQC_{fq_base}.log"
+		LOGDIR + "fastQC_{fq_base}.log"
 	threads:
 		get_resource("fastQC", "threads")
 	shell:
@@ -238,12 +238,12 @@ rule fastQC:
 
 rule fastQScreen:
 	input:
-		fq=FASTQDIR + '/{fq_base}.fastq.gz'
+		fq=FASTQDIR + '{fq_base}.fastq.gz'
 	output:
-		RESDIR+"/fastQScreen/{fq_base}_screen.txt",
-		RESDIR+"/fastQScreen/{fq_base}_screen.html"
+		RESDIR + "fastQScreen/{fq_base}_screen.txt",
+		RESDIR + "fastQScreen/{fq_base}_screen.html"
 	log:
-		LOGDIR + "/fastQC_{fq_base}.log"
+		LOGDIR + "fastQC_{fq_base}.log"
 	threads:
 		get_resource("fastQScreen", "threads")
 	shell:
@@ -254,12 +254,12 @@ rule fastQScreen:
 
 rule bowtie2_alignTo_refGenome:
 	input:
-		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
+		fq=lambda wildcards: expand(FASTQDIR + '{fq_file}', 
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
-		sam=DATADIR + "/align/{sample}_onlyRef.sam",
-		unal=DATADIR + "/align/{sample}_unal.fastq.gz",
-		stats=DATADIR + "/align/stats/{sample}.txt"
+		sam=DATADIR + "align/{sample}_onlyRef.sam",
+		unal=DATADIR + "align/{sample}_unal.fastq.gz",
+		stats=DATADIR + "align/stats/{sample}.txt"
 	params:
 		## with logical indexing retrieve the same PATH_genome n times, 
 		## get the first.
@@ -272,7 +272,7 @@ rule bowtie2_alignTo_refGenome:
 	resources:
 		mem_mb=get_resource("bowtie2", "mem_mb")	
 	log:
-		LOGDIR + "/bowtie2_{sample}.log"
+		LOGDIR + "bowtie2_{sample}.log"
 	run:
 		reads=",".join(input.fq)
 		## {output.unal}: reads that do NOT align to calibration genome
@@ -287,12 +287,12 @@ rule bowtie2_alignTo_refGenome:
 
 rule bowtie2_alignTo_calGenome:
 	input:
-		fq=lambda wildcards: expand(FASTQDIR + '/{fq_file}', 
+		fq=lambda wildcards: expand(FASTQDIR + '{fq_file}', 
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
-		sam=DATADIR + "/align/{sample}_all.sam",
-		unal=DATADIR + "/align/{sample}_calibration_unal.sam",
-		stats= DATADIR + "/align/stats/{sample}_calibration.txt"
+		sam=DATADIR + "align/{sample}_all.sam",
+		unal=DATADIR + "align/{sample}_calibration_unal.sam",
+		stats= DATADIR + "align/stats/{sample}_calibration.txt"
 	params:
 		calGenIx = lambda wildcards: expand("{calGenome}",
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0]),
@@ -303,7 +303,7 @@ rule bowtie2_alignTo_calGenome:
 	resources:
 		mem_mb=get_resource("bowtie2", "mem_mb")	
 	log:
-		LOGDIR + "/bowtie2_calibration_{sample}.log"
+		LOGDIR + "bowtie2_calibration_{sample}.log"
 	run:
 		reads=",".join(input.fq)
 		## Get all reads that align to reference genome in {output.sam}
@@ -318,17 +318,17 @@ rule bowtie2_alignTo_calGenome:
 rule calculate_scaled:
 	input:
 		# stats of alignment for Chip samples
-		stats=DATADIR + "/align/stats/{sample}.txt",
-		calStats=DATADIR + "/align/stats/{sample}_calibration.txt",
+		stats=DATADIR + "align/stats/{sample}.txt",
+		calStats=DATADIR + "align/stats/{sample}_calibration.txt",
 		# stats of alignment for Input samples
 		inputStats=lambda wildcards: expand(
-			DATADIR+"/align/stats/{input_stats}.txt", 
+			DATADIR + "align/stats/{input_stats}.txt", 
 			input_stats=data.Input[data.Samples==wildcards.sample].values[0]),
 		inputCalStats=lambda wildcards: expand(
-			DATADIR+"/align/stats/{input_stats}_calibration.txt",
+			DATADIR + "align/stats/{input_stats}_calibration.txt",
 			input_stats=data.Input[data.Samples==wildcards.sample].values[0])
 	output:
-		DATADIR + "/align/{sample}_ORI_factor.txt"
+		DATADIR + "align/{sample}_ORI_factor.txt"
 	shell:
 		"n1=$(awk -f scripts/get_aligned_reads.awk {input.stats});"
 		"n2=$(awk -f scripts/get_aligned_reads.awk {input.calStats});"
@@ -339,12 +339,12 @@ rule calculate_scaled:
 
 rule sort_sam:
 	input:
-		sam=DATADIR + "/align/{sample}_all.sam"
+		sam=DATADIR + "align/{sample}_all.sam"
 	output:
-		sorted_bam=DATADIR + "/align/{sample}_sorted.bam"
-		#sorted_bam=DATADIR + "/align/{sample}_sorted.bam"
+		sorted_bam=DATADIR + "align/{sample}_sorted.bam"
+		#sorted_bam=DATADIR + "align/{sample}_sorted.bam"
 	log:
-		LOGDIR + "/gatk/sortSam_{sample}.log"
+		LOGDIR + "gatk/sortSam_{sample}.log"
 	threads: 
 		1
 	resources:
@@ -361,17 +361,17 @@ rule sort_sam:
 
 rule remove_duplicates:
 	input:
-		sorted_bam=DATADIR + "/align/{sample}_sorted.bam"
+		sorted_bam=DATADIR + "align/{sample}_sorted.bam"
 	output:
-		nodup_bam=DATADIR + "/align/{sample}_final.bam",
-		metrics=DATADIR + "/align/stats/picardMarkDup_{sample}.txt"
+		nodup_bam=DATADIR + "align/{sample}_final.bam",
+		metrics=DATADIR + "align/stats/picardMarkDup_{sample}.txt"
 	threads: 
 		1
 	resources:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
-		LOGDIR + "/gatk/markDup_{sample}.log"
+		LOGDIR + "gatk/markDup_{sample}.log"
 	shell:
 		'''
 		gatk MarkDuplicates --java-options "-Xmx{resources.mem_mb}M" \
@@ -382,15 +382,15 @@ rule remove_duplicates:
 
 rule index_bam:
 	input:
-		DATADIR + "/align/{sample}_final.bam"
+		DATADIR + "align/{sample}_final.bam"
 	output:
-		DATADIR + "/align/{sample}_final.bai"
+		DATADIR + "align/{sample}_final.bai"
 	threads: 1
 	resources:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
-		LOGDIR + "/gatk/index_{sample}.log"
+		LOGDIR + "gatk/index_{sample}.log"
 	shell:
 		'''
 		gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
@@ -409,12 +409,12 @@ def Input_merge_bam(bams):
 rule merge_bam:
 	input:
 		## sample replicates have same Protein and Condition
-		bam=lambda wildcards: expand(DATADIR+"/align/{Samp}_final.bam",
+		bam=lambda wildcards: expand(DATADIR + "align/{Samp}_final.bam",
 		 Samp=data.Samples[(data.Protein == wildcards.Prot) & 
 		 (data.Condition == wildcards.Cond)].unique())
 	output:
 		## Get Prot and Cond wildcards from expanded filename  
-		DATADIR + "/align/{Prot}_{Cond}_final_merged.bam",
+		DATADIR + "align/{Prot}_{Cond}_final_merged.bam",
 	params:
 		I=lambda wildcards, input: Input_merge_bam(input.bam)
 	threads: 2
@@ -422,7 +422,7 @@ rule merge_bam:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
 	log:
-		LOGDIR + "/gatk/mergeSam_{Prot}_{Cond}.log"
+		LOGDIR + "gatk/mergeSam_{Prot}_{Cond}.log"
 	shell:
 		'''
 		gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
@@ -433,10 +433,10 @@ rule merge_bam:
 
 rule create_bigWig:
 	input:
-		nodup_bam=DATADIR + "/align/{sample}_final.bam",
-		bam_index=DATADIR + "/align/{sample}_final.bai"
+		nodup_bam=DATADIR + "align/{sample}_final.bam",
+		bam_index=DATADIR + "align/{sample}_final.bai"
 	output:
-		bw=RESDIR + "/bw/{sample}_RPKM.bw"
+		bw=RESDIR + "bw/{sample}_RPKM.bw"
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
 			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
@@ -448,7 +448,7 @@ rule create_bigWig:
 		mem_mb=get_resource("create_bigWig","mem_mb"),
 		walltime=get_resource("create_bigwig","walltime")
 	log:
-		LOGDIR + "/deeptols/bamCoverage_{sample}.log"
+		LOGDIR + "deeptols/bamCoverage_{sample}.log"
 	shell:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
@@ -458,11 +458,11 @@ rule create_bigWig:
 
 rule create_bigWig_scaled:
 	input:
-		nodup_bam=DATADIR + "/align/{sample}_final.bam",
-		bam_index=DATADIR + "/align/{sample}_final.bai",
-		scaleFactor=DATADIR + "/align/{sample}_ORI_factor.txt"
+		nodup_bam=DATADIR + "align/{sample}_final.bam",
+		bam_index=DATADIR + "align/{sample}_final.bai",
+		scaleFactor=DATADIR + "align/{sample}_ORI_factor.txt"
 	output:
-		bw=RESDIR + "/bw/{sample}_RPKM_scaled.bw"
+		bw=RESDIR + "bw/{sample}_RPKM_scaled.bw"
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
 			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
@@ -474,7 +474,7 @@ rule create_bigWig_scaled:
 		mem_mb=get_resource("create_bigWig","mem_mb"),
 		walltime=get_resource("create_bigwig","walltime")
 	log:
-		LOGDIR + "/deeptols/bamCoverage_{sample}_scaled.log"
+		LOGDIR + "deeptols/bamCoverage_{sample}_scaled.log"
 	shell:
 		'''
 		n=$(cat {input.scaleFactor});
@@ -485,38 +485,38 @@ rule create_bigWig_scaled:
 
 rule macs2_notMerged_callpeak:
 	input:
-		treatBam= DATADIR + '/align/{sample}_final.bam',
+		treatBam= DATADIR + 'align/{sample}_final.bam',
 		inputBam= lambda wildcards: expand(
-					DATADIR+'/align/{inputSample}_final.bam',
+					DATADIR + 'align/{inputSample}_final.bam',
 			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
 	output:
-		pred=RESDIR+'/macs/{sample}_predictd.txt',
-		peaks=RESDIR + '/macs/{sample}_peaks.narrowPeak',
-		summits=RESDIR + '/macs/{sample}_summits.bed'
+		pred=RESDIR + 'macs/{sample}_predictd.txt',
+		peaks=RESDIR + 'macs/{sample}_peaks.narrowPeak',
+		summits=RESDIR + 'macs/{sample}_summits.bed'
 	threads:
 		get_resource("macs2", "threads")
 	resources:
 		mem_mb=get_resource("macs2", "mem_mb"),
 		walltime=get_resource("macs2", "walltime")
 	params:
-		outDir=RESDIR+'/macs',
+		outDir=RESDIR + 'macs',
 		species=get_resource("macs2", "species")
 	log:
-		LOGDIR + "/macs/{sample}.log"
+		LOGDIR + "macs/{sample}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.sample} {params.outDir} &> {log}'
 
 rule macs2_merged_callpeak:
 	input:
-		treatBam= DATADIR + '/align/{Prot_Cond}_final_merged.bam',
+		treatBam= DATADIR + 'align/{Prot_Cond}_final_merged.bam',
 		inputBam= lambda wildcards: expand(
-					DATADIR+'/align/{inputSample}_final_merged.bam',
+					DATADIR + 'align/{inputSample}_final_merged.bam',
 			inputSample=data.InputMerged[data.Prot_Cond == wildcards.Prot_Cond].values[0])
 	output:
-		pred=RESDIR+'/macs/{Prot_Cond}_merged_predictd.txt',
-		peaks=RESDIR + '/macs/{Prot_Cond}_merged_peaks.narrowPeak',
-		summits=RESDIR + '/macs/{Prot_Cond}_merged_summits.bed'
+		pred=RESDIR + 'macs/{Prot_Cond}_merged_predictd.txt',
+		peaks=RESDIR + 'macs/{Prot_Cond}_merged_peaks.narrowPeak',
+		summits=RESDIR + 'macs/{Prot_Cond}_merged_summits.bed'
 	threads:
 		get_resource("macs2", "threads")
 	resources:
@@ -524,20 +524,20 @@ rule macs2_merged_callpeak:
 		walltime=get_resource("macs2", "walltime")
 	params:
 		fileName=lambda wildcards: str(wildcards.Prot_Cond) + "_merged",
-		outDir=RESDIR+'/macs',
+		outDir=RESDIR + 'macs',
 		species=get_resource("macs2", "species")
 	log:
-		LOGDIR + "/macs/{Prot_Cond}.log"
+		LOGDIR + "macs/{Prot_Cond}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
 		{params.species} {params.fileName} {params.outDir} &> {log}'
 
 rule unique_summits_NotMerged:
 	input:
-		summits=expand(RESDIR + '/macs/{sample}_summits.bed',
+		summits=expand(RESDIR + 'macs/{sample}_summits.bed',
 			   sample=data.Samples[data.Protein != 'input'].unique())
 	output:
-		RESDIR + '/macs/summits_NotMerged.dateRun'
+		RESDIR + 'macs/summits_NotMerged.dateRun'
 	threads: 1
 	resources:
 		mem_mb=500,
@@ -545,17 +545,17 @@ rule unique_summits_NotMerged:
 	params:
 		summitsBed=lambda wildcards,input: " ".join(input.summits)
 	log:
-		LOGDIR + "/macs/unique_summits.log"
+		LOGDIR + "macs/unique_summits.log"
 	shell:
 		'scripts/all_unique_summits.sh {params.summitsBed} |& tee {log} && \
 		date > {output}'
 
 rule unique_summits_merged:
 	input:
-		summits=expand(RESDIR + '/macs/{Prot_Cond}_merged_summits.bed',
+		summits=expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
 	output:
-		RESDIR + '/macs/summits_merged.dateRun'
+		RESDIR + 'macs/summits_merged.dateRun'
 	threads: 1
 	resources:
 		mem_mb=500,
@@ -563,7 +563,7 @@ rule unique_summits_merged:
 	params:
 		summitsBed=lambda wildcards,input: " ".join(input.summits)
 	log:
-		LOGDIR + "/macs/unique_summits.log"
+		LOGDIR + "macs/unique_summits.log"
 	shell:
 		'scripts/all_unique_summits.sh {params.summitsBed} |& tee {log} && \
 		date > {output}'
@@ -576,11 +576,11 @@ matrixLabels = " ".join(matrixFiles)
 
 rule compute_matrix:
 	input:
-		bw = expand(RESDIR + "/bw/{MatFile}_RPKM_scaled.bw",
+		bw = expand(RESDIR + "bw/{MatFile}_RPKM_scaled.bw",
 				  MatFile=matrixFiles)
 	output:
-		matrix = RESDIR + "/deeptools/matrix_all_samples_"+regionsType+".gz",
-		#sortRegions = RESDIR + "/deeptools/regions_all_samples_TSS_sorted.bed"
+		matrix = RESDIR + "deeptools/matrix_all_samples_"+regionsType+".gz",
+		#sortRegions = RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
