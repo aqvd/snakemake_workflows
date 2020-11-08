@@ -551,7 +551,7 @@ rule unique_summits_NotMerged:
 
 rule unique_summits_merged:
 	input:
-		summits=expand(RESDIR + '/macs/{Prot_Cond}_summits.bed',
+		summits=expand(RESDIR + '/macs/{Prot_Cond}_merged_summits.bed',
 			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
 	output:
 		RESDIR + '/macs/summits_merged.dateRun'
