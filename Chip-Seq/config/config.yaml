@@ -4,6 +4,8 @@ resdir: "/storage/scratch01/users/aquevedo/9Nov-siSA1_siSA2/res/"
 logdir: "/storage/scratch01/users/aquevedo/9Nov-siSA1_siSA2/log/"
 
 tableName: "config/table_siSA1-2_cluster.txt"
+regions: "summits" # possible values: summits | genes
+mergedRegions: "no" # possible values: yes | no
 
 rules:
     default:
@@ -40,7 +42,6 @@ rules:
             threads: 20
             mem_mb: 8000
             walltime: 60
-            regions: "summits" # summits | genes
 
     plot_heatmap:
         res:

@@ -84,10 +84,14 @@ def get_resource(rule,resource):
         return config["rules"]["default"]["res"][resource]
 
 ## Decide if reference are RefSeqGenes or summits from macs2 for compute_matrix
-regionsType = get_resource("compute_matrix", "regions")
+regionsType = config['regions']
+mergedRegions = config['mergedRegions'].lower()
 
 if regionsType == "summits":
-	regionsFile = RESDIR + 'macs/summits_unique.bed'
+	if mergedRegions == "yes":
+		regionsFile = RESDIR + 'unique_summits_merged.bed'
+	elif mergedRegions == "no":
+		regionsFile = RESDIR + 'unique_summits_NotMerged.bed'
 else:
 	regionsFile = refSeq_genes_path["hg19"]
 
