@@ -49,6 +49,7 @@ do
 
 	else if [[ $count -eq 2 ]]
 	## we have already processed sample1 file in the first shift. shift to skip
+		((count+=1))
 		shift
 	else
 	## Process the rest of files
