@@ -536,36 +536,38 @@ rule unique_summits_NotMerged:
 		summits=expand(RESDIR + 'macs/{sample}_summits.bed',
 			   sample=data.Samples[data.Protein != 'input'].unique())
 	output:
-		RESDIR + 'macs/summits_NotMerged.dateRun'
+		RESDIR + 'unique_summits_NotMerged.bed'
 	threads: 1
 	resources:
 		mem_mb=500,
 		walltime=5
 	params:
-		summitsBed=lambda wildcards,input: " ".join(input.summits)
+		summitsBed=lambda wildcards,input: " ".join(input.summits),
+		outFilename = "unique_summits_NotMerged.bed"
 	log:
 		LOGDIR + "macs/unique_summits.log"
 	shell:
-		'scripts/all_unique_summits.sh {params.summitsBed} |& tee {log} && \
-		date > {output}'
+		'scripts/all_unique_summits.sh {params.outFilename} \
+		{params.summitsBed} |& tee {log}'
 
 rule unique_summits_merged:
 	input:
 		summits=expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
 	output:
-		RESDIR + 'macs/summits_merged.dateRun'
+		RESDIR + 'unique_summits_merged.bed'
 	threads: 1
 	resources:
 		mem_mb=500,
 		walltime=5
 	params:
-		summitsBed=lambda wildcards,input: " ".join(input.summits)
+		summitsBed=lambda wildcards,input: " ".join(input.summits),
+		outFilename = "unique_summits_merged.bed"
 	log:
 		LOGDIR + "macs/unique_summits.log"
 	shell:
-		'scripts/all_unique_summits.sh {params.summitsBed} |& tee {log} && \
-		date > {output}'
+		'scripts/all_unique_summits.sh {params.outFilename} \
+		{params.summitsBed} |& tee {log}'
 
 
 

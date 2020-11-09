@@ -1,7 +1,7 @@
 #!/bin/bash
 
-## ./all_unique_summits.sh 	{sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
-## ./all_unique_summits.sh 	*_summits.bed  
+## ./all_unique_summits.sh {outFilename} {sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
+## ./all_unique_summits.sh {outFilename} *_summits.bed  
 ##
 ## Generates a file called "summits_unique.bed" given a list of summits.bed files
 ## at the same directory where {sample1}_summits.bed is located.
@@ -11,8 +11,8 @@
 ## Those files are the output of macs2 callpeak, so macs2 output directory should contain
 ## all the files necessary
 
-USAGE="./all_unique_summits.sh 	{sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
-./all_unique_summits.sh  *_summits.bed  "
+USAGE="./all_unique_summits.sh {outFilename} {sample1}_summits.bed {sample2}_summits.bed [{sampleN}_summits.bed]
+./all_unique_summits.sh {outFilename} *_summits.bed  "
 
 if [ "$#" == "0" ]
 then
@@ -20,10 +20,10 @@ then
 	exit 01
 fi
 
-DIR=$(dirname $1)
-RES="${DIR}/summits_unique.bed"
+DIR=$(dirname $2)
+RES="${DIR}/{1}"
 
-touch "${RES}"
+#touch "${RES}"
 
 ## Counter to know how many files were precessed
 declare -i count=1
@@ -32,32 +32,31 @@ declare -i count=1
 ## (( $# )) is true until there are files to be processed
 while (( $# ))
 do
-	## Save summit filename in new variable as $1 will suffer substitution
-	SUMMITS="${1}"
 	## replace extension in $1 to match peak file name
 	PEAKS="${1/_summits.bed/_peaks.narrowPeak}"
 	
 
 	if [[ $count -eq 1 ]]
+	## First time just cat sample1 summits into file called outFilename=${RES}
 	then
-		echo ">> Processing file ${count} ${SUMMITS}"
-		PEAKS2="${2/_summits.bed/_peaks.narrowPeak}"
-		
-		echo -e "Peaks Files are: \n ${PEAKS} \n ${PEAKS2}"
-		
-		## intersect first 2 files, get summits for peaks unique in -a
-		bedtools intersect -v -a "${PEAKS}" -b "${PEAKS2}" > int1.tmp
-		echo "REGIONS BEFORE: $(wc -l int1.tmp | sed -E 's/[ a-zA-Z.].+//g')"
-		
-		bedtools intersect -wa -a "${SUMMITS}" -b int1.tmp >> "${RES}"
-		echo "Intersected regions: $(wc -l ${SUMMITS} | sed -E 's/[ a-zA-Z.].+//g')"
-		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
-		
+		echo ">> Creating output file ${RES} with summits form ${2}"
+		cat ${2} > ${RES}
+		PEAKS="${2/_summits.bed/_peaks.narrowPeak}"
+
 		## increase and shift
 		((count+=1))
 		shift 
 
+	else if [[ $count -eq 2 ]]
+	## we have already processed sample1 file in the first shift. shift to skip
+		shift
 	else
+	## Process the rest of files
+		## Save summit filename in new variable as $1 will suffer substitution
+		SUMMITS="${1}"
+		## replace extension in $1 to match peak file name
+		PEAKS="${1/_summits.bed/_peaks.narrowPeak}"
+
 		echo ">>file ${count} ${SUMMITS}"
 		echo -e "Peaks file is: \n ${PEAKS}"
 		
