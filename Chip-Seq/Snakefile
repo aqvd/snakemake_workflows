@@ -358,7 +358,6 @@ rule sort_sam:
 		--SORT_ORDER coordinate |& tee {log}
 		'''
 
-
 rule remove_duplicates:
 	input:
 		sorted_bam=DATADIR + "align/{sample}_sorted.bam"
@@ -577,14 +576,14 @@ matrixLabels = " ".join(matrixFiles)
 rule compute_matrix:
 	input:
 		bw = expand(RESDIR + "bw/{MatFile}_RPKM_scaled.bw",
-				  MatFile=matrixFiles)
+				  MatFile=matrixFiles),
+		regions = regionsFile ## View right before rule all
 	output:
 		matrix = RESDIR + "deeptools/matrix_all_samples_"+regionsType+".gz",
 		#sortRegions = RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
 	threads:
 		get_resource("compute_matrix", "threads")
 	params:
-		regions = regionsFile, ## View right before rule all
 		labels = matrixLabels
 	conda:
 		"envs/deeptools.yaml"
@@ -594,7 +593,7 @@ rule compute_matrix:
 	shell:
 		'computeMatrix reference-point --referencePoint center \
 			--scoreFileName {input.bw} \
-			--regionsFileName {params.regions} \
+			--regionsFileName {input.regions} \
 			--upstream 2500 --downstream 2500 \
 			--binSize 50 \
 			--missingDataAsZero \
