@@ -1,19 +1,19 @@
-Run	GEO_Accession (exp)	Cell_Line	TREATMENT	Antibody	BioProject	Comments	Protein	Condition	Rep	File	Genome	Ext	Norm	Input
-SRR6501087	GSM2942285	MCF10A	Control	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siC	R1	/storage/scratch01/users/aquevedo/fastq/SA1_siC_R1_SRR6501087.fastq.gz	hg19	.fastq.gz		
-SRR6501088	GSM2942286	MCF10A	Control	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siC	R2	/storage/scratch01/users/aquevedo/fastq/SA1_siC_R2_SRR6501088.fastq.gz	hg19	.fastq.gz		
-SRR6501089	GSM2942287	MCF10A	Control	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siC	R1	/storage/scratch01/users/aquevedo/fastq/SA2_siC_R1_SRR6501089.fastq.gz	hg19	.fastq.gz		
-SRR6501090	GSM2942288	MCF10A	Control	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siC	R2	/storage/scratch01/users/aquevedo/fastq/SA2_siC_R2_SRR6501090.fastq.gz	hg19	.fastq.gz		
-SRR6501091	GSM2942289	MCF10A	STAG1 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA1	R1	/storage/scratch01/users/aquevedo/fastq/SA1_siSA1_R1_SRR6501091.fastq.gz	hg19	.fastq.gz		
-SRR6501092	GSM2942290	MCF10A	STAG1 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA1	R2	/storage/scratch01/users/aquevedo/fastq/SA1_siSA1_R2_SRR6501092.fastq.gz	hg19	.fastq.gz		
-SRR6501093	GSM2942291	MCF10A	STAG1 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA1	R1	/storage/scratch01/users/aquevedo/fastq/SA2_siSA1_R1_SRR6501093.fastq.gz	hg19	.fastq.gz		
-SRR6501094	GSM2942292	MCF10A	STAG1 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA1	R2	/storage/scratch01/users/aquevedo/fastq/SA2_siSA1_R2_SRR6501094.fastq.gz	hg19	.fastq.gz		
-SRR6501095	GSM2942293	MCF10A	STAG2 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA2	R1	/storage/scratch01/users/aquevedo/fastq/SA1_siSA2_R1_SRR6501095.fastq.gz	hg19	.fastq.gz		
-SRR6501096	GSM2942294	MCF10A	STAG2 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA2	R2	/storage/scratch01/users/aquevedo/fastq/SA1_siSA2_R2_SRR6501096.fastq.gz	hg19	.fastq.gz		
-SRR6501097	GSM2942295	MCF10A	STAG2 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA2	R1	/storage/scratch01/users/aquevedo/fastq/SA2_siSA2_R2_SRR6501097.fastq.gz	hg19	.fastq.gz		
-SRR6501098	GSM2942296	MCF10A	STAG2 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA2	R2	/storage/scratch01/users/aquevedo/fastq/SA2_siSA2_R1_SRR6501098.fastq.gz	hg19	.fastq.gz		
-SRR6501099	GSM2942297	MCF10A	STAG2 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA2	R1	/storage/scratch01/users/aquevedo/fastq/input_siSA2_R1_SRR6501099.fastq.gz	hg19	.fastq.gz		
-SRR6501099	GSM2942297	MCF10A	STAG2 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA2	R2	/storage/scratch01/users/aquevedo/fastq/input_siSA2_R1_SRR6501099.fastq.gz	hg19	.fastq.gz		
-SRR6501100	GSM2942298	MCF10A	STAG1 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA1	R1	/storage/scratch01/users/aquevedo/fastq/input_siSA1_R1_SRR6501100.fastq.gz	hg19	.fastq.gz		
-SRR6501100	GSM2942298	MCF10A	STAG1 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA1	R2	/storage/scratch01/users/aquevedo/fastq/input_siSA1_R1_SRR6501100.fastq.gz	hg19	.fastq.gz		
-SRR6501101	GSM2942299	MCF10A	Control	none	PRJNA395931	#Same input both replicates	input	siC	R1	/storage/scratch01/users/aquevedo/fastq/input_siC_R1_SRR6501101.fastq.gz	hg19	.fastq.gz		
-SRR6501101	GSM2942299	MCF10A	Control	none	PRJNA395931	#Same input both replicates	input	siC	R2	/storage/scratch01/users/aquevedo/fastq/input_siC_R1_SRR6501101.fastq.gz	hg19	.fastq.gz		
+Run	GEO_Accession (exp)	Cell_Line	TREATMENT	Antibody	BioProject	Comments	Protein	Condition	Rep	File	Genome	Norm	Ext
+SRR6501087	GSM2942285	MCF10A	Control	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siC	R1	/storage/scratch01/users/aquevedo/fastq/SA1_siC_R1_SRR6501087.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501088	GSM2942286	MCF10A	Control	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siC	R2	/storage/scratch01/users/aquevedo/fastq/SA1_siC_R2_SRR6501088.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501089	GSM2942287	MCF10A	Control	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siC	R1	/storage/scratch01/users/aquevedo/fastq/SA2_siC_R1_SRR6501089.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501090	GSM2942288	MCF10A	Control	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siC	R2	/storage/scratch01/users/aquevedo/fastq/SA2_siC_R2_SRR6501090.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501091	GSM2942289	MCF10A	STAG1 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA1	R1	/storage/scratch01/users/aquevedo/fastq/SA1_siSA1_R1_SRR6501091.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501092	GSM2942290	MCF10A	STAG1 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA1	R2	/storage/scratch01/users/aquevedo/fastq/SA1_siSA1_R2_SRR6501092.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501093	GSM2942291	MCF10A	STAG1 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA1	R1	/storage/scratch01/users/aquevedo/fastq/SA2_siSA1_R1_SRR6501093.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501094	GSM2942292	MCF10A	STAG1 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA1	R2	/storage/scratch01/users/aquevedo/fastq/SA2_siSA1_R2_SRR6501094.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501095	GSM2942293	MCF10A	STAG2 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA2	R1	/storage/scratch01/users/aquevedo/fastq/SA1_siSA2_R1_SRR6501095.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501096	GSM2942294	MCF10A	STAG2 siRNAs	custom made antibody for SA1 (STAG1)	PRJNA395931		SA1	siSA2	R2	/storage/scratch01/users/aquevedo/fastq/SA1_siSA2_R2_SRR6501096.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501097	GSM2942295	MCF10A	STAG2 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA2	R1	/storage/scratch01/users/aquevedo/fastq/SA2_siSA2_R2_SRR6501097.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501098	GSM2942296	MCF10A	STAG2 siRNAs	custom made antibody for SA2 (STAG2)	PRJNA395931		SA2	siSA2	R2	/storage/scratch01/users/aquevedo/fastq/SA2_siSA2_R1_SRR6501098.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501099	GSM2942297	MCF10A	STAG2 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA2	R1	/storage/scratch01/users/aquevedo/fastq/input_siSA2_R1_SRR6501099.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501099	GSM2942297	MCF10A	STAG2 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA2	R2	/storage/scratch01/users/aquevedo/fastq/input_siSA2_R1_SRR6501099.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501100	GSM2942298	MCF10A	STAG1 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA1	R1	/storage/scratch01/users/aquevedo/fastq/input_siSA1_R1_SRR6501100.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501100	GSM2942298	MCF10A	STAG1 siRNAs	none	PRJNA395931	#Same input both replicates	input	siSA1	R2	/storage/scratch01/users/aquevedo/fastq/input_siSA1_R1_SRR6501100.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501101	GSM2942299	MCF10A	Control	none	PRJNA395931	#Same input both replicates	input	siC	R1	/storage/scratch01/users/aquevedo/fastq/input_siC_R1_SRR6501101.fastq.gz	hg19	mm9	.fastq.gz
+SRR6501101	GSM2942299	MCF10A	Control	none	PRJNA395931	#Same input both replicates	input	siC	R2	/storage/scratch01/users/aquevedo/fastq/input_siC_R1_SRR6501101.fastq.gz	hg19	mm9	.fastq.gz
