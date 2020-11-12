@@ -224,6 +224,11 @@ rule bw_only:
 				sample=data.Samples[(data.PATH_genome_cal!="") & 
 								(data.Protein!="input")].unique())
 
+rule merge_bw_only:
+	input:
+		expand(RESDIR + "bw/{Prot_Cond}_mean.bw" ,
+			Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique())
+
 rule compute_matrix_only:
 	input:
 		# deeptools computeMatrix out files. regionsType = "summits" or "genes"
@@ -489,7 +494,25 @@ rule create_bigWig_scaled:
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing CPM --scaleFactor $n -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
-		'''			
+		'''		
+rule merge_bw_scaled:
+	input:
+	## bw replicates have the same Protein and Condition
+		bw=lambda wildcards: expand(RESDIR + "bw/{Samp}_RPKM_scaled.bw",
+		 Samp=data.Samples[(data.Protein == wildcards.Prot) & 
+		 (data.Condition == wildcards.Cond)].unique())
+	output:
+		RESDIR + "bw/{Prot}_{Cond}_mean.bw"
+	params:
+		bws = lambda wildcards, input: " ".join(input.bw)
+	threads: 1
+	log:
+		LOGDIR + "bw/{Prot}_{Cond}_mean.log"
+	shell:
+		'''
+		scripts/bwMean.sh {bws} {output} |& tee {log}
+		'''
+
 
 rule macs2_notMerged_callpeak:
 	input:
