@@ -510,7 +510,7 @@ rule merge_bw_scaled:
 		LOGDIR + "bw/{Prot}_{Cond}_mean.log"
 	shell:
 		'''
-		scripts/bwMean.sh {bws} {output} |& tee {log}
+		scripts/bwMean.sh {params.bws} {output} |& tee {log}
 		'''
 
 
