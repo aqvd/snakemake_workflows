@@ -1,5 +1,5 @@
 name: wiggletools
 channels:
-	-bioconda
+ - bioconda
 dependencies:
-	-wiggletools = 1.2.3
+ - wiggletools = 1.2.3
