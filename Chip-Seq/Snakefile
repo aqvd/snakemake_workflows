@@ -505,6 +505,8 @@ rule merge_bw_scaled:
 		RESDIR + "bw/{Prot}_{Cond}_mean.bw"
 	params:
 		bws = lambda wildcards, input: " ".join(input.bw)
+	conda:
+		'envs/wiggletools.yaml'
 	threads: 1
 	log:
 		LOGDIR + "bw/{Prot}_{Cond}_mean.log"
