@@ -222,8 +222,13 @@ rule bw_only:
 		# .bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
 				sample=data.Samples[(data.PATH_genome_cal!="") & 
-								(data.Protein!="input")].unique()),
+								(data.Protein!="input")].unique())
 
+rule compute_matrix_only:
+	input:
+		# deeptools computeMatrix out files. regionsType = "summits" or "genes"
+		# look right before rule all to see how regionsType is obtained.
+		RESDIR + "deeptools/matrix_all_samples_" + regionsType + ".gz"
 
 rule fastQC:
 	input:

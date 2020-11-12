@@ -20,8 +20,8 @@ then
 	exit 01
 fi
 
-DIR=$(dirname $2)
-RES="${DIR}/{1}"
+DIR=$(dirname ${2})
+RES="${DIR}/${1}"
 
 #touch "${RES}"
 
@@ -32,10 +32,6 @@ declare -i count=1
 ## (( $# )) is true until there are files to be processed
 while (( $# ))
 do
-	## replace extension in $1 to match peak file name
-	PEAKS="${1/_summits.bed/_peaks.narrowPeak}"
-	
-
 	if [[ $count -eq 1 ]]
 	## First time just cat sample1 summits into file called outFilename=${RES}
 	then
@@ -47,8 +43,10 @@ do
 		((count+=1))
 		shift 
 
-	else if [[ $count -eq 2 ]]
+	elif [[ $count -eq 2 ]]
+	then	
 	## we have already processed sample1 file in the first shift. shift to skip
+		echo ">> -- ${1##.+/} Already processed. Skipping..."
 		((count+=1))
 		shift
 	else
@@ -66,7 +64,6 @@ do
 		bedtools intersect -v -a "${PEAKS}" -b "${RES}" > int1.tmp &&
 		bedtools intersect -wa -a "${SUMMITS}" -b int1.tmp > int2.tmp &&
 
-		
 		## count lines befor and after appending new summits to ${RES}
 		echo "REGIONS BEFORE: $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
 		cat int2.tmp >> "${RES}"
@@ -76,7 +73,6 @@ do
 		## increase counter and shift
 		((count+=1))
 		shift 
-
 	fi
 done
 
