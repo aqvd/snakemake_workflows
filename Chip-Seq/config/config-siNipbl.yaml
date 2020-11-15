@@ -3,7 +3,7 @@ datadir: "/storage/scratch01/users/aquevedo/6Nov-siNipbl-newSnak/data/"
 resdir: "/storage/scratch01/users/aquevedo/6Nov-siNipbl-newSnak/res/"
 logdir: "/storage/scratch01/users/aquevedo/6Nov-siNipbl-newSnak/log/"
 
-tableName: "config/table_siNipbl_cluster.tsv"
+tableName: "config/table_siNipbl.tsv"
 regions: "summits" # possible values: summits | genes
 mergedRegions: "no" # possible values: yes | no
 

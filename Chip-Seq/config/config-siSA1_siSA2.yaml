@@ -3,7 +3,7 @@ datadir: "/storage/scratch01/users/aquevedo/9Nov-siSA1_siSA2/data/"
 resdir: "/storage/scratch01/users/aquevedo/9Nov-siSA1_siSA2/res/"
 logdir: "/storage/scratch01/users/aquevedo/9Nov-siSA1_siSA2/log/"
 
-tableName: "config/table_siSA1-2_cluster.tsv"
+tableName: "config/table_siSA1_siSA2.tsv"
 regions: "summits" # possible values: summits | genes
 mergedRegions: "no" # possible values: yes | no
 
