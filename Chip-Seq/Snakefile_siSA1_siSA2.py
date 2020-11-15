@@ -195,8 +195,8 @@ rule macs2_notMerged_only:
 		## Macs2 summits files
 		expand(RESDIR + 'macs/{sample}_summits.bed',
 				sample=data.Samples[data.Protein!="input"].unique()),
-		## After runing script to get unique summits save runtime here
-		RESDIR + 'macs/summits_NotMerged.dateRun'
+		# ## After runing script to get unique summits save runtime here
+		# RESDIR + 'macs/summits_NotMerged.dateRun'
 
 
 rule macs2_merged_only:
@@ -210,8 +210,8 @@ rule macs2_merged_only:
 		## Macs2 summits files from merged bams
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		## After runing script to get unique summits save runtime here
-		RESDIR + 'macs/summits_merged.dateRun'
+		# ## After runing script to get unique summits save runtime here
+		# RESDIR + 'macs/summits_merged.dateRun'
 
 rule bw_only:
 	input:
