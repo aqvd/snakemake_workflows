@@ -27,7 +27,7 @@ then
 fi
 
 echo "Obtaining mean score of ${1##*/} and ${2##*/}"
-wiggletools mean ${1} ${2} > ${tempFile}
+wiggletools mean ${1} ${2} > ${tempFile} &&
 
 echo "Sorting intermediary .bg file "
 bedSort ${tempFile} ${tempFile} &&
