@@ -121,7 +121,7 @@ rule mean_bw_scaled:
         #                  (data.Protein == wildcards.Prot) & 
         #                  (data.Condition == "siC")].unique())
     output:
-        BWDIR + "bw/{Prot}_{Cond}_mean.bw"
+        BWDIR + "{Prot}_{Cond}_mean.bw"
     conda:
         'envs/deeptools.yaml'
     threads: 5
