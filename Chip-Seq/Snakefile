@@ -8,7 +8,7 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "config/config.yaml"
+configfile: "config/config-siSA1_siSA2.yaml"
 
 
 ## 

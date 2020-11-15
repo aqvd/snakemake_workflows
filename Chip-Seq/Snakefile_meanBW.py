@@ -107,6 +107,15 @@ rule merge_bw_only:
             (data.Protein!="input")&
             (data.MergeBW =="yes")].unique())
 
+rule symlink_bw_oneReplicate:
+    input:
+        expand(BWDIR + "{Prot_Cond}_mean.bw" ,
+            Prot_Cond=data.Prot_Cond[
+            (data.Protein!="input")&
+            (data.MergeBW =="no")].unique())
+
+
+
 rule mean_bw_scaled:
     input:
     ## bw replicates have the same Protein and Condition
@@ -115,11 +124,6 @@ rule mean_bw_scaled:
                          (data.MergeBW == 'yes') &
                          (data.Protein == wildcards.Prot) & 
                          (data.Condition == wildcards.Cond)].unique()),
-        # bwCont=lambda wildcards: expand(BWDIR + "bw/{Samp}_RPKM_scaled.bw",
-        #  Samp=data.Samples[
-        #                  (data.MergeBW == 'yes') &
-        #                  (data.Protein == wildcards.Prot) & 
-        #                  (data.Condition == "siC")].unique())
     output:
         BWDIR + "{Prot}_{Cond}_mean.bw"
     conda:
@@ -138,6 +142,8 @@ rule mean_bw_scaled:
         -b2 {params.bw2} \
         -p {threads} \
         --outTormat bigwig \
-        --outFileName {output} 
+        --outFileName {output} |& tee {log}
         '''
+rule bw_log2_FC:
+    input:
 
