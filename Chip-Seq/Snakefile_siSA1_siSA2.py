@@ -570,7 +570,7 @@ rule unique_summits_NotMerged:
 		summits=expand(RESDIR + 'macs/{sample}_summits.bed',
 			   sample=data.Samples[data.Protein != 'input'].unique())
 	output:
-		RESDIR + 'unique_summits_NotMerged.bed'
+		RESDIR + 'macs/unique_summits_NotMerged.bed'
 	threads: 1
 	resources:
 		mem_mb=500,
@@ -589,7 +589,7 @@ rule unique_summits_merged:
 		summits=expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
 	output:
-		RESDIR + 'unique_summits_merged.bed'
+		RESDIR + 'macs/unique_summits_merged.bed'
 	threads: 1
 	resources:
 		mem_mb=500,
