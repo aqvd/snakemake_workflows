@@ -1,5 +1,5 @@
 bwdir: "/storage/scratch01/users/aquevedo/mergeBW-siNipbl_siSA1-2/"
-logdir: "/storage/scratch01/users/aquevedo/mergeBW-siNipbl_siSA1-2/log"
+logdir: "/storage/scratch01/users/aquevedo/mergeBW-siNipbl_siSA1-2/log/"
 
 tableName: "config/table_siNipbl_cluster.tsv"
 regions: "summits" # possible values: summits | genes

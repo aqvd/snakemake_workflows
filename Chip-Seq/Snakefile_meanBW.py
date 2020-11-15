@@ -102,7 +102,7 @@ else:
 ##################################################
 rule merge_bw_only:
     input:
-        expand(BWDIR + "bw/{Prot_Cond}_mean.bw" ,
+        expand(BWDIR + "{Prot_Cond}_mean.bw" ,
             Prot_Cond=data.Prot_Cond[
             (data.Protein!="input")&
             (data.MergeBW =="yes")].unique())
@@ -110,7 +110,7 @@ rule merge_bw_only:
 rule mean_bw_scaled:
     input:
     ## bw replicates have the same Protein and Condition
-        bw=lambda wildcards: expand(BWDIR + "bw/{Samp}_RPKM_scaled.bw",
+        bw=lambda wildcards: expand(BWDIR + "{Samp}_RPKM_scaled.bw",
          Samp=data.Samples[
                          (data.MergeBW == 'yes') &
                          (data.Protein == wildcards.Prot) & 
