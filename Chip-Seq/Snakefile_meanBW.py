@@ -129,13 +129,13 @@ rule mean_bw_scaled:
         bw1=lambda wildcards, input: input.bw[0],
         bw2=lambda wildcards, input: input.bw[1]
     log:
-        LOGDIR + "bw/{Prot}_{Cond}_mean.log"
+        LOGDIR + "{Prot}_{Cond}_mean.log"
     shell:
         '''
         bigwigCompare --opertation mean \
         --binSize 50 \
-        -b1 {input.bw1} \
-        -b2 {input.bw2} \
+        -b1 {params.bw1} \
+        -b2 {params.bw2} \
         -p {threads} \
         --outTormat bigwig \
         --outFileName {output} 
