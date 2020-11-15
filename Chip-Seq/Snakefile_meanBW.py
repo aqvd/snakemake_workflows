@@ -110,29 +110,32 @@ rule merge_bw_only:
 rule mean_bw_scaled:
     input:
     ## bw replicates have the same Protein and Condition
-        bwTreat=lambda wildcards: expand(BWDIR + "bw/{Samp}_RPKM_scaled.bw",
+        bw=lambda wildcards: expand(BWDIR + "bw/{Samp}_RPKM_scaled.bw",
          Samp=data.Samples[
                          (data.MergeBW == 'yes') &
                          (data.Protein == wildcards.Prot) & 
-                         (data.Condition != "siC")].unique()),
-        bwCont=lambda wildcards: expand(BWDIR + "bw/{Samp}_RPKM_scaled.bw",
-         Samp=data.Samples[
-                         (data.MergeBW == 'yes') &
-                         (data.Protein == wildcards.Prot) & 
-                         (data.Condition == "siC")].unique())
+                         (data.Condition == wildcards.Cond)].unique()),
+        # bwCont=lambda wildcards: expand(BWDIR + "bw/{Samp}_RPKM_scaled.bw",
+        #  Samp=data.Samples[
+        #                  (data.MergeBW == 'yes') &
+        #                  (data.Protein == wildcards.Prot) & 
+        #                  (data.Condition == "siC")].unique())
     output:
         BWDIR + "bw/{Prot}_{Cond}_mean.bw"
     conda:
         'envs/deeptools.yaml'
     threads: 5
+    params:
+        bw1=lambda wildcards, input: input.bw[0],
+        bw2=lambda wildcards, input: input.bw[1]
     log:
         LOGDIR + "bw/{Prot}_{Cond}_mean.log"
     shell:
         '''
         bigwigCompare --opertation mean \
         --binSize 50 \
-        -b1 {input.bwTreat} \
-        -b2 {input.bwCont} \
+        -b1 {input.bw1} \
+        -b2 {input.bw2} \
         -p {threads} \
         --outTormat bigwig \
         --outFileName {output} 
