@@ -198,7 +198,6 @@ rule macs2_notMerged_only:
 		# ## After runing script to get unique summits save runtime here
 		# RESDIR + 'macs/summits_NotMerged.dateRun'
 
-
 rule macs2_merged_only:
 	input:
 		# Macs2 fragment prediction for merged bam
@@ -430,7 +429,7 @@ rule merge_bam:
 		DATADIR + "align/{Prot}_{Cond}_final_merged.bam",
 	params:
 		I=lambda wildcards, input: Input_merge_bam(input.bam)
-	threads: 2
+	threads: 4
 	resources:
 		mem_mb=get_resource("gatk", "mem_mb"),
 		walltime=get_resource("gatk","walltime")
@@ -542,7 +541,9 @@ rule macs2_notMerged_callpeak:
 
 rule macs2_merged_callpeak:
 	input:
-		treatBam= DATADIR + 'align/{Prot_Cond}_final_merged.bam',
+		treatBam= lambda wildcards: expand(
+			DATADIR + 'align/{Prot_Cond}_final_merged.bam',
+				Prot_Cond=wildcards.Prot_Cond),
 		inputBam= lambda wildcards: expand(
 					DATADIR + 'align/{inputSample}_final_merged.bam',
 			inputSample=data.InputMerged[data.Prot_Cond == wildcards.Prot_Cond].values[0])
