@@ -60,7 +60,7 @@ data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)]
                  for Prot,Cond in zip(data.Protein,data.Condition)  ]
 
 # Input for calling peaks after merging replicates
-data["InputMerged"] = [ re.sub("_S[0-9]+$","", ip) if ip != ""
+data["InputMerged"] = [ re.sub("_[SR][0-9]+$","", ip) if ip != ""
                        else "" for ip in data.Input]
 
 # All different Prot_Cond prosibilities to merge replicates
@@ -543,9 +543,9 @@ rule macs2_merged_callpeak:
 	input:
 		treatBam= lambda wildcards: expand(
 			DATADIR + 'align/{Prot_Cond}_final_merged.bam',
-				Prot_Cond=wildcards.Prot_Cond),
+			Prot_Cond=wildcards.Prot_Cond),
 		inputBam= lambda wildcards: expand(
-					DATADIR + 'align/{inputSample}_final_merged.bam',
+			DATADIR + 'align/{inputSample}_final_merged.bam',
 			inputSample=data.InputMerged[data.Prot_Cond == wildcards.Prot_Cond].values[0])
 	output:
 		pred=RESDIR + 'macs/{Prot_Cond}_merged_predictd.txt',
