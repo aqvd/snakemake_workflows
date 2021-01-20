@@ -52,7 +52,7 @@ genome_size={"mm9":2620345972,
 data = pd.read_csv(TABLE_NAME,sep="\t")
 ## Add extra cols for salecting the appropriate wildcards path to files
 
-data["Samples"] = data.Protein +"_"+data.Condition+"_"+ data.Rep 
+data["Samples"] = str(data.Protein) +"_"+ str(data.Condition)+"_"+ str(data.Rep) 
 # Match each sample reads with appropriate input to calculate calibration factor
 data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)].values[0] \
                  if Prot != "input" \
