@@ -1,0 +1,5 @@
+Run	BioProject	GEO_Accession (exp)	Cell_Line	chip_antibody	Protein	Condition	Rep	Ext	File	Genome	Norm	Comments
+SRR6309985	PRJNA419210	GSM2862169	MCF10A		input	control	1	.fastq.gz	input_control_1_SRR6309985_.fastq.gz	hg19		
+SRR6309986	PRJNA419210	GSM2862170	MCF10A	"Homemade (ref. Morey et al.\, Cell Stem Cell\, 2015)"	RING1B	control	1	.fastq.gz	RING1B_control_1_SRR6309986_.fastq.gz	hg19		
+SRR6309987	PRJNA419210	GSM2862171	MCF10A	Active Motif # 39155	H3K27me3	control	1	.fastq.gz	H3K27me3_control_1_SRR6309987_.fastq.gz	hg19		
+SRR6309990	PRJNA419210	GSM2862174	MCF10A	Abcam # ab4729	H3K27ac	control	1	.fastq.gz	H3K27ac_control_1_SRR6309990_.fastq.gz	hg19		
