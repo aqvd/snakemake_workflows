@@ -24,9 +24,9 @@ rule fastq_dump:
 	threads: 5
 	shell:
 		'fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
-		--outfile {params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq.gz \
+		--outfile {params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq \
 		--outdir {params.Dir} {params.srr} 2> {log} && \
-		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr} && \
+		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq && \
 		touch {output}'
 
 
