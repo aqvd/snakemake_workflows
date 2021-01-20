@@ -211,7 +211,7 @@ rule macs2_merged_only:
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## After runing script to get unique summits save runtime here
-		RESDIR + 'macs/summits_merged.dateRun'
+		# RESDIR + 'macs/summits_merged.dateRun'
 
 rule bw_only:
 	input:
@@ -263,7 +263,7 @@ rule fastQScreen:
 	shell:
 		"fastq_screen --threads {{threads}} --aligner bowtie2 \
 		--conf /home/aquevedo/opt/FastQ-Screen-0.14.1/fastq_screen.conf \
-		--outdir {}/fastQScreen {{input.fq}} |& tee {{log}}".format(RESDIR)
+		--outdir {}fastQScreen {{input.fq}} |& tee {{log}}".format(RESDIR)
 		
 
 rule bowtie2_alignTo_refGenome:

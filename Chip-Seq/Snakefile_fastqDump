@@ -7,12 +7,17 @@ ACC_TABLE="/home/aquevedo/ChromHMM-MCF10A-SRA_table.csv"
 
 data = pd.read_csv(ACC_TABLE,sep=",")
 
-rule all:
+rule faster_download:
 	input:
-		expand(FASTQDIR + "{SRR}.finished", SRR=data.Run.unique())
-rule fastq_dump:
+		expand(FASTQDIR + "{SRR}_faster.finished", SRR=data.Run.unique())
+
+rule safe_download:
+	input:
+		expand(FASTQDIR + "{SRR}_prefetch.finished", SRR=data.Run.unique())
+
+rule fastERq_dump:
 	output:
-		FASTQDIR + "{SRR}.finished", # created only if all succeded on time
+		FASTQDIR + "{SRR}_faster.finished", # created only if all succeded on time
 	params:
 		srr=lambda wildcards: wildcards.SRR,
 		Dir=FASTQDIR,
@@ -29,5 +34,26 @@ rule fastq_dump:
 		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq && \
 		touch {output}'
 
+rule prefetch_fastq_dump:
+	output:
+		FASTQDIR + "{SRR}_prefetch.finished", # created only if all succeded on time
+	params:
+		srr=lambda wildcards: wildcards.SRR,
+		Dir=FASTQDIR,
+		prot=lambda wildcards: data.Protein[data.Run == wildcards.SRR].values[0],
+		cond=lambda wildcards: data.Condition[data.Run == wildcards.SRR].values[0],
+		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0]
+	log:
+		FASTQDIR + 'log/fastqDump/{SRR}.log'
+	threads: 5
+	shell:
+		'prefetch {params.srr} |& tee {log} && \
+		fastq-dump --log-level 6 --outdir {params.Dir} |& -a {log} && \
+		mv {paramsDir}{params.srr}.fastq \
+		{paramsDir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq 2>> {log} && \
+		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq 2>> {log} && \
+		touch {output} 2>> {log}'
+
+	
 
 
