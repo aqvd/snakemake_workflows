@@ -34,7 +34,7 @@ genome_path = {
     "hg19":"/storage/scratch01/users/dgimenezl/genomes/human/hg19/hg19",
     "hg38":"/storage/scratch01/users/dgimenezl/genomes/human/hg38/hg38",
     "-":""}
-    
+
 refSeq_genes_path = {
 	"mm9" : "",
 	"mm10" : "",
@@ -325,8 +325,18 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 		isCalMesage = ">>> CALIBRATED <<<"
 		noCalMesage = ">>> NOT CALIBRATED <<<"
-		## If YES calibration
-		if params.calGenIx != "":
+		print("!!!!! :" + str(params.calGenIx))
+
+		if params.calGenIx == "": ## If NO calibration. 
+		## Check we are in this case by distinct bowtie flags using snakemake -p option
+			print(f"{noCalMesage:^80}")
+			shell("bowtie2 -U {reads} -x {params.genomeIndex} \
+				-p {threads} --time -S {output.sam} |& tee {log}")
+			## Create the rest of output files, but empty, to avoid missingOutputException
+			shell("touch {output.unal} {output.stats}")
+
+
+		else: ## If YES calibration
 			print(f"{isCalMesage:^80}")
 			## Get all reads that align to reference genome in {output.sam}
 			## Get reads that do NOT align to rederence in {output.unal}.
@@ -336,13 +346,6 @@ rule bowtie2_alignTo_calGenome:
 			shell("bowtie2 -x {params.calGenIx} -U {output.unal} \
 				-p {threads} --time	--no-unal -S /dev/null \
 				|& tee {output.stats}")
-		else: ## If NO calibration. 
-		## Check we are in this case by distinct bowtie flags using snakemake -p option
-			print(f"{noCalMesage:^80}")
-			shell("bowtie2 -U {reads} -x {params.genomeIndex} \
-				-p {threads} --time -S {output.sam} |& tee {log}")
-			## Create the rest of output files, but empty, to avoid missingOutputException
-			shell("touch {output.unal} {output.stats}")
 
 rule calculate_scaled:
 	input:
