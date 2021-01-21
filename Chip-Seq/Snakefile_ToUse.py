@@ -322,8 +322,9 @@ rule bowtie2_alignTo_calGenome:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
 	run:
 		reads=",".join(input.fq)
-		## In case there is no calibration genome in the samples
+		## If YES calibration
 		if params.calGenIx != "":
+			print(f"{>>> CALIBRATED <<<:^80}")
 			## Get all reads that align to reference genome in {output.sam}
 			## Get reads that do NOT align to rederence in {output.unal}.
 			shell("bowtie2 -x {params.genomeIndex} -U {reads} \
@@ -332,7 +333,8 @@ rule bowtie2_alignTo_calGenome:
 			shell("bowtie2 -x {params.calGenIx} -U {output.unal} \
 				-p {threads} --time	--no-unal -S /dev/null \
 				|& tee {output.stats}")
-		else:
+		else: ## If NO calibration
+			print(f"{>>> NOT CALIBRATED <<<:^80}")
 			shell("bowtie2 -x {params.genomeIndex} -U {reads} \
 				-p {threads} --time	--un-gz {output.unal} -S {output.sam} |& tee {log}")
 
