@@ -103,7 +103,7 @@ print(data.Genome_size)
 ##################################################
 
 ## ## Rules priority
-ruleorder: bowtie2_alignTo_calGenome > bowtie2_alignTo_refGenome 
+ruleorder: bowtie2_alignTo_refGenome > bowtie2_alignTo_calGenome 
 ruleorder: unique_summits_merged > unique_summits_NotMerged
 rule all:
 	input:
