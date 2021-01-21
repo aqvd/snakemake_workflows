@@ -104,7 +104,7 @@ print(data.Genome_size)
 ##################################################
 
 ## ## Rules priority
-ruleorder: bowtie2_alignTo_refGenome > bowtie2_alignTo_calGenome 
+ruleorder: bowtie2_alignTo_calGenome > bowtie2_alignTo_refGenome 
 ruleorder: unique_summits_merged > unique_summits_NotMerged
 rule all:
 	input:
@@ -325,7 +325,7 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 		shell("touch /home/aquevedo/snakemake_workflows/Chip-Seq/delete_{params.calGenIx}.delete")
 
-		if str(params.calGenIx) == 'NO_CALIBRATION': ## If NO calibration. 
+		if str(params.calGenIx) != 'NO_CALIBRATION': ## If NO calibration. 
 		## Check we are in this case by distinct bowtie flags using snakemake -p option
 			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {output.sam} |& tee {log}")
 			## Create the rest of output files, but empty, to avoid missingOutputException
