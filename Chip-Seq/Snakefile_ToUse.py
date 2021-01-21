@@ -33,7 +33,7 @@ genome_path = {
     "mm10":"/storage/scratch01/users/dgimenezl/genomes/mouse/mm10/mm10" ,
     "hg19":"/storage/scratch01/users/dgimenezl/genomes/human/hg19/hg19",
     "hg38":"/storage/scratch01/users/dgimenezl/genomes/human/hg38/hg38",
-    "-":""}
+    "-":"NO_CALIBRATION"}
 
 refSeq_genes_path = {
 	"mm9" : "",
@@ -328,7 +328,7 @@ rule bowtie2_alignTo_calGenome:
 		print("!!!!! :" + str(params.calGenIx))
 		shell("touch /home/aquevedo/snakemake_workflows/Chip-Seq/delete_{params.calGenIx}.delete")
 
-		if "{params.calGenIx}" == '': ## If NO calibration. 
+		if "{params.calGenIx}" == 'NO_CALIBRATION': ## If NO calibration. 
 		## Check we are in this case by distinct bowtie flags using snakemake -p option
 			print(f"{noCalMesage:^80}")
 			shell("bowtie2 -U {reads} -x {params.genomeIndex} \
