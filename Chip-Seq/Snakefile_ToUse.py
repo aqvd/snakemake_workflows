@@ -95,7 +95,7 @@ if regionsType == "summits":
 else:
 	regionsFile = refSeq_genes_path["hg19"]
 
-print(data.Sample)
+print(data.Samples)
 print(data.Genome_size)
 
 ##################################################
