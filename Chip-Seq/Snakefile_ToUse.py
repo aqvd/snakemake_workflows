@@ -325,11 +325,11 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 		shell("touch /home/aquevedo/snakemake_workflows/Chip-Seq/delete_{params.calGenIx}.delete")
 
-		if str(params.calGenIx) != 'NO_CALIBRATION': ## If NO calibration. 
+		if str(params.calGenIx[0]) == 'NO_CALIBRATION': ## If NO calibration. 
 		## Check we are in this case by distinct bowtie flags using snakemake -p option
 			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {output.sam} |& tee {log}")
 			## Create the rest of output files, but empty, to avoid missingOutputException
-			shell("touch {output.unal} {output.stats}")
+			shell("mkdir -p {DATADIR}align/stats && touch {output.unal} {output.stats}")
 
 
 		else: ## If YES calibration
