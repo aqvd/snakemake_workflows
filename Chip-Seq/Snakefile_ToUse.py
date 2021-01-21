@@ -33,7 +33,7 @@ genome_path = {
     "mm10":"/storage/scratch01/users/dgimenezl/genomes/mouse/mm10/mm10" ,
     "hg19":"/storage/scratch01/users/dgimenezl/genomes/human/hg19/hg19",
     "hg38":"/storage/scratch01/users/dgimenezl/genomes/human/hg38/hg38",
-    "-":"NO_CALIBRATION"}
+    "-":""}
 
 refSeq_genes_path = {
 	"mm9" : "",
@@ -325,7 +325,7 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 		shell("touch /home/aquevedo/snakemake_workflows/Chip-Seq/delete_{params.calGenIx}.delete")
 
-		if str(params.calGenIx[0]) == 'NO_CALIBRATION': ## If NO calibration. 
+		if str(params.calGenIx[0]) == '': ## If NO calibration. 
 		## Check we are in this case by distinct bowtie flags using snakemake -p option
 			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {output.sam} |& tee {log}")
 			## Create the rest of output files, but empty, to avoid missingOutputException
@@ -433,8 +433,8 @@ rule merge_bam:
 	input:
 		## sample replicates have same Protein and Condition
 		bam=lambda wildcards: expand(DATADIR + "align/{Samp}_final.bam",
-		 Samp=data.Samples[(data.Protein == wildcards.Prot) & 
-		 (data.Condition == wildcards.Cond)].unique())
+			Samp=data.Samples[(data.Protein == wildcards.Prot) & 
+				(data.Condition == wildcards.Cond)].unique())
 	output:
 		## Get Prot and Cond wildcards from expanded filename  
 		DATADIR + "align/{Prot}_{Cond}_final_merged.bam",
