@@ -326,6 +326,7 @@ rule bowtie2_alignTo_calGenome:
 		isCalMesage = ">>> CALIBRATED <<<"
 		noCalMesage = ">>> NOT CALIBRATED <<<"
 		print("!!!!! :" + str(params.calGenIx))
+		shell("touch /home/aquevedo/snakemake_workflows/Chip-Seq/delete_{params.calGenIx}.delete")
 
 		if params.calGenIx == "": ## If NO calibration. 
 		## Check we are in this case by distinct bowtie flags using snakemake -p option
