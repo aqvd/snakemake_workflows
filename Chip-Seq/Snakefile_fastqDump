@@ -54,7 +54,7 @@ rule prefetch_fastq_dump:
 		mv {paramsDir}{params.srr}.fastq \
 		{paramsDir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
 		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
-		touch {output} | tee -a {log}'
+		touch {output} |& tee -a {log}'
 
 	
 
