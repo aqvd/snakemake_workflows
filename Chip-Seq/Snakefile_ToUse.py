@@ -199,7 +199,7 @@ rule macs2_notMerged_only:
 		expand(RESDIR + 'macs/{sample}_summits.bed',
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## After runing script to get unique summits save runtime here
-		RESDIR + 'macs/summits_NotMerged.dateRun'
+		# RESDIR + 'macs/summits_NotMerged.dateRun'
 
 
 rule macs2_merged_only:
