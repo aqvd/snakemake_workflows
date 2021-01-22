@@ -2,7 +2,9 @@ import pandas as pd
 import glob
 
 FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
-ACC_TABLE="/home/aquevedo/ChromHMM-MCF10A-SRA_table.csv"
+ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_BRD4_PRJNA295370.csv"
+# ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_RNAPol2_PRJNA647387.csv"
+
 
 
 data = pd.read_csv(ACC_TABLE,sep=",")
@@ -30,9 +32,9 @@ rule fastERq_dump:
 	shell:
 		'fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
 		--outfile {params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq \
-		--outdir {params.Dir} {params.srr} 2> {log} && \
-		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq && \
-		touch {output}'
+		--outdir {params.Dir} {params.srr} |& tee {log} && \
+		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
+		touch {output} |& tee -a {log}'
 
 rule prefetch_fastq_dump:
 	output:
@@ -48,11 +50,11 @@ rule prefetch_fastq_dump:
 	threads: 5
 	shell:
 		'prefetch {params.srr} |& tee {log} && \
-		fastq-dump --log-level 6 --outdir {params.Dir} |& -a {log} && \
+		fastq-dump --log-level 6 --outdir {params.Dir} |& tee -a {log} && \
 		mv {paramsDir}{params.srr}.fastq \
-		{paramsDir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq 2>> {log} && \
-		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq 2>> {log} && \
-		touch {output} 2>> {log}'
+		{paramsDir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
+		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
+		touch {output} | tee -a {log}'
 
 	
 
