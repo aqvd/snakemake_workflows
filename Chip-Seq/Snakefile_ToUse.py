@@ -504,7 +504,8 @@ rule create_bigWig_scaled:
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing CPM --scaleFactor $n -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
-		'''		
+		'''	
+			
 rule merge_bw_scaled:
 	input:
 	## bw replicates have the same Protein and Condition
