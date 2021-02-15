@@ -542,7 +542,7 @@ rule create_bigWig_InputNorm:
 		bamCompare -b1 {input.nodup_bam} -b2 {input.nodup_bam_input} \
 		-o {output.bw} --outFileFormat bigwig \
 		--binSize 50 \
-		--scaleFactorsMethod none \
+		--scaleFactorsMethod None \
 		--effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing BPM -p {threads} |& tee -a {log} 
 		'''
