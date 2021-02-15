@@ -1,0 +1,3 @@
+Run	Protein	Condition	Rep	Ext	File	Genome	Norm	AvgSpotLen	BioProject	Bytes	Cell_Line	GEO_Accession (exp)	LibraryLayout	Organism	Sample Name	Treatment
+SRR12270006	RNApol2	siCont	R1	.fastq.gz	RNApol2_siCont_R1_SRR12270006.fastq.gz	hg19	-	75	PRJNA647387	1113548113	MCF10A	GSM4678343	SINGLE	Homo sapiens	GSM4678343	non-targeting siRNAs for 72 hours
+SRR12270008	input	siCont	R1	.fastq.gz	input_siCont_R1_SRR12270008.fastq.gz	hg19	-	75	PRJNA647387	1102533427	MCF10A	GSM4678345	SINGLE	Homo sapiens	GSM4678345	"To control for local copy number changes\, equal amounts of unprecipitated genomic DNA from each sample were pooled and used to generate a Next-Generation sequencing library which was sequenced in parallel with the ChIP-Seq samples."

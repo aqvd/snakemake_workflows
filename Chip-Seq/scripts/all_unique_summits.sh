@@ -65,11 +65,11 @@ do
 		bedtools intersect -wa -a "${SUMMITS}" -b int1.tmp > int2.tmp &&
 
 		## count lines befor and after appending new summits to ${RES}
-		echo "REGIONS BEFORE: $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
+		echo "REGIONS BEFORE: $(wc -l ${RES} | sed -E 's/^[ ]*([0-9]+).*$/\1/g')"
 		cat int2.tmp >> "${RES}"
 		
-		echo "Intersected regions $(wc -l ${SUMMITS} | sed -E 's/[ a-zA-Z.].+//g')"
-		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/[ a-zA-Z.].+//g')"
+		echo "Intersected regions $(wc -l ${SUMMITS} | sed -E 's/^[ ]*([0-9]+).*$/\1/g')"
+		echo "REGIONS AFTER $(wc -l ${RES} | sed -E 's/^[ ]*([0-9]+).*$/\1/g')"
 		## increase counter and shift
 		((count+=1))
 		shift 

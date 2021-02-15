@@ -56,7 +56,7 @@ data = pd.read_csv(TABLE_NAME,sep="\t")
 data["Samples"] = data.Protein +"_"+ data.Condition +"_"+ data.Rep
 # Match each sample reads with appropriate input to calculate calibration factor
 data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)].values[0] \
-                 if Prot != "input" \
+                 if Prot != "input" and Cond in data.Condition[data.Protein=="input"].values \
                  else "" \
                  for Prot,Cond in zip(data.Protein,data.Condition)  ]
 
@@ -323,7 +323,6 @@ rule bowtie2_alignTo_calGenome:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
 	run:
 		reads=",".join(input.fq)
-		shell("touch /home/aquevedo/snakemake_workflows/Chip-Seq/delete_{params.calGenIx}.delete")
 
 		if str(params.calGenIx[0]) == '': ## If NO calibration. 
 		## Check we are in this case by distinct bowtie flags using snakemake -p option
@@ -446,12 +445,21 @@ rule merge_bam:
 		walltime=get_resource("gatk","walltime")
 	log:
 		LOGDIR + "gatk/mergeSam_{Prot}_{Cond}.log"
-	shell:
-		'''
-		gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
-		--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-		{params.I} --OUTPUT {output} |& tee {log}
-		'''
+	# shell:
+	# 	'''
+	# 	gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
+	# 	--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
+	# 	{params.I} --OUTPUT {output} |& tee {log}
+	#   '''
+	run:
+		if len(input.bam) > 1:
+			shell('gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
+				--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
+	 			{params.I} --OUTPUT {output} |& tee {log}')
+		else:
+			shell("touch {output}_just1replicate.info")
+			shell('echo ">>> RENAMING {input.bam} to {output}" |& tee {log}')
+			shell('mv {input.bam} {output} |& tee -a {log}')
 
 
 rule create_bigWig:
@@ -505,7 +513,39 @@ rule create_bigWig_scaled:
 		--normalizeUsing CPM --scaleFactor $n -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''	
-			
+
+rule create_bigWig_InputNorm:
+	input:
+		nodup_bam=DATADIR + "align/{sample}_final.bam",
+		bam_index=DATADIR + "align/{sample}_final.bai",
+		nodup_bam_input=lambda wildcards: expand(DATADIR + "align/{input}_final.bam",
+			input=data.Input[data.Samples==wildcards.sample]),
+		bam_index_input=lambda wildcards: expand(DATADIR + "align/{input}_final.bai",
+			input=data.Input[data.Samples==wildcards.sample])
+	output:
+		bw=RESDIR + "bw/{sample}_RPKM_inputNormalized.bw"
+	params:
+		genomeSize= lambda wildcards: expand("{genome_size}", 
+			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
+	threads:
+		get_resource("create_bigWig", "threads")
+	conda:
+		"envs/deeptools.yaml"
+	resources:
+		mem_mb=get_resource("create_bigWig","mem_mb"),
+		walltime=get_resource("create_bigwig","walltime")
+	log:
+		LOGDIR + "deeptols/bamCoverage_{sample}.log"
+	shell:
+		'''
+		bamCompare -b1 {input.nodup_bam} -b2 {nodup_bam_input} \
+		-o {output.bw} --outFileFormat bigWig \
+		--binSize 50 \
+		--scaleFactorsMethod readCount \
+		--effectiveGenomeSize {params.genomeSize} \
+		--normalizeUsing RPKM -p {threads} |& tee -a {log} 
+		'''
+
 rule merge_bw_scaled:
 	input:
 	## bw replicates have the same Protein and Condition
@@ -549,7 +589,7 @@ rule macs2_notMerged_callpeak:
 		LOGDIR + "macs/{sample}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
-		{params.species} {wildcards.sample} {params.outDir} &> {log}'
+		{params.species} {wildcards.sample} {params.outDir} |& tee {log}'
 
 rule macs2_merged_callpeak:
 	input:
@@ -576,7 +616,7 @@ rule macs2_merged_callpeak:
 		LOGDIR + "macs/{Prot_Cond}.log"
 	shell:
 		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
-		{params.species} {params.fileName} {params.outDir} &> {log}'
+		{params.species} {params.fileName} {params.outDir} |& tee {log}'
 
 rule unique_summits_NotMerged:
 	input:
