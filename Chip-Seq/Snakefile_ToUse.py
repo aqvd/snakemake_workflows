@@ -537,13 +537,14 @@ rule create_bigWig_InputNorm:
 	log:
 		LOGDIR + "deeptols/bwInputNormalized_{sample}.log"
 	shell:
+	# BPM normalization as RPKM not good for between samples comparison
 		'''
 		bamCompare -b1 {input.nodup_bam} -b2 {input.nodup_bam_input} \
 		-o {output.bw} --outFileFormat bigwig \
 		--binSize 50 \
-		--scaleFactorsMethod readCount \
+		--scaleFactorsMethod none \
 		--effectiveGenomeSize {params.genomeSize} \
-		--normalizeUsing RPKM -p {threads} |& tee -a {log} 
+		--normalizeUsing BPM -p {threads} |& tee -a {log} 
 		'''
 
 rule merge_bw_scaled:
