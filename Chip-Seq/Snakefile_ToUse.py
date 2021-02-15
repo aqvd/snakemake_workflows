@@ -519,9 +519,9 @@ rule create_bigWig_InputNorm:
 		nodup_bam=DATADIR + "align/{sample}_final.bam",
 		bam_index=DATADIR + "align/{sample}_final.bai",
 		nodup_bam_input=lambda wildcards: expand(DATADIR + "align/{input}_final.bam",
-			input=data.Input[data.Samples==wildcards.sample]),
+			input=data.Input[data.Samples==wildcards.sample].values[0]),
 		bam_index_input=lambda wildcards: expand(DATADIR + "align/{input}_final.bai",
-			input=data.Input[data.Samples==wildcards.sample])
+			input=data.Input[data.Samples==wildcards.sample].values[0])
 	output:
 		bw=RESDIR + "bw/{sample}_RPKM_inputNormalized.bw"
 	params:
@@ -538,7 +538,7 @@ rule create_bigWig_InputNorm:
 		LOGDIR + "deeptols/bamCoverage_{sample}.log"
 	shell:
 		'''
-		bamCompare -b1 {input.nodup_bam} -b2 {nodup_bam_input} \
+		bamCompare -b1 {input.nodup_bam} -b2 {input.nodup_bam_input} \
 		-o {output.bw} --outFileFormat bigWig \
 		--binSize 50 \
 		--scaleFactorsMethod readCount \
