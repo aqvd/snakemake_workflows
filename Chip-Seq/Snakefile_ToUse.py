@@ -535,11 +535,11 @@ rule create_bigWig_InputNorm:
 		mem_mb=get_resource("create_bigWig","mem_mb"),
 		walltime=get_resource("create_bigwig","walltime")
 	log:
-		LOGDIR + "deeptols/bamCoverage_{sample}.log"
+		LOGDIR + "deeptols/bwInputNormalized_{sample}.log"
 	shell:
 		'''
 		bamCompare -b1 {input.nodup_bam} -b2 {input.nodup_bam_input} \
-		-o {output.bw} --outFileFormat bigWig \
+		-o {output.bw} --outFileFormat bigwig \
 		--binSize 50 \
 		--scaleFactorsMethod readCount \
 		--effectiveGenomeSize {params.genomeSize} \
