@@ -175,12 +175,12 @@ rule QC_only:
 		## fastQC quality control
 		expand(RESDIR + "fastQC/{fq_base}_fastqc.zip", 
 			fq_base=data.fqBasename.unique()),
+		# fastQ Screen contamination control
+		expand(RESDIR + "fastQScreen/{fq_base}_screen.txt", 
+			fq_base=data.fqBasename.unique()),
 		## fastQ Screen contamination control
-		# expand(RESDIR + "fastQScreen/{fq_base}_screen.txt", 
-		# 	fq_base=data.fqBasename.unique()),
-		# ## fastQ Screen contamination control
-		# expand(RESDIR + "fastQScreen/{fq_base}_screen.html", 
-		# 	fq_base=data.fqBasename.unique())
+		expand(RESDIR + "fastQScreen/{fq_base}_screen.html", 
+			fq_base=data.fqBasename.unique())
 
 rule merge_bams_only:
 	input:
