@@ -220,12 +220,14 @@ rule bw_only:
 	input:
 		# .bw files RPKM normalized or scaled. One per sample. Then merge if heatmap
 		# shows good correlation between samples
-		expand(RESDIR + "bw/{sample}_RPKM.bw", 
-			sample=data.Samples.unique()),
+		# expand(RESDIR + "bw/{sample}_RPKM.bw", 
+		# 	sample=data.Samples.unique()),
 		# .bw files scaled (CPM * scaleFactor)
+		# expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
+		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
+		# 						(data.Protein!="input")].unique())
 		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
-				sample=data.Samples[(data.PATH_genome_cal!="") & 
-								(data.Protein!="input")].unique())
+				sample=data.Samples[(data.PATH_genome_cal!="")].unique())
 
 rule merge_bw_only:
 	input:
@@ -629,7 +631,7 @@ rule unique_summits_NotMerged:
 		RESDIR + 'unique_summits_NotMerged.bed'
 	threads: 1
 	resources:
-		mem_mb=500,
+		mem_mb=2000,
 		walltime=5
 	params:
 		summitsBed=lambda wildcards,input: " ".join(input.summits),
@@ -648,7 +650,7 @@ rule unique_summits_merged:
 		RESDIR + 'unique_summits_merged.bed'
 	threads: 1
 	resources:
-		mem_mb=500,
+		mem_mb=2000,
 		walltime=5
 	params:
 		summitsBed=lambda wildcards,input: " ".join(input.summits),
