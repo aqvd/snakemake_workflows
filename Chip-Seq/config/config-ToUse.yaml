@@ -18,6 +18,7 @@ rules:
             threads: 8   
     fastQScreen:
         res:
+            mem_mb: 10000
             threads: 12
     bowtie2:
         res:

@@ -260,9 +260,11 @@ rule fastQScreen:
 		RESDIR + "fastQScreen/{fq_base}_screen.txt",
 		RESDIR + "fastQScreen/{fq_base}_screen.html"
 	log:
-		LOGDIR + "fastQC_{fq_base}.log"
+		LOGDIR + "fastQScreen_{fq_base}.log"
 	threads:
 		get_resource("fastQScreen", "threads")
+	resources:
+		mem_mb=get_resource("fastQScreen", "mem_mb")
 	shell:
 		"fastq_screen --threads {{threads}} --aligner bowtie2 \
 		--conf /home/aquevedo/opt/FastQ-Screen-0.14.1/fastq_screen.conf \
