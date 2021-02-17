@@ -8,7 +8,7 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "config/config-MoreyPaper.yaml"
+configfile: "config/config-ToUse.yaml"
 
 
 ## 
@@ -523,7 +523,7 @@ rule create_bigWig_InputNorm:
 		bam_index_input=lambda wildcards: expand(DATADIR + "align/{input}_final.bai",
 			input=data.Input[data.Samples==wildcards.sample].values[0])
 	output:
-		bw=RESDIR + "bw/{sample}_RPKM_inputNormalized.bw"
+		bw=RESDIR + "bw/{sample}_BPM_inputNormalized.bw"
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
 			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
