@@ -227,7 +227,7 @@ rule bw_only:
 		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
 		# 						(data.Protein!="input")].unique())
 		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
-				sample=data.Samples[(data.PATH_genome_cal!="")].unique())
+				sample=data.Samples[data.PATH_genome_cal!=""].unique())
 
 rule merge_bw_only:
 	input:
@@ -282,7 +282,7 @@ rule bowtie2_alignTo_refGenome:
 		unal=DATADIR + "align/{sample}_unal.fastq.gz",
 		stats=DATADIR + "align/stats/{sample}.txt"
 	params:
-		## with logical indexing retrieve the same PATH_genome n times, 
+		## with logical indexing retrieve the same PATH_genome ntimes, 
 		## get the first.
 		genomeIndex= lambda wildcards: expand("{genome}",
 			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0]),
@@ -333,7 +333,6 @@ rule bowtie2_alignTo_calGenome:
 			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {output.sam} |& tee {log}")
 			## Create the rest of output files, but empty, to avoid missingOutputException
 			shell("mkdir -p {DATADIR}align/stats && touch {output.unal} {output.stats}")
-
 
 		else: ## If YES calibration
 			## Get all reads that align to reference genome in {output.sam}
