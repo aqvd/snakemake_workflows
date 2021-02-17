@@ -220,14 +220,12 @@ rule bw_only:
 	input:
 		# .bw files RPKM normalized or scaled. One per sample. Then merge if heatmap
 		# shows good correlation between samples
-		# expand(RESDIR + "bw/{sample}_RPKM.bw", 
-		# 	sample=data.Samples.unique()),
-		# .bw files scaled (CPM * scaleFactor)
-		# expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
-		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
-		# 						(data.Protein!="input")].unique())
+		expand(RESDIR + "bw/{sample}_RPKM.bw", 
+			sample=data.Samples.unique()),
+		#.bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
-				sample=data.Samples[data.PATH_genome_cal!=""].unique())
+				sample=data.Samples[(data.PATH_genome_cal!="") & 
+								(data.Protein!="input")].unique())
 
 rule merge_bw_only:
 	input:
