@@ -1,0 +1,4 @@
+Cell_Line	Protein	Condition	Rep	File	Genome	Norm	Comments
+A637	FLI1	5.A-SA2KO_trimmed	R1	5-FLI1_S19_L002_R1_001_trimmed.fastq.gz	hg19	mm9	
+A637	H3me3	5-SA2KO_trimmed	R1	5-H3me3_S14_L001_R1_001_trimmed.fastq.gz	hg19	mm9	
+A637	R1B	2.C-WT_trimmed	R1	2-R1B_S15_L001_R1_001_trimmed.fastq.gz	hg19	mm9	
