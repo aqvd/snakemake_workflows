@@ -398,7 +398,7 @@ rule remove_duplicates:
 	shell:
 		'''
 		gatk MarkDuplicates --java-options "-Xmx{resources.mem_mb}M" \
-		--REMOVE_DUPLICATES true
+		--REMOVE_DUPLICATES true \
 		-I {input.sorted_bam} \
 		-O {output.nodup_bam} \
 		-M {output.metrics} |& tee {log}
