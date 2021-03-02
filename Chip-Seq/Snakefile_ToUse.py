@@ -108,18 +108,6 @@ ruleorder: bowtie2_alignTo_calGenome > bowtie2_alignTo_refGenome
 ruleorder: unique_summits_merged > unique_summits_NotMerged
 rule all:
 	input:
-		# ## fastQC quality control
-		# expand(RESDIR + "fastQC/{fq_base}_fastqc.html", 
-		# 	fq_base=data.fqBasename.unique()),
-		# ## fastQC quality control
-		# expand(RESDIR + "fastQC/{fq_base}_fastqc.zip", 
-		# 	fq_base=data.fqBasename.unique()),
-		# ## fastQ Screen contamination control
-		# expand(RESDIR + "fastQScreen/{fq_base}_screen.txt", 
-		# 	fq_base=data.fqBasename.unique()),
-		# ## fastQ Screen contamination control
-		# expand(RESDIR + "fastQScreen/{fq_base}_screen.html", 
-		# 	fq_base=data.fqBasename.unique()),
 		# ## .sam bowtie2 alignments. All reads aligning to reference genome
 		# expand(DATADIR + "align/{sample}_all.sam", 
 		# 	sample=data.Samples.unique()),
@@ -144,22 +132,6 @@ rule all:
 		## Merged bams 
 		expand(DATADIR + "align/{Prot_Cond}_final_merged.bam",
 			Prot_Cond=data.Prot_Cond.unique()),
-		## .bw files RPKM normalized
-		# expand(RESDIR + "bw/{sample}_RPKM.bw", 
-		# 	sample=data.Samples.unique()),
-		## .bw files scaled (CPM * scaleFactor)
-		# expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
-		# 		sample=data.Samples[(data.PATH_genome_cal!="") & 
-		# 						(data.Protein!="input")].unique()),
-		## Macs2 fragment prediction for merged bam
-		# expand(RESDIR + 'macs/{Prot_Cond}_predictd.txt',
-		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		# ## Macs2 peak files merged bam
-		# expand(RESDIR + 'macs/{Prot_Cond}_peaks.narrowPeak',
-		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		# ## Macs2 summits files from merged bams
-		# expand(RESDIR + 'macs/{Prot_Cond}_summits.bed',
-		# 		Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## .bed file with all unique summits among samples
 		#RESDIR + 'macs/summits_unique.bed',
 		## deeptools computeMatrix out files. regionsType = "summits" or "genes"
@@ -182,6 +154,11 @@ rule QC_only:
 		expand(RESDIR + "fastQScreen/{fq_base}_screen.html", 
 			fq_base=data.fqBasename.unique())
 
+rule noDup_alignments:
+	input:
+		expand(DATADIR + "align/{sample}_final.bam", 
+		 	sample=data.Samples.unique())
+
 rule merge_bams_only:
 	input:
 		expand(DATADIR + "align/{Prot_Cond}_final_merged.bam",
@@ -197,10 +174,7 @@ rule macs2_notMerged_only:
 				sample=data.Samples[data.Protein!="input"].unique()),
 		## Macs2 summits files
 		expand(RESDIR + 'macs/{sample}_summits.bed',
-				sample=data.Samples[data.Protein!="input"].unique()),
-		## After runing script to get unique summits save runtime here
-		# RESDIR + 'macs/summits_NotMerged.dateRun'
-
+				sample=data.Samples[data.Protein!="input"].unique())
 
 rule macs2_merged_only:
 	input:
@@ -212,9 +186,7 @@ rule macs2_merged_only:
 				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
 		## Macs2 summits files from merged bams
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
-				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique()),
-		## After runing script to get unique summits save runtime here
-		# RESDIR + 'macs/summits_merged.dateRun'
+				Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique())
 
 rule bw_only:
 	input:
@@ -366,7 +338,6 @@ rule sort_sam:
 		sam=DATADIR + "align/{sample}_all.sam"
 	output:
 		sorted_bam=DATADIR + "align/{sample}_sorted.bam"
-		#sorted_bam=DATADIR + "align/{sample}_sorted.bam"
 	log:
 		LOGDIR + "gatk/sortSam_{sample}.log"
 	threads: 
@@ -512,6 +483,7 @@ rule create_bigWig_scaled:
 		'''
 		n=$(cat {input.scaleFactor});
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
+		--ignoreDuplicates \
 		--normalizeUsing CPM --scaleFactor $n -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''	
@@ -544,29 +516,10 @@ rule create_bigWig_InputNorm:
 		bamCompare -b1 {input.nodup_bam} -b2 {input.nodup_bam_input} \
 		-o {output.bw} --outFileFormat bigwig \
 		--binSize 50 \
+		--ignoreDuplicates \
 		--scaleFactorsMethod None \
 		--effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing BPM -p {threads} |& tee -a {log} 
-		'''
-
-rule merge_bw_scaled:
-	input:
-	## bw replicates have the same Protein and Condition
-		bw=lambda wildcards: expand(RESDIR + "bw/{Samp}_RPKM_scaled.bw",
-		 Samp=data.Samples[(data.Protein == wildcards.Prot) & 
-		 (data.Condition == wildcards.Cond)].unique())
-	output:
-		RESDIR + "bw/{Prot}_{Cond}_mean.bw"
-	params:
-		bws = lambda wildcards, input: " ".join(input.bw)
-	conda:
-		'envs/wiggletools.yaml'
-	threads: 1
-	log:
-		LOGDIR + "bw/{Prot}_{Cond}_mean.log"
-	shell:
-		'''
-		scripts/bwMean.sh {params.bws} {output} |& tee {log}
 		'''
 
 
@@ -658,7 +611,6 @@ rule unique_summits_merged:
 	shell:
 		'scripts/all_unique_summits.sh {params.outFilename} \
 		{params.summitsBed} |& tee {log}'
-
 
 
 ## For rule compute matrix we need to generate lists with filenames and labels
