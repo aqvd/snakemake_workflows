@@ -553,7 +553,7 @@ rule macs2_notMerged_callpeak:
 		LOGDIR + "macs/{sample}.log"
 
 	conda:
-		"envs/bc.yaml"
+		"envs/bc-1_07.yaml"
 	shell:
 		'scripts/macs2_callPeaks_downsampling.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.sample} {params.inputSample} \
