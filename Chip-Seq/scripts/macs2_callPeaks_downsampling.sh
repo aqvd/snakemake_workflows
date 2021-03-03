@@ -125,7 +125,7 @@ else
 	else
 		echo ">> Downsample input ${INPUT_SAMPLE}"
 		
-		FRACTION=$(sed -En '2p' ${DATADIR}align/stats/downsample_${INPUT_SAMPLE}.txt)
+		FRACTION=$(sed -En '2p' ${DATADIR}align/stats/downsample_${SAMPLE}.txt)
 		echo "Retained ${FRACTION} of reads"
 
 		echo "=== DownsampleSam ==="
