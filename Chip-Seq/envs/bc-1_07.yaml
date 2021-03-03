@@ -1,0 +1,12 @@
+name: bc
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - bc=1.07.1=h516909a_0
+  - libgcc-ng=9.3.0=h2828fa1_18
+  - libgomp=9.3.0=h2828fa1_18
+prefix: /home/aquevedo/anaconda3/envs/bc

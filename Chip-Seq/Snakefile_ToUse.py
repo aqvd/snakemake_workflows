@@ -551,6 +551,9 @@ rule macs2_notMerged_callpeak:
 		inputSample=lambda wildcards: data.Input[data.Samples == wildcards.sample].values[0]
 	log:
 		LOGDIR + "macs/{sample}.log"
+
+	conda:
+		"envs/bc.yaml"
 	shell:
 		'scripts/macs2_callPeaks_downsampling.sh {input.treatBam} {input.inputBam} \
 		{params.species} {wildcards.sample} {params.inputSample} \
