@@ -524,19 +524,27 @@ rule create_bigWig_InputNorm:
 
 rule macs2_notMerged_callpeak:
 	input:
-		treatBam= DATADIR + 'align/{sample}_final.bam',
-		inputBam= lambda wildcards: expand(
-					DATADIR + 'align/{inputSample}_final.bam',
+		treatBam = DATADIR + 'align/{sample}_final.bam',
+		treatStats = DATADIR + "align/stats/picardMarkDup_{sample}.txt",
+		inputBam = lambda wildcards: expand(
+			DATADIR + 'align/{inputSample}_final.bam',
+			inputSample=data.Input[data.Samples == wildcards.sample].values[0]),
+		inputStats = lambda wildcards: expand(
+			DATADIR + "align/stats/picardMarkDup_{inputSample}.txt",
 			inputSample=data.Input[data.Samples == wildcards.sample].values[0])
+	
 	output:
 		pred=RESDIR + 'macs/{sample}_predictd.txt',
 		peaks=RESDIR + 'macs/{sample}_peaks.narrowPeak',
 		summits=RESDIR + 'macs/{sample}_summits.bed'
+	
 	threads:
 		get_resource("macs2", "threads")
+	
 	resources:
 		mem_mb=get_resource("macs2", "mem_mb"),
 		walltime=get_resource("macs2", "walltime")
+	
 	params:
 		outDir=RESDIR + 'macs',
 		species=get_resource("macs2", "species"),
