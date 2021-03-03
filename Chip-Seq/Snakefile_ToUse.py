@@ -156,7 +156,7 @@ rule QC_only:
 
 rule noDup_alignments:
 	input:
-		expand(DATADIR + "align/{sample}_final.bam", 
+		expand(DATADIR + "align/{sample}_final.bam.bai", 
 		 	sample=data.Samples.unique())
 
 rule merge_bams_only:
@@ -299,7 +299,6 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 
 		if str(params.calGenIx[0]) == '': ## If NO calibration. 
-		## Check we are in this case by distinct bowtie flags using snakemake -p option
 			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {output.sam} |& tee {log}")
 			## Create the rest of output files, but empty, to avoid missingOutputException
 			shell("mkdir -p {DATADIR}align/stats && touch {output.unal} {output.stats}")

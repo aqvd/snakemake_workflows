@@ -5,31 +5,46 @@
 # macs2 built binary must be included in $PATH
 #
 # USAGE:
-# ./predict_fragment.sh <treatBAM> <inputBAM> <hs | mm> <sampleName> <outdir>
+# ./predict_fragment.sh <treatBAM> <inputBAM>  <hs | mm> <sampleName> 
+# <inputSampleName> <outdir> <datadir>
 
 TREAT=$1
 INPUT=$2
 ORG=$3
 SAMPLE=$4
-OUTDIR=$5
+INPUT_SAMPLE=$5
+OUTDIR=$6
+DATADIR=$7
 
 ## heck correct number of arguments
-if [[ $# -ne 5 ]]
+if [[ $# -ne 7 ]]
 then
 	echo "USAGE:  
-	./predict_fragment.sh <BAMtreat> <BAMinput> <hs | mm> <sampleName> <outdir>
+	./predict_fragment.sh <treatBAM> <inputBAM>  <hs | mm> <sampleName> 
+	<inputSampleName> <outdir> <datadir>
 
-predict_fragment.sh requires this 5 parameters:
-BAMtreat: chip treatment
-BAMinput: chip input
-hs | mm: organism
-sampleName: to name macs2 files
-outdir: if not exists, it will be created"
+predict_fragment.sh requires this 7 parameters:
+
+· BAMtreat: chip treatment
+
+· BAMinput: chip input
+
+· hs | mm: organism
+
+· sampleName: to name macs2 files
+
+· inputSampleName: name for input samples  
+
+· outdir: if not exists, it will be created
+
+· datadir: where alignment directory is
+
+"
 	exit 01
 fi
 
 ## Check correct organism 
-if [[ "$ORG" != "hs" || "$ORG" != "mm" ]]
+if [[ "${ORG}" != "hs" || "${ORG}" != "mm" ]]
 then
 	echo 'Second argument must be either:
 	1) hs for "Homo sapiens" samples
@@ -44,17 +59,96 @@ mkdir -p "${OUTDIR}"
 
 ## Predict fragment size and extract legth from stdErr redirected file
 echo "===== Predicting fragment size ======="
-macs2 predictd -i "${TREAT}" -g "$ORG" 2> "${OUTDIR}/${SAMPLE}_predictd.txt" &&
+macs2 predictd -i "${TREAT}" -g ${ORG} 2> "${OUTDIR}/${SAMPLE}_predictd.txt" &&
 echo "Preciction succeded"
 FragLen=$(grep -Eio "predicted fragment length is .+" \
 "${OUTDIR}/${SAMPLE}_predictd.txt" | grep -Eo "[0-9]+")
 
 echo "Fragment length is: ${FragLen}"
 
+## Check if need for subsampling
+echo "Running downsample.sh ..."
+
+/home/aquevedo/snakemake_workflows/Chip-Seq/scripts/downsample.sh \
+"${DATADIR}align/stats/picardMarkDup_${SAMPLE}.txt" \
+"${DATADIR}align/stats/picardMarkDup_${INPUT_SAMPLE}.txt" \
+"${DATADIR}align/stats/downsample_${SAMPLE}.txt" &&
+
+echo "Completed downsample.sh"
+
 ## Call peaks with MACS2
-echo "===== Calling Peaks ====="
-macs2 callpeak -t "${TREAT}" -c "${INPUT}" --gsize "${ORG}" \
---extsize "${FragLen}" --nomodel --name "${SAMPLE}" --outdir "${OUTDIR}" &&
-echo "Peak calling succeded, Exiting"
+
+DOWNSAMPLE_RES=$(grep No_need_downsampling \
+${DATADIR}align/stats/downsample_${SAMPLE}.txt)
+
+echo "${DOWNSAMPLE_RES}"
+
+if [[ -n "${DOWNSAMPLE_RES}" ]]; then
+	echo ">>No need for downsampling"
+
+	echo "===== Calling Peaks ====="
+	macs2 callpeak -t "${TREAT}" -c "${INPUT}" --gsize "${ORG}" \
+	--extsize "${FragLen}" --nomodel --name "${SAMPLE}" --outdir "${OUTDIR}" &&
+	
+	echo "Peak calling succeded, Exiting"
+
+	exit 00
+
+else
+	DOWN_INPUT=$(grep "input" ${DATADIR}align/stats/downsample_${SAMPLE}.txt)
+	if [[ -z "${DOWN_INPUT}" ]]; then
+		echo ">> Downsample treatment ${SAMPLE}"
+		
+		FRACTION=$(sed -En '2p' ${DATADIR}align/stats/downsample_${SAMPLE}.txt)
+		echo "Retained ${FRACTION} of reads"
+
+		echo "=== DownsampleSam ==="
+		gatk DownsampleSam --java-options "-Xmx4096M" \
+		-I "${TREAT}" \
+		-O "${TREAT/%.bam/_downsampled.bam}" \
+		-P "${FRACTION}" \
+		--METRICS_FILE "${DATADIR}align/stats/DownsampleSamPicard_${SAMPLE}.txt" \
+		--CREATE_INDEX true &&
+
+		echo "Downsampling finished"
+		
+		echo "===== Calling Peaks ====="
+		macs2 callpeak -t "${TREAT/%.bam/_downsampled.bam}" \
+		-c "${INPUT}" --gsize "${ORG}" \
+		--extsize "${FragLen}" --nomodel --name "${SAMPLE}" \
+		--outdir "${OUTDIR}" &&
+	
+		echo "Peak calling succeded, Exiting"
+
+		exit 00
+
+	else
+		echo ">> Downsample input ${INPUT_SAMPLE}"
+		
+		FRACTION=$(sed -En '2p' ${DATADIR}align/stats/downsample_${INPUT_SAMPLE}.txt)
+		echo "Retained ${FRACTION} of reads"
+
+		echo "=== DownsampleSam ==="
+		gatk DownsampleSam --java-options "-Xmx4096M" \
+		-I "${INPUT}" \
+		-O "${INPUT/%.bam/_downsampled.bam}" \
+		-P "${FRACTION}" \
+		--METRICS_FILE "${DATADIR}align/stats/DownsampleSamPicard_${INPUT_SAMPLE}.txt" \
+		--CREATE_INDEX true &&
+
+		echo "Downsampling finished"
+		
+		echo "===== Calling Peaks ====="
+		macs2 callpeak -t "${TREAT}" \
+		-c "${INPUT/%.bam/_downsampled.bam}" \
+		--gsize "${ORG}" \
+		--extsize "${FragLen}" --nomodel --name "${SAMPLE}" \
+		--outdir "${OUTDIR}" &&
+	
+		echo "Peak calling succeded, Exiting"
+
+		exit 00
+	fi
+fi
 exit 00
 

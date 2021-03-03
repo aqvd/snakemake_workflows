@@ -38,6 +38,7 @@ rules:
             mem_mb: 6000
             walltime: 30
             species: "hs"
+    
     compute_matrix:
         res:
             threads: 20
