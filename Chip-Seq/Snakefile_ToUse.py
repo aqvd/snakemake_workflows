@@ -250,7 +250,7 @@ rule bowtie2_alignTo_refGenome:
 	output:
 		sam=DATADIR + "align/{sample}_onlyRef.sam",
 		unal=DATADIR + "align/{sample}_unal.fastq.gz",
-		stats=DATADIR + "align/stats/{sample}.txt"
+		stats=DATADIR + "align/stats/{sample}_onlyRef.txt"
 	params:
 		## with logical indexing retrieve the same PATH_genome ntimes, 
 		## get the first.
@@ -313,7 +313,7 @@ rule bowtie2_alignTo_calGenome:
 rule calculate_scaled:
 	input:
 		# stats of alignment for Chip samples
-		stats=DATADIR + "align/stats/{sample}.txt",
+		stats=DATADIR + "align/stats/{sample}_onlyRef.txt",
 		calStats=DATADIR + "align/stats/{sample}_calibration.txt",
 		# stats of alignment for Input samples
 		inputStats=lambda wildcards: expand(
