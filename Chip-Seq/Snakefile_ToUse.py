@@ -539,12 +539,14 @@ rule macs2_notMerged_callpeak:
 		walltime=get_resource("macs2", "walltime")
 	params:
 		outDir=RESDIR + 'macs',
-		species=get_resource("macs2", "species")
+		species=get_resource("macs2", "species"),
+		inputSample=lambda wildcards: data.Input[data.Samples == wildcards.sample].values[0]
 	log:
 		LOGDIR + "macs/{sample}.log"
 	shell:
-		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
-		{params.species} {wildcards.sample} {params.outDir} |& tee {log}'
+		'scripts/macs2_callPeaks_downsampling.sh {input.treatBam} {input.inputBam} \
+		{params.species} {wildcards.sample} {params.inputSample} \
+		{params.outDir} ' + DATADIR + ' |& tee {log}'
 
 rule macs2_merged_callpeak:
 	input:
