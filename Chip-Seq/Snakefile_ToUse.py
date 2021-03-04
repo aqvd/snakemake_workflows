@@ -300,7 +300,7 @@ rule bowtie2_alignTo_calGenome:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
 	shell:
 		'''
-		echo "-x {params.genomeIndex} -U {fq} -p {threads} --time --un-gz {output.unal} |& tee {log}
+		echo "-x {params.genomeIndex} -U {input.fq} -p {threads} --time --un-gz {output.unal} |& tee {log}
 		samtools view -hb -F 4 {params.tmp_sam} > {output.bam}
 		rm {params.tmp_sam}
 		bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads}\
