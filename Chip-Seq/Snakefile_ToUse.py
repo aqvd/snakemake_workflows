@@ -51,9 +51,10 @@ genome_size={"mm9":2620345972,
 ## 				READ METADATA					##
 ##################################################
 data = pd.read_csv(TABLE_NAME,sep="\t")
+data = data.as_type({ "Protein":str, "Condition":str, "Rep":str })
 ## Add extra cols for salecting the appropriate wildcards path to files
 
-data["Samples"] = data.Protein +"_"+ data.Condition +"_"+ data.Rep
+data["Samples"] = str(data.Protein) +"_"+ str(data.Condition) +"_"+ str(data.Rep)
 # Match each sample reads with appropriate input to calculate calibration factor
 data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)].values[0] \
                  if Prot != "input" and Cond in data.Condition[data.Protein=="input"].values \
@@ -61,7 +62,7 @@ data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)]
                  for Prot,Cond in zip(data.Protein,data.Condition)  ]
 
 # Input for calling peaks after merging replicates
-data["InputMerged"] = [ re.sub("_[SR][0-9]+$","", ip) if ip != ""
+data["InputMerged"] = [ re.sub("^(.+)_(.+)_(.+)$",r'\1_\2', ip) if ip != ""
                        else "" for ip in data.Input]
 
 # All different Prot_Cond prosibilities to merge replicates
