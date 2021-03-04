@@ -287,7 +287,7 @@ rule bowtie2_alignTo_calGenome:
 		stats= DATADIR + "align/stats/{sample}_calibration.txt"
 	params:
 		## intermediate sam file from which to remove unmaped reads
-		tmp_sam = lambda wildcards: "{}_tmp.sam".format(wildcards.sample),
+		tmp_sam = lambda wildcards: "{0}align/{1}_tmp.sam".format(DATADIR, wildcards.sample),
 		calGenIx = lambda wildcards: expand("{calGenome}",
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0]),
 		genomeIndex= lambda wildcards: expand("{genome}",
