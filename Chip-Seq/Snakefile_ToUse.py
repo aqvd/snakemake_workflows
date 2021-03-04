@@ -310,7 +310,7 @@ rule bowtie2_alignTo_calGenome:
 		bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads} \
 	 	 -time --no-unal -S /dev/null |& tee {output.stats}"
 		'''
-	run:
+	# run:
 		# reads=",".join(input.fq)
 
 		# if str(params.calGenIx[0]) == '': ## If NO calibration. 
