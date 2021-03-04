@@ -299,16 +299,23 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 
 		if str(params.calGenIx[0]) == '': ## If NO calibration. 
-			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {output.sam} |& tee {log}")
-			## Create the rest of output files, but empty, to avoid missingOutputException
-			shell("mkdir -p {DATADIR}align/stats && touch {output.unal} {output.stats}")
+			shell("bowtie2 -U {reads} -x {params.genomeIndex} \
+				-p {threads} --time -S {output.sam} |& tee {log}")
+			## Create the rest of output files, but empty, to avoid \
+			## missingOutputException
+			shell("mkdir -p {DATADIR}align/stats && touch \
+				{output.unal} {output.stats}")
 
 		else: ## If YES calibration
-			## Get all reads that align to reference genome in {output.sam}
-			## Get reads that do NOT align to rederence in {output.unal}.
-			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {output.unal} -S {output.sam} |& tee {log}")
+			## Get only reads that align to reference genome: {output.sam}
+			## Get reads that do NOT align to rederence: {output.unal}.
+			shell("bowtie2 -x {params.genomeIndex} -U {reads} \
+				-p {threads} --time --un-gz {output.unal} \
+				--no-unal -S {output.sam} |& tee {log}")
 			## {output.stats}: alignemt stats reads unique to calibration genome
-			shell("bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads} --time --no-unal -S /dev/null |& tee {output.stats}")
+			shell("bowtie2 -x {params.calGenIx} -U {output.unal} \
+				-p {threads} --time --no-unal \
+				-S /dev/null |& tee {output.stats}")
 
 rule calculate_scaled:
 	input:
