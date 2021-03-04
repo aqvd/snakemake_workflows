@@ -311,27 +311,40 @@ rule bowtie2_alignTo_calGenome:
 		reads=",".join(input.fq)
 
 		if str(params.calGenIx[0]) == '': ## If NO calibration. 
-			shell('echo " >> No calibration"')
+			shell('echo " >> No calibration" > {log} ')
 			## Just get aligned reads to ref genome
-			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {params.tmp_sam} |& tee {log}")
+			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} \
+				--time -S {params.tmp_sam} |& tee -a {log}")
+
 			## Remove unmaped -F 4 "do not output SAM flag == 4 alignments"
+			shell('echo " >> Removing unaligned" >> {log} ')
 			shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
+			shell('echo " >> Removing unaligned done" >> {log} ')
 			shell("rm {params.tmp_sam}")
-			## Create the rest of output files, but empty, to avoid missingOutputException
+
+			## Create the rest of output files, but empty, to avoid 
+			## missingOutputException
 			shell("mkdir -p {DATADIR}align/stats && touch {output.stats}")
 
 		else: ## If YES calibration
-			shell('echo " >> Yes calibration"')
+			shell('echo " >> Yes calibration" > {log}')
 			## Get all reads that align to reference genome in {output.sam}
 			## Get reads that do NOT align to rederence in {params.unal}.
-			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {params.unal} -S {params.tmp_sam} |& tee {log}")
+			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} \
+				--time --un-gz {params.unal} -S {params.tmp_sam} |& \
+				tee -a {log}")
+
 			## Remove unmaped reads and intermediary sam
-			shell("samtools view -hb -F 4 -@ 4 {params.tmp_sam} > {output.bam} |& tee -a {log}")
+			shell('echo " >> Removing unaligned" > {log} ')
+			shell("samtools view -hb -F 4 -@ 4 {params.tmp_sam} > {output.bam} \
+				|& tee -a {log}")
+			shell('echo " >> Removing unaligned done" > {log} ')
 			shell("rm {params.tmp_sam}")
+			
 			## {output.stats}: alignemt stats of reads that ONLY align to
 			##                 calibration genome
-			shell("bowtie2 -x {params.calGenIx} -U {params.unal} -p {threads}\
-				 -time --no-unal -S /dev/null |& tee {output.stats}")
+			shell("bowtie2 -x {params.calGenIx} -U {params.unal} -p {threads} \
+				-time --no-unal -S /dev/null |& tee {output.stats}")
 			shell("rm {params.unal}")
 
 rule remove_unaligned:
