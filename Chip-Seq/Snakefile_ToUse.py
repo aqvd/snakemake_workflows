@@ -304,10 +304,10 @@ rule bowtie2_alignTo_calGenome:
 	shell:
 		'''
 		echo "bowtie2 -x {params.genomeIndex} -U {input.fq} -p {threads} \
-		--time --un-gz {output.unal} |& tee {log}
+		--time --un-gz {params.unal} |& tee {log}
 		samtools view -S -hb -F 4 -@ 4 {params.tmp_sam} > {output.bam}
 		rm {params.tmp_sam}
-		bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads} \
+		bowtie2 -x {params.calGenIx} -U {params.unal} -p {threads} \
 	 	 -time --no-unal -S /dev/null |& tee {output.stats}"
 		'''
 	# run:
