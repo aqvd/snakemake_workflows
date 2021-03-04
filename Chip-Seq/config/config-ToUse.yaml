@@ -1,9 +1,9 @@
-fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/"
-datadir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO/data/"
-resdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO/res/"
-logdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO/log/"
+fastqdir: "/storage/scratch01/users/aquevedo/fastq/test_pipesBowtie/"
+datadir: "/storage/scratch01/users/aquevedo/test_pipesBowtie/data/"
+resdir: "/storage/scratch01/users/aquevedo/test_pipesBowtie/res/"
+logdir: "/storage/scratch01/users/aquevedo/test_pipesBowtie/log/"
 
-tableName: "config/table_ewing_WT_SA2KO_chip_metadata.tsv"
+tableName: "config/test_table.tsv"
 regions: "summits" # possible values: summits | genes
 mergedRegions: "no" # possible values: yes | no
 

@@ -1,3 +1,2 @@
-Protein	Condition	Rep	Ext	Run	File	Genome	Norm	Input
-input	SiC	S9	L001_R1_001.fastq.gz		input-SiC_S9_L001_R1_001.fastq.gz	hg19	mm9	
-input	SiC	S9	L002_R1_001.fastq.gz		input-SiC_S9_L002_R1_001.fastq.gz	hg19	mm9	
+Cell_Line	Protein	Condition	Rep	File	Genome	Norm	Comments
+A673	test-pipesBowtie	FLI1	24.2	test-pipesBowtie_FLI1_24.2.fastq.gz	hg19	mm9	
