@@ -322,7 +322,7 @@ rule bowtie2_alignTo_calGenome:
 		else: ## If YES calibration
 			## Get all reads that align to reference genome in {output.sam}
 			## Get reads that do NOT align to rederence in {output.unal}.
-			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {output.unal} |& tee {log}")
+			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {output.unal} -S {params.tmp_sam} |& tee {log}")
 			## Remove unmaped reads and intermediary sam
 			shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
 			shell("rm {params.tmp_sam}")
