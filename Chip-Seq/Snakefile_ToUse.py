@@ -324,7 +324,7 @@ rule bowtie2_alignTo_calGenome:
 			## Get reads that do NOT align to rederence in {output.unal}.
 			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {output.unal} -S {params.tmp_sam} |& tee {log}")
 			## Remove unmaped reads and intermediary sam
-			shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
+			shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam} |& tee -a {log}")
 			shell("rm {params.tmp_sam}")
 			## {output.stats}: alignemt stats of reads that ONLY align to
 			##                 calibration genome
