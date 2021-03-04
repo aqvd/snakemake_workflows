@@ -24,7 +24,6 @@ fi
 
 if (( $(echo "${scale} < 0.95" | bc -l) )); then # more reads in input
 	echo "Downsample_Control: ${input_dupStats##/*/}" > ${out_scale}
-	scale=$(python -c "print( 1/${scale} )")
 	echo "scale factor for downsampling is: ${scale}"
 
 	result=$(python -c "print( round(${scale},2) )")
@@ -33,6 +32,7 @@ if (( $(echo "${scale} < 0.95" | bc -l) )); then # more reads in input
 
 else # more reads tratment
 	echo "Downsample_Treatmemt: ${dupStats##/*/}" > ${out_scale}
+	scale=$(python -c "print( 1/${scale} )")
 	echo "scale factor for downsampling is: ${scale}"
 
 	result=$(python -c "print( round(${scale},2) )")
