@@ -298,38 +298,38 @@ rule bowtie2_alignTo_calGenome:
 		mem_mb=get_resource("bowtie2", "mem_mb")	
 	log:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
-	shell:
-		'''
-		echo "-x {params.genomeIndex} -U {input.fq} -p {threads} --time --un-gz {output.unal} |& tee {log}
-		samtools view -hb -F 4 {params.tmp_sam} > {output.bam}
-		rm {params.tmp_sam}
-		bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads}\
-	 			 -time --no-unal -S /dev/null |& tee {output.stats}"
-		'''
-	# run:
-	# 	reads=",".join(input.fq)
+	# shell:
+	# 	'''
+	# 	echo "-x {params.genomeIndex} -U {input.fq} -p {threads} --time --un-gz {output.unal} |& tee {log}
+	# 	samtools view -hb -F 4 {params.tmp_sam} > {output.bam}
+	# 	rm {params.tmp_sam}
+	# 	bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads}\
+	#  			 -time --no-unal -S /dev/null |& tee {output.stats}"
+	#	'''
+	run:
+		reads=",".join(input.fq)
 
-	# 	if str(params.calGenIx[0]) == '': ## If NO calibration. 
-	# 		## Just get aligned reads to ref genome
-	# 		shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {params.tmp_sam} |& tee {log}")
-	# 		## Remove unmaped -F 4 "do not output SAM flag == 4 alignments"
-	# 		shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
-	# 		shell("rm {params.tmp_sam}")
-	# 		## Create the rest of output files, but empty, to avoid missingOutputException
-	# 		shell("mkdir -p {DATADIR}align/stats && touch {output.unal} \
-	# 			{output.stats}")
+		if str(params.calGenIx[0]) == '': ## If NO calibration. 
+			## Just get aligned reads to ref genome
+			shell("bowtie2 -U {reads} -x {params.genomeIndex} -p {threads} --time -S {params.tmp_sam} |& tee {log}")
+			## Remove unmaped -F 4 "do not output SAM flag == 4 alignments"
+			shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
+			shell("rm {params.tmp_sam}")
+			## Create the rest of output files, but empty, to avoid missingOutputException
+			shell("mkdir -p {DATADIR}align/stats && touch {output.unal} \
+				{output.stats}")
 
-	# 	else: ## If YES calibration
-	# 		## Get all reads that align to reference genome in {output.sam}
-	# 		## Get reads that do NOT align to rederence in {output.unal}.
-	# 		shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {output.unal} |& tee {log}")
-	# 		## Remove unmaped reads and intermediary sam
-	# 		shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
-	# 		shell("rm {params.tmp_sam}")
-	# 		## {output.stats}: alignemt stats of reads that ONLY align to
-	# 		##                 calibration genome
-	# 		shell("bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads}\
-	# 			 -time --no-unal -S /dev/null |& tee {output.stats}")
+		else: ## If YES calibration
+			## Get all reads that align to reference genome in {output.sam}
+			## Get reads that do NOT align to rederence in {output.unal}.
+			shell("bowtie2 -x {params.genomeIndex} -U {reads} -p {threads} --time --un-gz {output.unal} |& tee {log}")
+			## Remove unmaped reads and intermediary sam
+			shell("samtools view -hb -F 4 {params.tmp_sam} > {output.bam}")
+			shell("rm {params.tmp_sam}")
+			## {output.stats}: alignemt stats of reads that ONLY align to
+			##                 calibration genome
+			shell("bowtie2 -x {params.calGenIx} -U {output.unal} -p {threads}\
+				 -time --no-unal -S /dev/null |& tee {output.stats}")
 
 rule calculate_scaled:
 	input:
