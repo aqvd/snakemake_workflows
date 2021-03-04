@@ -96,7 +96,7 @@ if [[ -n "${DOWNSAMPLE_RES}" ]]; then
 
 else
 	DOWN_INPUT=$(grep "input" ${DATADIR}align/stats/downsample_${SAMPLE}.txt)
-	if [[ -z "${DOWN_INPUT}" ]]; then
+	if [[ -z "${DOWN_INPUT}" ]]; then ## input not present in results
 		echo ">> Downsample treatment ${SAMPLE}"
 		
 		FRACTION=$(sed -En '2p' ${DATADIR}align/stats/downsample_${SAMPLE}.txt)

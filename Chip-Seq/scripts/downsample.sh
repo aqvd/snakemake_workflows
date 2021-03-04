@@ -17,23 +17,22 @@ scale=$(python -c "print( float(${validReads}) / float(${input_validReads}) )")
 
 echo "Scale Factor: treatment / input = ${scale}"
 
-if (( $(echo "${scale} > 0.75" | bc -l) & $(echo "${scale} < 1.25" | bc -l) )); then
+if (( $(echo "${scale} > 0.95" | bc -l) & $(echo "${scale} < 1.05" | bc -l) )); then
 	echo "No_need_downsampling" > ${out_scale} 
 	exit 0
 fi
 
-if (( $(echo "${scale} < 0.75" | bc -l) )); then
-
-	echo "Downsample_Treatmemt: ${dupStats##/*/}" > ${out_scale}
+if (( $(echo "${scale} < 0.95" | bc -l) )); then # more reads in input
+	echo "Downsample_Control: ${input_dupStats##/*/}" > ${out_scale}
+	scale=$(python -c "print( 1/${scale} )")
 	echo "scale factor for downsampling is: ${scale}"
 
 	result=$(python -c "print( round(${scale},2) )")
 	echo ${result} >> ${out_scale} 
 	exit 0
 
-else
-	echo "Downsample_Control: ${input_dupStats##/*/}" > ${out_scale}
-	scale=$(python -c "print( 1/${scale} )")
+else # more reads tratment
+	echo "Downsample_Treatmemt: ${dupStats##/*/}" > ${out_scale}
 	echo "scale factor for downsampling is: ${scale}"
 
 	result=$(python -c "print( round(${scale},2) )")
