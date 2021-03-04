@@ -338,7 +338,10 @@ rule bowtie2_alignTo_calGenome:
 				tee -a {log}")
 
 			## Remove unmaped reads and intermediary sam
-			shell('echo " >> Removing unaligned" >> {log} ')
+			shell('echo -e " >> Command for Removing unaligned:\n \
+				samtools view -S -hb -F 4 -@ 4 --verbosity 5 \
+				{params.tmp_sam} > {output.bam}" >> {log} ')
+
 			shell("samtools view -S -hb -F 4 -@ 4 --verbosity 5 \
 				{params.tmp_sam} > {output.bam}")
 			shell('echo " >> Removing unaligned done" > {log} ')
