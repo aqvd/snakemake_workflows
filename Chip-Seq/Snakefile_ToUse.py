@@ -51,7 +51,7 @@ genome_size={"mm9":2620345972,
 ## 				READ METADATA					##
 ##################################################
 data = pd.read_csv(TABLE_NAME,sep="\t")
-data = data.astype({ "Protein":str, "Condition":str, "Rep":str })
+data[["Protein","Condition","Rep"]] = data[["Protein","Condition","Rep"]].astype(str)
 ## Add extra cols for salecting the appropriate wildcards path to files
 
 data["Samples"] = str(data.Protein) +"_"+ str(data.Condition) +"_"+ str(data.Rep)
