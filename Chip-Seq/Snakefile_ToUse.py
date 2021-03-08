@@ -248,10 +248,11 @@ rule bowtie2_alignTo_refGenome:
 		fq=lambda wildcards: expand(FASTQDIR + '{fq_file}', 
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
-		sam=DATADIR + "align/{sample}_onlyRef.sam",
-		unal=DATADIR + "align/{sample}_unal.fastq.gz",
 		stats=DATADIR + "align/stats/{sample}_onlyRef.txt"
 	params:
+		## temporary file
+		tmp_unal=lambda wildcards: expand(DATADIR + "align/{sample}_unal.fastq.gz",
+			sample=wildcards.sample),
 		## with logical indexing retrieve the same PATH_genome ntimes, 
 		## get the first.
 		genomeIndex= lambda wildcards: expand("{genome}",
@@ -269,12 +270,13 @@ rule bowtie2_alignTo_refGenome:
 		## {output.unal}: reads that do NOT align to calibration genome
 		## -S /dev/null to discard aligned reads
 		shell("bowtie2 -x {params.calGenIx} -U {reads} \
-			-p {threads} --time	--un-gz {output.unal} -S /dev/null |& tee {log}")
+			-p {threads} --time	--un-gz {params.tmp_unal} -S /dev/null |& tee {log}")
 		## -S {output.sam}: reads unique to reference genome.
 		## {output.stats}: align stats of reads unique to human
-		shell("bowtie2 -x {params.genomeIndex} -U {output.unal} \
-			-p {threads} --time	--no-unal -S {output.sam} \
-			|& tee {output.stats}")
+		shell("bowtie2 -x {params.genomeIndex} -U {params.tmp_unal} \
+			-p {threads} --time	--no-unal -S /dev/null |& \
+			tee {output.stats} && \
+			rm {params.tmp_unal}")
 
 rule bowtie2_alignTo_calGenome:
 	input:
@@ -282,9 +284,11 @@ rule bowtie2_alignTo_calGenome:
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
 		sam=DATADIR + "align/{sample}_all.sam",
-		unal=DATADIR + "align/{sample}_calibration_unal.sam",
 		stats= DATADIR + "align/stats/{sample}_calibration.txt"
 	params:
+		## temporary file
+		tmp_unal=lambda wildcards: expand(DATADIR + "align/{sample}_unal.fastq.gz",
+			sample=wildcards.sample),
 		calGenIx = lambda wildcards: expand("{calGenome}",
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0]),
 		genomeIndex= lambda wildcards: expand("{genome}",
@@ -303,19 +307,19 @@ rule bowtie2_alignTo_calGenome:
 				-p {threads} --time -S {output.sam} |& tee {log}")
 			## Create the rest of output files, but empty, to avoid \
 			## missingOutputException
-			shell("mkdir -p {DATADIR}align/stats && touch \
-				{output.unal} {output.stats}")
+			shell("mkdir -p {DATADIR}align/stats && touch {output.stats}")
 
 		else: ## If YES calibration
 			## Get only reads that align to reference genome: {output.sam}
-			## Get reads that do NOT align to rederence: {output.unal}.
+			## Get reads that do NOT align to rederence: {params.tmp_unal}.
 			shell("bowtie2 -x {params.genomeIndex} -U {reads} \
-				-p {threads} --time --un-gz {output.unal} \
+				-p {threads} --time --un-gz {params.tmp_unal} \
 				--no-unal -S {output.sam} |& tee {log}")
-			## {output.stats}: alignemt stats reads unique to calibration genome
-			shell("bowtie2 -x {params.calGenIx} -U {output.unal} \
-				-p {threads} --time --no-unal \
-				-S /dev/null |& tee {output.stats}")
+			## {output.stats}: stats alignments reads unique to calibration genome
+			shell("bowtie2 -x {params.calGenIx} -U {params.tmp_unal} \
+				-p {threads} --time --no-unal -S /dev/null |& \
+				tee {output.stats} && \
+				rm {params.tmp_unal}")
 
 rule calculate_scaled:
 	input:
