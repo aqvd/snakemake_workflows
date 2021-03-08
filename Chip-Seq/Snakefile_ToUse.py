@@ -324,7 +324,7 @@ rule calculate_scaled:
 		calStats=DATADIR + "align/stats/{sample}_calibration.txt",
 		# stats of alignment for Input samples
 		inputStats=lambda wildcards: expand(
-			DATADIR + "align/stats/{input_stats}.txt", 
+			DATADIR + "align/stats/{input_stats}_onlyRef.txt", 
 			input_stats=data.Input[data.Samples==wildcards.sample].values[0]),
 		inputCalStats=lambda wildcards: expand(
 			DATADIR + "align/stats/{input_stats}_calibration.txt",

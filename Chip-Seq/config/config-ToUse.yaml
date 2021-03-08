@@ -34,7 +34,7 @@ rules:
             threads: 30
     macs2:
         res:
-            threads: 2
+            threads: 6
             mem_mb: 6000
             walltime: 30
             species: "hs"
