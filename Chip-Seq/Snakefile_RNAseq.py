@@ -103,7 +103,8 @@ rule all:
 		expand(RESDIR + 'bw/{protCond}_RPKM_merged.bw', 
 			protCond=data.Prot_Cond[data.MergeReplicates == True].unique()),
 		expand(RESDIR + 'bw/{sample}_RPKM.bw', 
-			sample=data.Samples[data.MergeReplicates == False].unique())
+			sample=data.Samples[data.MergeReplicates == False].unique()),
+		RESDIR + 'count_matrix.tsv'
 
 rule hisat2_align_and_sortBam:
 	input:
