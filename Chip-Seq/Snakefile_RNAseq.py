@@ -129,7 +129,7 @@ rule hisat2_align_and_sortBam:
 			(hisat2 --time --summary-file {output.stats} \
 			--no-unal --threads {threads} \
 			-x {params.genomeIx} \
-			-U {input.fq} \
+			-U '+ reads +' \
 			-S - | \
 			samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
 			tee {log}" && \
