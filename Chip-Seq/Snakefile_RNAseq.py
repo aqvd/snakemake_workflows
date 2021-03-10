@@ -112,7 +112,6 @@ rule hisat2_align_and_sortBam:
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
 		bam = DATADIR + "align/{sample}_sorted.bam",
-		bai = DATADIR + "align/{sample}_sorted.bam.bai",
 		stats = DATADIR + "align/stats/{sample}_hisat2stats.txt"
 	params:
 		genomeIx = lambda wildcards: expand("{genome}",
@@ -133,7 +132,23 @@ rule hisat2_align_and_sortBam:
 			-S - | \
 			samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
 			tee {log}')
-		shell('samtools index {output.bam} |& tee -a {log}')
+
+rule index_bam:
+	input:
+		DATADIR + "align/{sample}_sorted.bam"
+	output:
+		DATADIR + "align/{sample}_sorted.bai"
+	threads: 1
+	resources:
+		mem_mb=get_resource("gatk", "mem_mb"),
+		walltime=get_resource("gatk","walltime")
+	log:
+		LOGDIR + "gatk/index_{sample}.log"
+	shell:
+		'''
+		gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
+		-I {input} |& tee {log}
+		'''
 
 rule htseq_count:
 	input:
@@ -210,7 +225,7 @@ rule merge_bam:
 rule create_bigWig:
 	input:
 		bam=DATADIR + "align/{sample}_sorted.bam",
-		bam_index=DATADIR + "align/{sample}_sorted.bam.bai"
+		bam_index=DATADIR + "align/{sample}_sorted.bai"
 	output:
 		bw=RESDIR + "bw/{sample}_RPKM.bw"
 	params:
