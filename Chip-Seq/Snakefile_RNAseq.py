@@ -228,7 +228,7 @@ rule create_bigWig:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing RPKM -p {threads} \
-		-b {input.nodup_bam} -o {output.bw} |& tee {log} 
+		-b {input.bam} -o {output.bw} |& tee {log} 
 		'''
 
 rule create_bigWig_mergedReps:
@@ -257,5 +257,5 @@ rule create_bigWig_mergedReps:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing RPKM -p {threads} \
-		-b {input.nodup_bam} -o {output.bw} |& tee {log} 
+		-b {input.bam} -o {output.bw} |& tee {log} 
 		'''
