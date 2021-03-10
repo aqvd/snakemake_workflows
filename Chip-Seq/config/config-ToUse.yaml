@@ -1,11 +1,16 @@
-fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/"
-datadir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO/data/"
-resdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO/res/"
-logdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO/log/"
+fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/RNAseq_A673_SA2KO/"
+datadir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_RNAseq/data/"
+resdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_RNAseq/res/"
+logdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_RNAseq/log/"
 
-tableName: "config/table_ewing_WT_SA2KO_chip_metadata.tsv"
-regions: "summits" # possible values: summits | genes
-mergedRegions: "no" # possible values: yes | no
+tableName: "config/table_ewingSA2KO_RNAseq.tsv"
+regions: "summits" # possible values: <summits | genes>
+mergedRegions: "no" # possible values: <yes | no>
+
+gtf: "/storage/scratch01/users/aquevedo/dani_files/genes_hg19.gtf"
+feature: "exon" ## must appear in column 3 of gtf
+id_counts: "gene_id" ## id to sum htseq counts and to appear in countMatrix 1 row
+strandness: "no" ## is RNAseq stranded? <yes | no>
 
 rules:
     default:
