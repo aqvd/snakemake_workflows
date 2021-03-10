@@ -208,7 +208,7 @@ rule merge_bam:
 rule create_bigWig:
 	input:
 		bam=DATADIR + "align/{sample}_sorted.bam",
-		bam_index=DATADIR + "align/{sample}_final.bai"
+		bam_index=DATADIR + "align/{sample}_final.bam.bai"
 	output:
 		bw=RESDIR + "bw/{sample}_RPKM.bw"
 	params:
