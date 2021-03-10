@@ -110,7 +110,7 @@ rule hisat2_align_and_sortBam:
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
 		bam = DATADIR + "align/{sample}_sorted.bam",
-		bai = DATADIR + "align/{sample}_sorted.bam.bai"
+		bai = DATADIR + "align/{sample}_sorted.bam.bai",
 		stats = DATADIR + "align/stats/{sample}_hisat2stats.txt"
 	params:
 		genomeIx = lambda wildcards: expand("{genome}",
