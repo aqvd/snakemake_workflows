@@ -29,6 +29,10 @@ rules:
         res:
             threads: 15
             mem_mb: 10000
+    hisat2:
+        res:
+            threads: 15
+            mem_mb: 15000
     gatk:
         res:
             mem_mb: 4096 #in MB
