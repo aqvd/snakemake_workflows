@@ -116,6 +116,7 @@ rule hisat2_align_and_sortBam:
 	params:
 		genomeIx = lambda wildcards: expand("{genome}",
 			genome=data.HisatIx_path[data.Samples==wildcards.sample].values[0])
+		reads =lambda wildcards, input: ','.join(input.fq)
 	threads: 
 		get_resource("hisat2", "threads")
 	resources:
@@ -124,16 +125,16 @@ rule hisat2_align_and_sortBam:
 		'envs/samtools.yaml'
 	log:
 		LOGDIR + "hisat2_{sample}.log"
-	run:
-		reads = ','.join(input.fq)
-		shell('\
-			(hisat2 --time --summary-file {output.stats} \
-			--no-unal --threads {threads} \
-			-x {params.genomeIx} \
-			-U ' + reads + ' \
-			-S - | \
-			samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
-			tee {log}')
+	shell:
+		'''
+		(hisat2 --time --summary-file {output.stats} \
+		--no-unal --threads {threads} \
+		-x {params.genomeIx} \
+		-U {params.reads} \
+		-S - | \
+		samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+		tee {log}
+		'''
 
 rule index_bam:
 	input:
