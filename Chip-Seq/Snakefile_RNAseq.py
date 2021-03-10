@@ -98,7 +98,7 @@ def get_resource(rule,resource):
 ##					RULES 						##
 ##################################################
 rule all:
-	output:
+	input:
 		expand(RESDIR + 'bw/{protCond}_RPKM_merged.bw', 
 			protCond=data.Prot_Cond[data.MergeReplicates == True].unique()),
 		expand(RESDIR + 'bw/{sample}_RPKM.bw', 
