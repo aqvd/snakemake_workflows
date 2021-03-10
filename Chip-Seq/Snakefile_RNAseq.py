@@ -118,7 +118,7 @@ rule hisat2_align_and_sortBam:
 	threads: 
 		get_resource("hisat2", "threads")
 	resources:
-		get_resource("hisat2", "mem_mb")
+		mem_mb = get_resource("hisat2", "mem_mb")
 	log:
 		LOGDIR + "hisat2_{sample}.log"
 	run:
@@ -179,11 +179,11 @@ rule merge_bam:
 		## Get Prot and Cond wildcards from expanded filename  
 		DATADIR + "align/{Prot}_{Cond}_final_merged.bam",
 	params:
-		I=lambda wildcards, input: Input_merge_bam(input.bam)
+		I = lambda wildcards, input: Input_merge_bam(input.bam)
 	threads: 2
 	resources:
-		mem_mb=get_resource("gatk", "mem_mb"),
-		walltime=get_resource("gatk","walltime")
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
 	log:
 		LOGDIR + "gatk/mergeSam_{Prot}_{Cond}.log"
 	# shell:
@@ -219,8 +219,8 @@ rule create_bigWig:
 	conda:
 		"envs/deeptools.yaml"
 	resources:
-		mem_mb=get_resource("create_bigWig","mem_mb"),
-		walltime=get_resource("create_bigwig","walltime")
+		mem_mb = get_resource("create_bigWig","mem_mb"),
+		walltime = get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "deeptols/bamCoverage_{sample}.log"
 	shell:
@@ -248,8 +248,8 @@ rule create_bigWig_mergedReps:
 	conda:
 		"envs/deeptools.yaml"
 	resources:
-		mem_mb=get_resource("create_bigWig","mem_mb"),
-		walltime=get_resource("create_bigwig","walltime")
+		mem_mb = get_resource("create_bigWig","mem_mb"),
+		walltime = get_resource("create_bigwig","walltime")
 	log:
 		LOGDIR + "deeptols/bamCoverage_{sample}.log"
 	shell:
