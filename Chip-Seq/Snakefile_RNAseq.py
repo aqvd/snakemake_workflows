@@ -232,10 +232,10 @@ rule create_bigWig:
 
 rule create_bigWig_mergedReps:
 	input:
-		bam=expand(DATADIR + "align/{ProtCond}_final_merged.bam",
+		bam=lambda wildcards: expand(DATADIR + "align/{ProtCond}_final_merged.bam",
 			ProtCond=data.Prot_Cond[(data.Protein==wildcards.prot) &
 								   (data.Condition==wildcards.cond)].values[0]),
-		bam_index=expand(DATADIR + "align/{ProtCond}_final_merged.bai",
+		bam_index=lambda wildcards: expand(DATADIR + "align/{ProtCond}_final_merged.bai",
 			ProtCond=data.Prot_Cond[(data.Protein==wildcards.prot) &
 								   (data.Condition==wildcards.cond)].values[0]),
 	output:
