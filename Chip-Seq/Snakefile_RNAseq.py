@@ -151,7 +151,7 @@ rule htseq_count:
 	conda:
 		'envs/htseq.yaml'
 	log:
-		LOGDIR + 'htseqCount_{sample}.txt'
+		LOGDIR + 'htseqCount_allSamples.txt'
 	shell:
 		'''
 		htseq-count --format=bam --order=pos --stranded={params.is_stranded} \
@@ -251,7 +251,7 @@ rule create_bigWig_mergedReps:
 		mem_mb = get_resource("create_bigWig","mem_mb"),
 		walltime = get_resource("create_bigwig","walltime")
 	log:
-		LOGDIR + "deeptols/bamCoverage_{sample}.log"
+		LOGDIR + "deeptols/bamCoverage_{prot}_{cond}_merged.log"
 	shell:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
