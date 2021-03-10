@@ -59,7 +59,8 @@ data["Samples"] = data.Protein +"_"+ data.Condition +"_"+ data.Rep
 
 data["fqBasename"] = [f.replace(".fastq.gz","") for f in data["File"]]
 
-data["HisatIx_path"] = [genome_path[i] for i in data.Genome] 
+data["HisatIx_path"] = [genome_path[i] for i in data.Genome]
+data["Genome_size"] = [genome_size[i] for i in data.Genome] 
 
 # All different Prot_Cond prosibilities to merge replicates
 data["Prot_Cond"] = ["_".join((Prot,Cond)) for Prot,Cond in zip(data.Protein,data.Condition)]
