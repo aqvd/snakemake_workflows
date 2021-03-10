@@ -115,7 +115,7 @@ rule hisat2_align_and_sortBam:
 		stats = DATADIR + "align/stats/{sample}_hisat2stats.txt"
 	params:
 		genomeIx = lambda wildcards: expand("{genome}",
-			genome=data.HisatIx_path[data.Samples==wildcards.sample].values[0])
+			genome=data.HisatIx_path[data.Samples==wildcards.sample].values[0]),
 		reads =lambda wildcards, input: ','.join(input.fq)
 	threads: 
 		get_resource("hisat2", "threads")
