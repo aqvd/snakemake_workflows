@@ -33,7 +33,7 @@ genome_path = {
     "mm10":"/storage/scratch01/users/dgimenezl/genomes/mouse/mm10/mm10" ,
     "hg19":"/storage/scratch01/users/dgimenezl/genomes/human/hg19/hg19",
     "hg38":"/storage/scratch01/users/dgimenezl/genomes/human/hg38/hg38",
-    "-":""}
+    "-":"NoCalibration"}
 
 refSeq_genes_path = {
 	"mm9" : "",
@@ -198,7 +198,7 @@ rule bw_only:
 			sample=data.Samples.unique()),
 		#.bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
-				sample=data.Samples[(data.PATH_genome_cal!="") & 
+				sample=data.Samples[(data.PATH_genome_cal!="NoCalibration") & 
 								(data.Protein!="input")].unique())
 
 rule merge_bw_only:
@@ -294,7 +294,9 @@ rule bowtie2_alignTo_calGenome:
 		calGenIx = lambda wildcards: expand("{calGenome}",
 			calGenome=data.PATH_genome_cal[data.Samples==wildcards.sample].values[0]),
 		genomeIndex= lambda wildcards: expand("{genome}",
-			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0])
+			genome=data.PATH_genome[data.Samples==wildcards.sample].values[0]),
+		reads =lambda wildcards, input: ' '.join(input.fq),
+		stat_dir=DATADIR + "align/stats"
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
@@ -303,31 +305,37 @@ rule bowtie2_alignTo_calGenome:
 		'envs/samtools.yaml'	
 	log:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
-	run:
-		reads=",".join(input.fq)
+	script:
+		"scripts/bowtie2_alignTo_calGenome.sh {output.bam} \
+		{output.stats} {params.stat_dir} {params.tmp_unal} \
+		{params.calGenIx} {params.genomeIndex} \
+		{threads} {log} {reads}"
 
-		if str(params.calGenIx[0]) == '': ## If NO calibration. 
-			shell("(bowtie2 -U {reads} -x {params.genomeIndex} \
-				-p {threads} --time -S - | \
-				samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
-				tee {log})")
-			## Create the rest of output files, but empty, to avoid \
-			## missingOutputException
-			shell("mkdir -p {DATADIR}align/stats && touch {output.stats}")
+	# run:
+	# 	reads=",".join(input.fq)
 
-		else: ## If YES calibration
-			## Get only reads that align to reference genome: {output.bam}
-			## Get reads that do NOT align to rederence: {params.tmp_unal}.
-			shell("(bowtie2 -x {params.genomeIndex} -U {reads} \
-				-p {threads} --time --un-gz {params.tmp_unal} \
-				--no-unal -S - | \
-				samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
-				tee {log})")
-			## {output.stats}: stats alignments reads unique to calibration genome
-			shell("bowtie2 -x {params.calGenIx} -U {params.tmp_unal} \
-				-p {threads} --time --no-unal -S /dev/null |& \
-				tee {output.stats} && \
-				rm {params.tmp_unal}")
+	# 	if str(params.calGenIx[0]) == '': ## If NO calibration. 
+	# 		shell("(bowtie2 -U {reads} -x {params.genomeIndex} \
+	# 			-p {threads} --time -S - | \
+	# 			samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+	# 			tee {log})")
+	# 		## Create the rest of output files, but empty, to avoid \
+	# 		## missingOutputException
+	# 		shell("mkdir -p {DATADIR}align/stats && touch {output.stats}")
+
+	# 	else: ## If YES calibration
+	# 		## Get only reads that align to reference genome: {output.bam}
+	# 		## Get reads that do NOT align to rederence: {params.tmp_unal}.
+	# 		shell("(bowtie2 -x {params.genomeIndex} -U {reads} \
+	# 			-p {threads} --time --un-gz {params.tmp_unal} \
+	# 			--no-unal -S - | \
+	# 			samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+	# 			tee {log})")
+	# 		## {output.stats}: stats alignments reads unique to calibration genome
+	# 		shell("bowtie2 -x {params.calGenIx} -U {params.tmp_unal} \
+	# 			-p {threads} --time --no-unal -S /dev/null |& \
+	# 			tee {output.stats} && \
+	# 			rm {params.tmp_unal}")
 
 rule calculate_scaled:
 	input:
