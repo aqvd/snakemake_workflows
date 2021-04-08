@@ -309,7 +309,7 @@ rule bowtie2_alignTo_calGenome:
 		"scripts/bowtie2_alignTo_calGenome.sh {output.bam} \
 		{output.stats} {params.stat_dir} {params.tmp_unal} \
 		{params.calGenIx} {params.genomeIndex} \
-		{threads} {log} {reads}"
+		{threads} {log} {params.reads}"
 
 	# run:
 	# 	reads=",".join(input.fq)
