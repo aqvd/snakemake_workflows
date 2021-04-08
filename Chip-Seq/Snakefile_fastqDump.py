@@ -1,11 +1,19 @@
+import os
 import pandas as pd
 import glob
 
 FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
 #ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_BRD4_PRJNA295370.csv"
-ACC_TABLE="SraRunTable_MCF7A_DDx10andCohesin_GSE105517_GSE137216.csv"
+ACC_TABLE="config/SraRunTable_MCF7A_DDx10andCohesin_GSE105517_GSE137216.csv"
 
+## Function to create directories unless they already exist
+def tryMkdir(path):
+	try:
+		os.makedirs(path,exist_ok=False) # raise error if exists
+	except FileExistsError:
+		pass
 
+tryMkdir(FASTQDIR)
 
 data = pd.read_csv(ACC_TABLE,sep=",")
 

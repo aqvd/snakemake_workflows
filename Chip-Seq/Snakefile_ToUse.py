@@ -51,17 +51,20 @@ genome_size={"mm9":2620345972,
 ## 				READ METADATA					##
 ##################################################
 data = pd.read_csv(TABLE_NAME,sep="\t")
-## Add extra cols for salecting the appropriate wildcards path to files
 
+data[["Protein","Condition","Rep"]] = data[["Protein","Condition","Rep"]].astype(str)
+
+## Add extra cols for salecting the appropriate wildcards path to files
 data["Samples"] = data.Protein +"_"+ data.Condition +"_"+ data.Rep
+
 # Match each sample reads with appropriate input to calculate calibration factor
 data["Input"] = [ data.Samples[(data.Protein=="input") & (data.Condition==Cond)].values[0] \
                  if Prot != "input" and Cond in data.Condition[data.Protein=="input"].values \
                  else "" \
                  for Prot,Cond in zip(data.Protein,data.Condition)  ]
 
-# Input for calling peaks after merging replicates
-data["InputMerged"] = [ re.sub("_[SR][0-9]+$","", ip) if ip != ""
+# Input for calling peaks after merging replicates. Remove "Rep" part from Input
+data["InputMerged"] = [ re.sub("^(.+)_(.+)_(.+)$",r"\1_\2", ip) if ip != ""
                        else "" for ip in data.Input]
 
 # All different Prot_Cond prosibilities to merge replicates
@@ -108,7 +111,7 @@ ruleorder: unique_summits_merged > unique_summits_NotMerged
 rule all:
 	input:
 		# ## .sam bowtie2 alignments. All reads aligning to reference genome
-		# expand(DATADIR + "align/{sample}_all.sam", 
+		# expand(DATADIR + "align/{sample}_all.bam", 
 		# 	sample=data.Samples.unique()),
 		# ## .sam bowtie2 alignments. Reads unique for reference genome
 		# expand(DATADIR + "align/{sample}_onlyRef.sam", 
@@ -282,7 +285,7 @@ rule bowtie2_alignTo_calGenome:
 		fq=lambda wildcards: expand(FASTQDIR + '{fq_file}', 
 			fq_file=data.File[data.Samples==wildcards.sample].values)
 	output:
-		sam=DATADIR + "align/{sample}_all.sam",
+		bam=DATADIR + "align/{sample}_all.bam",
 		stats= DATADIR + "align/stats/{sample}_calibration.txt"
 	params:
 		## temporary file
@@ -295,25 +298,31 @@ rule bowtie2_alignTo_calGenome:
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
-		mem_mb=get_resource("bowtie2", "mem_mb")	
+		mem_mb=get_resource("bowtie2", "mem_mb")
+	conda:
+		'envs/samtools.yaml'	
 	log:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
 	run:
 		reads=",".join(input.fq)
 
 		if str(params.calGenIx[0]) == '': ## If NO calibration. 
-			shell("bowtie2 -U {reads} -x {params.genomeIndex} \
-				-p {threads} --time -S {output.sam} |& tee {log}")
+			shell("(bowtie2 -U {reads} -x {params.genomeIndex} \
+				-p {threads} --time -S - | \
+				samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+				tee {log})")
 			## Create the rest of output files, but empty, to avoid \
 			## missingOutputException
 			shell("mkdir -p {DATADIR}align/stats && touch {output.stats}")
 
 		else: ## If YES calibration
-			## Get only reads that align to reference genome: {output.sam}
+			## Get only reads that align to reference genome: {output.bam}
 			## Get reads that do NOT align to rederence: {params.tmp_unal}.
-			shell("bowtie2 -x {params.genomeIndex} -U {reads} \
+			shell("(bowtie2 -x {params.genomeIndex} -U {reads} \
 				-p {threads} --time --un-gz {params.tmp_unal} \
-				--no-unal -S {output.sam} |& tee {log}")
+				--no-unal -S - | \
+				samtools sort -@ 6 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+				tee {log})")
 			## {output.stats}: stats alignments reads unique to calibration genome
 			shell("bowtie2 -x {params.calGenIx} -U {params.tmp_unal} \
 				-p {threads} --time --no-unal -S /dev/null |& \
@@ -344,7 +353,7 @@ rule calculate_scaled:
 
 rule sort_sam:
 	input:
-		sam=DATADIR + "align/{sample}_all.sam"
+		bam=DATADIR + "align/{sample}_all.bam"
 	output:
 		sorted_bam=DATADIR + "align/{sample}_sorted.bam"
 	log:
@@ -357,7 +366,7 @@ rule sort_sam:
 	shell:
 		'''
 		gatk SortSam --java-options "-Xmx{resources.mem_mb}M" \
-		-I {input.sam} \
+		-I {input.bam} \
 		-O {output.sorted_bam} \
 		--SORT_ORDER coordinate |& tee {log}
 		'''
