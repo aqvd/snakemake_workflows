@@ -1,9 +1,9 @@
-fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/RNAseq_A673_SA2KO/"
-datadir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_RNAseq/data/"
-resdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_RNAseq/res/"
-logdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_RNAseq/log/"
+fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/"
+datadir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_mouseChromatin/data/"
+resdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_mouseChromatin/res/"
+logdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_mouseChromatin/log/"
 
-tableName: "config/table_ewingSA2KO_RNAseq.tsv"
+tableName: "config/table_ewing_WT_SA2KO_mouseChromatin_chip_metadata.tsv"
 regions: "summits" # possible values: <summits | genes>
 mergedRegions: "no" # possible values: <yes | no>
 

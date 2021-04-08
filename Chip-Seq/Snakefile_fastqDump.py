@@ -3,7 +3,7 @@ import glob
 
 FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
 #ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_BRD4_PRJNA295370.csv"
-ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_RNAPol2_PRJNA647387.csv"
+ACC_TABLE="SraRunTable_MCF7A_DDx10andCohesin_GSE105517_GSE137216.csv"
 
 
 

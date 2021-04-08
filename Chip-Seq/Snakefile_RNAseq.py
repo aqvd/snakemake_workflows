@@ -177,7 +177,7 @@ rule htseq_count:
 		htseq-count --format=bam --order=pos --stranded={params.is_stranded} \
 		--type={params.type_feature} --idattr={params.ID_in_countMatrix} \
 		--mode=union --secondary-alignments=ignore \
-		{input.bams} {params.gtf} > {output} 3>&1 2>&1 1>&3 | tee {log}
+		{input.bams} {params.gtf} > {output} 3>&2 2>&1 1>&3 | tee {log}
  		'''
 
 def Input_merge_bam(bams):

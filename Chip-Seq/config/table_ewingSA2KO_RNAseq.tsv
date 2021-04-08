@@ -7,10 +7,10 @@ A677	WT	clon2	R1	ac-A673n2a_S18_L001_R1_001.fastq.gz	hg19	-
 A678	WT	clon2	R1	ac-A673n2a_S18_L002_R1_001.fastq.gz	hg19	-	
 A679	WT	clon2	R1	ac-A673n2a_S18_L003_R1_001.fastq.gz	hg19	-	
 A680	WT	clon2	R1	ac-A673n2a_S18_L004_R1_001.fastq.gz	hg19	-	
-A681	WT	clon24.2	R2	ac-A673n2b_S21_L001_R1_001.fastq.gz	hg19	-	
-A682	WT	clon24.2	R2	ac-A673n2b_S21_L002_R1_001.fastq.gz	hg19	-	
-A683	WT	clon24.2	R2	ac-A673n2b_S21_L003_R1_001.fastq.gz	hg19	-	
-A684	WT	clon24.2	R2	ac-A673n2b_S21_L004_R1_001.fastq.gz	hg19	-	
+A681	WT	clon2	R2	ac-A673n2b_S21_L001_R1_001.fastq.gz	hg19	-	
+A682	WT	clon2	R2	ac-A673n2b_S21_L002_R1_001.fastq.gz	hg19	-	
+A683	WT	clon2	R2	ac-A673n2b_S21_L003_R1_001.fastq.gz	hg19	-	
+A684	WT	clon2	R2	ac-A673n2b_S21_L004_R1_001.fastq.gz	hg19	-	
 A685	SA2-KO	clon5	R1	ac-A673n5_S20_L001_R1_001.fastq.gz	hg19	-	
 A686	SA2-KO	clon5	R1	ac-A673n5_S20_L002_R1_001.fastq.gz	hg19	-	
 A687	SA2-KO	clon5	R1	ac-A673n5_S20_L003_R1_001.fastq.gz	hg19	-	
