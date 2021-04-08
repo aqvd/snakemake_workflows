@@ -1,4 +1,4 @@
-fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/"
+fastqdir: "/storage/scratch01/users/aquevedo/fastq/"
 datadir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/data/"
 resdir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/res/"
 logdir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/log/"
