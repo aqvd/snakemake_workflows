@@ -1,9 +1,9 @@
 fastqdir: "/storage/scratch01/users/aquevedo/fastq/ewing_cells/"
-datadir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_mouseChromatin/data/"
-resdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_mouseChromatin/res/"
-logdir: "/storage/scratch01/users/aquevedo/ewing_cells_SA2KO_mouseChromatin/log/"
+datadir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/data/"
+resdir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/res/"
+logdir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/log/"
 
-tableName: "config/table_ewing_WT_SA2KO_mouseChromatin_chip_metadata.tsv"
+tableName: "config/table_DDX20_MCF7.tsv"
 regions: "summits" # possible values: <summits | genes>
 mergedRegions: "no" # possible values: <yes | no>
 

@@ -201,10 +201,10 @@ rule bw_only:
 				sample=data.Samples[(data.PATH_genome_cal!="NoCalibration") & 
 								(data.Protein!="input")].unique())
 
-rule merge_bw_only:
-	input:
-		expand(RESDIR + "bw/{Prot_Cond}_mean.bw" ,
-			Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique())
+# rule merge_bw_only:
+# 	input:
+# 		expand(RESDIR + "bw/{Prot_Cond}_mean.bw" ,
+# 			Prot_Cond=data.Prot_Cond[data.Protein!="input"].unique())
 
 rule compute_matrix_only:
 	input:
@@ -305,7 +305,7 @@ rule bowtie2_alignTo_calGenome:
 		'envs/samtools.yaml'	
 	log:
 		LOGDIR + "bowtie2_calibration_{sample}.log"
-	script:
+	shell:
 		"scripts/bowtie2_alignTo_calGenome.sh {output.bam} \
 		{output.stats} {params.stat_dir} {params.tmp_unal} \
 		{params.calGenIx} {params.genomeIndex} \
