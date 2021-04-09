@@ -7,7 +7,7 @@ import re
 ##################################################
 ##				Configutation					##
 ##################################################
-configfile: "config/config-ToUse.yaml"
+configfile: "config/config-ToUse-RNAseq.yaml"
 
 FASTQDIR = config["fastqdir"]
 DATADIR = config["datadir"]
