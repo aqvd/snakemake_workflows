@@ -265,7 +265,8 @@ rule create_bigWig_mergedReps:
 		bw=RESDIR + "bw/{prot}_{cond}_BPM_merged.bw"
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
-			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
+			genome_size=data.Genome_size[(data.Protein==wildcards.prot) &
+								   (data.Condition==wildcards.cond)].values[0])
 	threads:
 		get_resource("create_bigWig", "threads")
 	conda:
