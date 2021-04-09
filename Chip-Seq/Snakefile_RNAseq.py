@@ -53,6 +53,7 @@ genome_size={"mm9":2620345972,
 ## 				READ METADATA					##
 ##################################################
 data = pd.read_csv(TABLE_NAME,sep="\t")
+data[["Protein","Condition","Rep"]] = data[["Protein","Condition","Rep"]].astype(str)
 ## Add extra cols for salecting the appropriate wildcards path to files
 
 data["Samples"] = data.Protein +"_"+ data.Condition +"_"+ data.Rep
@@ -100,9 +101,9 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
-		expand(RESDIR + 'bw/{protCond}_RPKM_merged.bw', 
+		expand(RESDIR + 'bw/{protCond}_BPM_merged.bw', 
 			protCond=data.Prot_Cond[data.MergeReplicates == True].unique()),
-		expand(RESDIR + 'bw/{sample}_RPKM.bw', 
+		expand(RESDIR + 'bw/{sample}_BPM.bw', 
 			sample=data.Samples[data.MergeReplicates == False].unique()),
 		RESDIR + 'count_matrix.tsv'
 
@@ -199,6 +200,7 @@ rule merge_bam:
 	output:
 		## Get Prot and Cond wildcards from expanded filename  
 		DATADIR + "align/{Prot}_{Cond}_final_merged.bam",
+		DATADIR + "align/{Prot}_{Cond}_final_merged.bai"
 	params:
 		I = lambda wildcards, input: Input_merge_bam(input.bam)
 	threads: 2
@@ -231,7 +233,7 @@ rule create_bigWig:
 		bam=DATADIR + "align/{sample}_sorted.bam",
 		bam_index=DATADIR + "align/{sample}_sorted.bai"
 	output:
-		bw=RESDIR + "bw/{sample}_RPKM.bw"
+		bw=RESDIR + "bw/{sample}_BPM.bw"
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
 			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
@@ -247,7 +249,7 @@ rule create_bigWig:
 	shell:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
-		--normalizeUsing RPKM -p {threads} \
+		--normalizeUsing BPM -p {threads} \
 		-b {input.bam} -o {output.bw} |& tee {log} 
 		'''
 
@@ -260,7 +262,7 @@ rule create_bigWig_mergedReps:
 			ProtCond=data.Prot_Cond[(data.Protein==wildcards.prot) &
 								   (data.Condition==wildcards.cond)].values[0]),
 	output:
-		bw=RESDIR + "bw/{prot}_{cond}_RPKM_merged.bw"
+		bw=RESDIR + "bw/{prot}_{cond}_BPM_merged.bw"
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
 			genome_size=data.Genome_size[data.Samples==wildcards.sample].values[0])
@@ -276,6 +278,6 @@ rule create_bigWig_mergedReps:
 	shell:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
-		--normalizeUsing RPKM -p {threads} \
+		--normalizeUsing BPM -p {threads} \
 		-b {input.bam} -o {output.bw} |& tee {log} 
 		'''
