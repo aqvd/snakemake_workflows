@@ -30,7 +30,7 @@ def tryMkdir(path):
 [tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, RESDIR + "fastQC")]
 
 ## Genome bowtie2 index prefixes paths
-genome_path = {
+HisatIx_path = {
 	"mm9":"",
     "mm10":"" ,
     "hg19":"/storage/scratch01/users/aquevedo/genomes/human/hg19/hisat/hg19/genome",
