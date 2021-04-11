@@ -119,7 +119,7 @@ rule hisat2_align_and_sortBam:
 			genome=data.HisatIx_path[data.Samples==wildcards.sample].values[0]),
 		reads =lambda wildcards, input: ','.join(input.fq)
 	threads: 
-		get_resource("hisat2", "threads")
+		get_resource("hisat2", "threads") - 3
 	resources:
 		mem_mb = get_resource("hisat2", "mem_mb"),
 		time = get_resource("hisat2", "walltime")
@@ -129,13 +129,12 @@ rule hisat2_align_and_sortBam:
 		LOGDIR + "hisat2_{sample}.log"
 	shell:
 		'''
-		(
-		hisat2 --time --summary-file {output.stats} \
-			--no-unal --threads {threads} \
+		( hisat2 --time --summary-file {output.stats} \
+			--threads {threads} \
 			-x {params.genomeIx} \
 			-U {params.reads} \
 			-S - | \
-		samtools view -h -@ 3 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+		samtools view -h -@ 3 -F 4 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
 		tee {log}
 		'''
 
