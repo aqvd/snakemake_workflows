@@ -32,7 +32,7 @@ def tryMkdir(path):
 ## Genome bowtie2 index prefixes paths
 genome_path = {
 	"mm9":"",
-    "mm10":"" ,
+    "mm10":"/storage/scratch01/users/aquevedo/genomes/mouse/mm10/hisat/genome" ,
     "hg19":"/storage/scratch01/users/aquevedo/genomes/human/hg19/hisat/hg19/genome",
     "hg38":"",
     "-":""}
