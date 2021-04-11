@@ -587,8 +587,8 @@ rule macs2_merged_callpeak:
 				Prot_Cond=wildcards.Prot_Cond),
 		inputBam= lambda wildcards: expand(
 			DATADIR + 'align/{inputSample}_final_merged.bam',
-				inputSample=data.InputMerged[ (data.Prot_Cond == wildcards.Prot_Cond) &
-				(data.MergeReplicates == True) ].values[0])
+				inputSample=data.InputMerged[(data.Prot_Cond==wildcards.Prot_Cond)&
+				(data.MergeReplicates==True) ].values[0])
 	output:
 		pred=RESDIR + 'macs/{Prot_Cond}_merged_predictd.txt',
 		peaks=RESDIR + 'macs/{Prot_Cond}_merged_peaks.narrowPeak',
@@ -605,7 +605,7 @@ rule macs2_merged_callpeak:
 	log:
 		LOGDIR + "macs/{Prot_Cond}.log"
 	shell:
-		'scripts/macs2_callPeaks.sh {input.treatBam} {input.inputBam} \
+		'scripts/macs2_callPeaks_backup.sh {input.treatBam} {input.inputBam} \
 		{params.species} {params.fileName} {params.outDir} |& tee {log}'
 
 rule unique_summits_NotMerged:
