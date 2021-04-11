@@ -1,9 +1,9 @@
 fastqdir: "/storage/scratch01/users/aquevedo/fastq/"
-datadir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/data/"
-resdir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/res/"
-logdir: "/storage/scratch01/users/aquevedo/MCF7/DDX20/log/"
+datadir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/data/"
+resdir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/res/"
+logdir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/log/"
 
-tableName: "config/table_DDX20_MCF7.tsv"
+tableName: "config/table-cohesin-MCF7_GSE137216.tsv"
 regions: "summits" # possible values: <summits | genes>
 mergedRegions: "no" # possible values: <yes | no>
 

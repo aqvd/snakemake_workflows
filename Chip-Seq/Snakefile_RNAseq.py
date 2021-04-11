@@ -121,7 +121,8 @@ rule hisat2_align_and_sortBam:
 	threads: 
 		get_resource("hisat2", "threads")
 	resources:
-		mem_mb = get_resource("hisat2", "mem_mb")
+		mem_mb = get_resource("hisat2", "mem_mb"),
+		time = get_resource("hisat2", "walltime")
 	conda:
 		'envs/samtools.yaml'
 	log:

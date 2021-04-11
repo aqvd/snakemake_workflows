@@ -173,7 +173,7 @@ rule QC_only:
 
 rule noDup_alignments:
 	input:
-		expand(DATADIR + "align/{sample}_final.bam.bai", 
+		expand(DATADIR + "align/{sample}_final.bam", 
 		 	sample=data.Samples.unique())
 
 rule merge_bams_only:
@@ -195,7 +195,7 @@ rule macs2Callpeak_and_BigWig:
 		## Macs2 summits files
 		expand(RESDIR + 'macs/{sample}_summits.bed',
 				sample=data.Samples[(data.Protein!="input") & 
-				(data.MergeReplicates==False)].unique())
+				(data.MergeReplicates==False)].unique()),
 
 	## When merge replicates is needed
 		# Macs2 fragment prediction for merged bam
@@ -209,7 +209,7 @@ rule macs2Callpeak_and_BigWig:
 		## Macs2 summits files from merged bams
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[(data.Protein!="input") & 
-				(data.MergeReplicates==True)].unique())
+				(data.MergeReplicates==True)].unique()),
 
 		# .bw files RPKM normalized or scaled. One per sample. Then merge if heatmap
 		# shows good correlation between samples
@@ -426,7 +426,7 @@ rule merge_bam:
 		bam=lambda wildcards: expand(DATADIR + "align/{Samp}_final.bam",
 			Samp=data.Samples[(data.Protein == wildcards.Prot) & 
 				(data.Condition == wildcards.Cond) & 
-				(data.multipleReps==True)].unique())
+				(data.MergeReplicates==True)].unique())
 	output:
 		## Get Prot and Cond wildcards from expanded filename  
 		DATADIR + "align/{Prot}_{Cond}_final_merged.bam",
@@ -587,7 +587,8 @@ rule macs2_merged_callpeak:
 				Prot_Cond=wildcards.Prot_Cond),
 		inputBam= lambda wildcards: expand(
 			DATADIR + 'align/{inputSample}_final_merged.bam',
-				inputSample=data.InputMerged[data.Prot_Cond == wildcards.Prot_Cond].values[0])
+				inputSample=data.InputMerged[ (data.Prot_Cond == wildcards.Prot_Cond) &
+				(data.MergeReplicates == True) ].values[0])
 	output:
 		pred=RESDIR + 'macs/{Prot_Cond}_merged_predictd.txt',
 		peaks=RESDIR + 'macs/{Prot_Cond}_merged_peaks.narrowPeak',
@@ -629,7 +630,8 @@ rule unique_summits_NotMerged:
 rule unique_summits_merged:
 	input:
 		summits=expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
-			   Prot_Cond=data.Prot_Cond[data.Protein != 'input'].unique())
+			   Prot_Cond=data.Prot_Cond[ (data.Protein != 'input') & 
+				(data.MergeReplicates==True) ].unique())
 	output:
 		RESDIR + 'macs/unique_summits_merged.bed'
 	threads: 1

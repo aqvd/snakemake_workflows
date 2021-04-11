@@ -10,7 +10,6 @@ import re
 ## write .yaml configuration filename
 configfile: "config/config-ToUse.yaml"
 
-
 ## 
 FASTQDIR=config["fastqdir"]
 DATADIR=config["datadir"]

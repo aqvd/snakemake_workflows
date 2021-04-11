@@ -31,6 +31,7 @@ rules:
             mem_mb: 10000
     hisat2:
         res:
+            walltime: 240
             threads: 15
             mem_mb: 15000
     gatk:
