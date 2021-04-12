@@ -1,0 +1,65 @@
+fastqdir: "/storage/scratch01/users/aquevedo/fastq/"
+datadir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/data/"
+resdir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/res/"
+logdir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/log/"
+
+tableName: "config/table-cohesin-MCF7_GSE137216.tsv"
+regions: "summits" # possible values: <summits | genes>
+mergedRegions: "no" # possible values: <yes | no>
+
+gtf: "/storage/scratch01/users/aquevedo/dani_files/genes_hg19.gtf"
+feature: "exon" ## must appear in column 3 of gtf
+id_counts: "gene_id" ## id to sum htseq counts and to appear in countMatrix 1 row
+strandness: "no" ## is RNAseq stranded? <yes | no>
+
+rules:
+    default:
+        res:
+            threads: 1
+            mem_mb: 8000 #in MB
+            walltime: 480   
+    fastQC:
+        res:
+            threads: 8   
+    fastQScreen:
+        res:
+            mem_mb: 10000
+            threads: 12
+    bowtie2:
+        res:
+            threads: 18
+            mem_mb: 10000
+            walltime: 200
+    hisat2:
+        res:
+            threads: 15
+            mem_mb: 15000
+    gatk:
+        res:
+            mem_mb: 4096 #in MB
+            walltime: 25
+    create_bigWig:
+        res:
+            mem_mb: 8000
+            threads: 30
+    macs2:
+        res:
+            threads: 6
+            mem_mb: 6000
+            walltime: 30
+            species: "hs"
+    
+    compute_matrix:
+        res:
+            threads: 20
+            mem_mb: 8000
+            walltime: 60
+
+    plot_heatmap:
+        res:
+            threads: 10
+            mem_mb: 4000
+            walltime: 30
+            kmeans: 8
+            cluster_by_protein: "SA2"
+
