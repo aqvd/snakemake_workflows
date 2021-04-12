@@ -27,8 +27,9 @@ rules:
             threads: 12
     bowtie2:
         res:
-            threads: 15
+            threads: 18
             mem_mb: 10000
+            walltime: 200
     hisat2:
         res:
             threads: 15
