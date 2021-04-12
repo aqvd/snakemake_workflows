@@ -4,4 +4,4 @@ MCF7	CTCF	control	R2	.fastq.gz	CTCF_control_R2_SRR10096219.fastq.gz	hg19	-
 MCF7	RAD21	control	R1	.fastq.gz	RAD21_control_R1_SRR10096220.fastq.gz	hg19	-	
 MCF7	RAD21	control	R2	.fastq.gz	RAD21_control_R2_SRR10096221.fastq.gz	hg19	-	
 MCF7	input	control	R1	.fastq.gz	input_control_R1_SRR10096222.fastq.gz	hg19	-	
-MCF7	input	control	R2	.fastq.gz	input_control_R2_SRR10096222.fastq.gz	hg19	-	
+MCF7	input	control	R2	.fastq.gz	input_control_R1_SRR10096222.fastq.gz	hg19	-	

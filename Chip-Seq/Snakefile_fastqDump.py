@@ -2,9 +2,8 @@ import os
 import pandas as pd
 import glob
 
-FASTQDIR="/storage/scratch01/users/aquevedo/fastq/"
-#ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_BRD4_PRJNA295370.csv"
-ACC_TABLE="config/SraRunTable_MCF7A_DDx10andCohesin_GSE105517_GSE137216.csv"
+FASTQDIR="/storage/scratch01/users/aquevedo/fastq/NIPBLko_mouseHepatocytes_GSE93431"
+ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_NIPBLko_mouseHepatocytes_GSE93431.csv"
 
 ## Function to create directories unless they already exist
 def tryMkdir(path):

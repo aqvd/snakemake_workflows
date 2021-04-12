@@ -8,7 +8,7 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "config/config-ToUse.yaml"
+configfile: "config/delete-config-ToUse.yaml"
 
 
 ## 
@@ -187,29 +187,29 @@ rule macs2Callpeak_and_BigWig:
 		## Macs2 fragment prediction
 		expand(RESDIR + 'macs/{sample}_predictd.txt',
 				sample=data.Samples[(data.Protein!="input") & 
-				(data.MergeReplicates==False)].unique()),
+									(data.MergeReplicates==False)].unique()),
 		## Macs2 peak files
 		expand(RESDIR + 'macs/{sample}_peaks.narrowPeak',
 				sample=data.Samples[(data.Protein!="input") & 
-				(data.MergeReplicates==False)].unique()),
+									(data.MergeReplicates==False)].unique()),
 		## Macs2 summits files
 		expand(RESDIR + 'macs/{sample}_summits.bed',
 				sample=data.Samples[(data.Protein!="input") & 
-				(data.MergeReplicates==False)].unique()),
+									(data.MergeReplicates==False)].unique()),
 
 	## When merge replicates is needed
 		# Macs2 fragment prediction for merged bam
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_predictd.txt',
 				Prot_Cond=data.Prot_Cond[(data.Protein!="input") & 
-				(data.MergeReplicates==True)].unique()),
+										(data.MergeReplicates==True)].unique()),
 		## Macs2 peak files merged bam
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_peaks.narrowPeak',
 				Prot_Cond=data.Prot_Cond[(data.Protein!="input") & 
-				(data.MergeReplicates==True)].unique()),
+										(data.MergeReplicates==True)].unique()),
 		## Macs2 summits files from merged bams
 		expand(RESDIR + 'macs/{Prot_Cond}_merged_summits.bed',
 				Prot_Cond=data.Prot_Cond[(data.Protein!="input") & 
-				(data.MergeReplicates==True)].unique()),
+										(data.MergeReplicates==True)].unique()),
 
 		# .bw files RPKM normalized or scaled. One per sample. Then merge if heatmap
 		# shows good correlation between samples
@@ -218,7 +218,11 @@ rule macs2Callpeak_and_BigWig:
 		#.bw files scaled (CPM * scaleFactor)
 		expand(RESDIR + "bw/{sample}_RPKM_scaled.bw",
 				sample=data.Samples[(data.PATH_genome_cal!="NoCalibration") & 
-								(data.Protein!="input")].unique())
+								(data.Protein!="input")].unique()),
+		## .bw files merging replicates when there is no calibration
+		expand(RESDIR + "bw/{Prot_Cond}_RPKM_merged.bw",
+				Prot_Cond=data.Prot_Cond[(data.PATH_genome_cal=="NoCalibration") & 
+									(data.MergeReplicates==True)].unique()),
 
 # rule merge_bw_only:
 # 	input:
@@ -283,7 +287,8 @@ rule bowtie2_alignTo_refGenome:
 	threads:
 		get_resource("bowtie2", "threads")
 	resources:
-		mem_mb=get_resource("bowtie2", "mem_mb")	
+		mem_mb=get_resource("bowtie2", "mem_mb"),
+		walltime=get_resource("bowtie2", "walltime")
 	log:
 		LOGDIR + "bowtie2_{sample}.log"
 	run:
@@ -317,9 +322,10 @@ rule bowtie2_alignTo_calGenome:
 		reads =lambda wildcards, input: ' '.join(input.fq),
 		stat_dir=DATADIR + "align/stats"
 	threads:
-		get_resource("bowtie2", "threads")
+		get_resource("bowtie2", "threads") - 3
 	resources:
-		mem_mb=get_resource("bowtie2", "mem_mb")
+		mem_mb=get_resource("bowtie2", "mem_mb"),
+		walltime=get_resource("bowtie2", "walltime")
 	conda:
 		'envs/samtools.yaml'	
 	log:
@@ -442,17 +448,17 @@ rule merge_bam:
 	# 	'''
 	# 	gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
 	# 	--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-	# 	{params.I} --OUTPUT {output} |& tee {log}
+	# 	{params.I} --OUTPUT {output[0]} |& tee {log}
 	#   '''
 	run:
 		if len(input.bam) > 1:
 			shell('gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
 				--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-	 			{params.I} --OUTPUT {output} |& tee {log}')
+	 			{params.I} --OUTPUT {output[0]} |& tee {log}')
 		else:
 			shell("touch {output}_just1replicate.info")
-			shell('echo ">>> RENAMING {input.bam} to {output}" |& tee {log}')
-			shell('mv {input.bam} {output} |& tee -a {log}')
+			shell('echo ">>> RENAMING {input.bam} to {output[0]}" |& tee {log}')
+			shell('mv {input.bam} {output[0]} |& tee -a {log}')
 
 
 rule create_bigWig:
@@ -507,6 +513,32 @@ rule create_bigWig_scaled:
 		--normalizeUsing CPM --scaleFactor $n -p {threads} \
 		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
 		'''	
+
+rule create_bw_mergedReplicates:
+	input:
+		merged_bam = lambda wildcards: expand(
+				DATADIR + "align/{prot_cond}_final_merged.bam",
+					prot_cond=wildcards.Prot_Cond),
+	output:
+		bw = RESDIR + "bw/{Prot_Cond}_RPKM_merged.bw",
+	params:
+		genomeSize= lambda wildcards: expand("{genome_size}", 
+			genome_size=data.Genome_size[(data.Prot_Cond==wildcards.ProtCond)].values[0])
+	threads:
+		get_resource("create_bigWig", "threads")
+	conda:
+		"envs/deeptools.yaml"
+	resources:
+		mem_mb=get_resource("create_bigWig","mem_mb"),
+		walltime=get_resource("create_bigwig","walltime")
+	log:
+		LOGDIR + "deeptols/bamCoverage_{Prot_Cond}_merged.log"
+	shell:
+		'''
+		bamCoverage --effectiveGenomeSize {params.genomeSize} \
+		--normalizeUsing RPKM -p {threads} \
+		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
+		'''
 
 rule create_bigWig_InputNorm:
 	input:

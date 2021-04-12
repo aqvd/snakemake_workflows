@@ -212,20 +212,20 @@ rule merge_bam:
 	# 	'''
 	# 	gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
 	# 	--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-	# 	{params.I} --OUTPUT {output} |& tee {log}
+	# 	{params.I} --OUTPUT {output[0]} |& tee {log}
 	#   '''
 	run:
 		if len(input.bam) > 1: # more than 1 replicate
 			shell('gatk MergeSamFiles --java-options "-Xmx{resources.mem_mb}M" \
 				--SORT_ORDER coordinate --USE_THREADING true --CREATE_INDEX true \
-	 			{params.I} --OUTPUT {output} |& tee {log}')
+	 			{params.I} --OUTPUT {output[0]} |& tee {log}')
 		else: # mjust 1 replicate
 			shell("touch {output}_just1replicate.info")
 			shell('echo ">> Creating BAM index for {input}"')
 			shell('gatk BuildBamIndex --java-options "-Xmx{resources.mem_mb}M" \
 		-I {input} |& tee {log}')
-			shell('echo ">>> RENAMING {input.bam} to {output}" |& tee {log}')
-			shell('mv {input.bam} {output} |& tee -a {log}')
+			shell('echo ">>> RENAMING {input.bam} to {output[0]}" |& tee {log}')
+			shell('mv {input.bam} {output[0]} |& tee -a {log}')
 
 rule create_bigWig:
 	input:
