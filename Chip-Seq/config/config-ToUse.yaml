@@ -1,9 +1,10 @@
-fastqdir: "/storage/scratch01/users/aquevedo/fastq/"
-datadir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/data/"
-resdir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/res/"
-logdir: "/storage/scratch01/users/aquevedo/MCF7/Cohesin/log/"
+# Directories must end with "/" !!!!
+fastqdir: "/storage/scratch01/users/aquevedo/fastq/A673_chip_reanalysis/"
+datadir: "/storage/scratch01/users/aquevedo/A673chip_reanalysis/data/"
+resdir: "/storage/scratch01/users/aquevedo/A673chip_reanalysis/res/"
+logdir: "/storage/scratch01/users/aquevedo/A673chip_reanalysis/log/"
 
-tableName: "config/table-cohesin-MCF7_GSE137216.tsv"
+tableName: "config/table-A673chip_reanalysis.txt"
 regions: "summits" # possible values: <summits | genes>
 mergedRegions: "no" # possible values: <yes | no>
 

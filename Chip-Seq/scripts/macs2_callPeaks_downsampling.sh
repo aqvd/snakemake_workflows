@@ -105,7 +105,7 @@ else
 		echo "=== DownsampleSam ==="
 		gatk DownsampleSam --java-options "-Xmx4096M" \
 		-I "${TREAT}" \
-		-O "${TREAT/%.bam/_downsampled.bam}" \
+		-O "${TREAT/%.bam/_${SAMPLE}_downsampled.bam}" \
 		-P "${FRACTION}" \
 		--METRICS_FILE "${DATADIR}align/stats/DownsampleSamPicard_${SAMPLE}.txt" \
 		--CREATE_INDEX true &&
@@ -113,14 +113,16 @@ else
 		echo "Downsampling finished"
 		
 		echo "===== Calling Peaks ====="
-		macs2 callpeak -t "${TREAT/%.bam/_downsampled.bam}" \
+		macs2 callpeak -t "${TREAT/%.bam/_${SAMPLE}_downsampled.bam}" \
 		-c "${INPUT}" --gsize "${ORG}" \
 		--extsize "${FragLen}" --nomodel --name "${SAMPLE}" \
 		--outdir "${OUTDIR}" &&
-	
-		echo "Peak calling succeded, Exiting"
+		
+		echo "Removing temporary downsampled treatment .bam:
+		${TREAT/%.bam/_${SAMPLE}_downsampled.bam} "
+		rm "${TREAT/%.bam/_${SAMPLE}_downsampled.bam}" "${TREAT/%.bam/_${SAMPLE}_downsampled.bai}"
 
-		exit 00
+		echo "Peak calling succeded, Exiting"
 
 	else
 		echo ">> Downsample input ${INPUT_SAMPLE}"
@@ -131,24 +133,28 @@ else
 		echo "=== DownsampleSam ==="
 		gatk DownsampleSam --java-options "-Xmx4096M" \
 		-I "${INPUT}" \
-		-O "${INPUT/%.bam/_downsampled.bam}" \
+		-O "${INPUT/%.bam/_${SAMPLE}_downsampled.bam}" \
 		-P "${FRACTION}" \
-		--METRICS_FILE "${DATADIR}align/stats/DownsampleSamPicard_${INPUT_SAMPLE}.txt" \
+		--METRICS_FILE "${DATADIR}align/stats/DownsampleSamPicard_${INPUT_SAMPLE}_accordingTo_${SAMPLE}.txt" \
 		--CREATE_INDEX true &&
 
 		echo "Downsampling finished"
 		
 		echo "===== Calling Peaks ====="
 		macs2 callpeak -t "${TREAT}" \
-		-c "${INPUT/%.bam/_downsampled.bam}" \
+		-c "${INPUT/%.bam/_${SAMPLE}_downsampled.bam}" \
 		--gsize "${ORG}" \
 		--extsize "${FragLen}" --nomodel --name "${SAMPLE}" \
 		--outdir "${OUTDIR}" &&
+
+		echo "Removing temporary downsampled input .bam:
+		${INPUT/%.bam/_${SAMPLE}_downsampled.bam} "
+		rm "${INPUT/%.bam/_${SAMPLE}_downsampled.bam}" "${INPUT/%.bam/_${SAMPLE}_downsampled.bai}"
 	
 		echo "Peak calling succeded, Exiting"
 
-		exit 00
 	fi
+
 fi
 exit 00
 

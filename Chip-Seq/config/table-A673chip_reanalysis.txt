@@ -1,0 +1,12 @@
+Cell_Line	Protein	Condition	Rep	Ext	File	Genome	Norm	Comments
+A673	EWSR1	cont-EWRinp	R1	.fastq.gz	EWSR1_cont-EWRinp_R1_SRR12017943.fastq.gz	hg19	-	
+A673	input	cont-EWRinp	R1	.fastq.gz	input_cont-EWRinp_R1_SRR12017944.fastq.gz	hg19	-	
+Ewing sarcoma cell line	input	cont-R1Binp	R1	.fastq.gz	input_cont-R1Binp_R1_SRR9062607.fastq.gz	hg19	-	
+Ewing sarcoma cell line	input	cont-R1Binp	R2	.fastq.gz	input_cont-R1Binp_R2_SRR9062608.fastq.gz	hg19	-	
+Ewing sarcoma cell line	RING1B	cont-R1Binp	R2	.fastq.gz	RING1B_cont-R1Binp_R2_SRR9062606.fastq.gz	hg19	-	
+Ewing sarcoma cell line	RING1B	cont-R1Binp	R1	.fastq.gz	RING1B_cont-R1Binp_R1_SRR9062605.fastq.gz	hg19	-	
+Ewing sarcoma cell line A673	FLI	cont-Riggi-inp	R1	.fastq.gz	FLI_cont-Riggi-inp_R1_SRR1593985.fastq.gz	hg19	-	
+Ewing sarcoma cell line A673	H3K27ac	cont-Riggi-inp	R1	.fastq.gz	H3K27ac_cont-Riggi-inp_R1_SRR1593986.fastq.gz	hg19	-	
+Ewing sarcoma cell line A673	H3K27me3	cont-Riggi-inp	R1	.fastq.gz	H3K27me3_cont-Riggi-inp_R1_SRR1593988.fastq.gz	hg19	-	
+Ewing sarcoma cell line A673	H3K4me3	cont-Riggi-inp	R1	.fastq.gz	H3K4me3_cont-Riggi-inp_R1_SRR1593989.fastq.gz	hg19	-	
+Ewing sarcoma cell line A673	input	cont-Riggi-inp	R1	.fastq.gz	input_cont-Riggi-inp_R1_SRR1593991.fastq.gz	hg19	-	

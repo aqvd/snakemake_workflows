@@ -1,5 +1,0 @@
-Cell_Line	Protein	Condition	Rep	File	Genome	Norm	Comments
-MCF7	RNAp2	control	R1	.fastq.gz	RNAp2_control_R1_SRR357488.fastq.gz	hg19	-
-MCF7	RNAp2	control	R2	.fastq.gz	RNAp2_control_R2_SRR357489.fastq.gz	hg19	-
-MCF7	input	control	R1	.fastq.gz	input_control_R1_SRR357466.fastq.gz	hg19	-
-MCF7	input	control	R2	.fastq.gz	input_control_R2_SRR357466.fastq.gz	hg19	-

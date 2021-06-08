@@ -1,0 +1,12 @@
+Run,Protein,Condition,Rep,Ext,File,Genome,Norm,Assay Type,AvgSpotLen,Bases,BioProject,BioSample,Cell_Line,chip_antibody,GEO_Accession (exp),SRA Study
+SRR1593985,FLI,cont-Riggi-inp,R1,.fastq.gz,FLI_cont-Riggi-inp_R1_SRR1593985.fastq.gz,hg19,-,ChIP-Seq,36,697800960,PRJNA262730,SAMN03085545,Ewing sarcoma cell line A673,"FLI1 (Santa Cruz, sc-356)",GSM1517562,SRP048560
+SRR1593991,input,cont-Riggi-inp,R1,.fastq.gz,input_cont-Riggi-inp_R1_SRR1593991.fastq.gz,hg19,-,ChIP-Seq,36,2913844320,PRJNA262730,SAMN03085557,Ewing sarcoma cell line A673,WCE,GSM1517568,SRP048560
+SRR1593986,H3K27ac,cont-Riggi-inp,R1,.fastq.gz,H3K27ac_cont-Riggi-inp_R1_SRR1593986.fastq.gz,hg19,-,ChIP-Seq,36,737692848,PRJNA262730,SAMN03085552,Ewing sarcoma cell line A673,"H3K27ac (Abcam\, ab4729)",GSM1517563,SRP048560
+SRR1593988,H3K27me3,cont-Riggi-inp,R1,.fastq.gz,H3K27me3_cont-Riggi-inp_R1_SRR1593988.fastq.gz,hg19,-,ChIP-Seq,36,435354948,PRJNA262730,SAMN03085554,Ewing sarcoma cell line A673,"H3K27me3 (Millipore\, 07-449)",GSM1517565,SRP048560
+SRR1593989,H3K4me3,cont-Riggi-inp,R1,.fastq.gz,H3K4me3_cont-Riggi-inp_R1_SRR1593989.fastq.gz,hg19,-,ChIP-Seq,36,631696500,PRJNA262730,SAMN03085555,Ewing sarcoma cell line A673,"H3K4me3 (Millipore\, 07-473)",GSM1517566,SRP048560
+SRR9062606,RING1B,cont-R1Binp,R1,.fastq.gz,RING1B_cont-R1Binp_R1_SRR9062606.fastq.gz,hg19,-,ChIP-Seq,50,1728066250,PRJNA543121,SAMN11654940,Ewing sarcoma cell line,"RING1B (MBL\, D139-3\, lot 017)",GSM3768755,SRP198531
+SRR9062607,input,cont-R1Binp,R1,.fastq.gz,input_cont-R1Binp_R1_SRR9062607.fastq.gz,hg19,-,ChIP-Seq,50,1673328100,PRJNA543121,SAMN11654939,Ewing sarcoma cell line,NONE,GSM3768756,SRP198531
+SRR9062608,input,cont-R1Binp,R2,.fastq.gz,input_cont-R1Binp_R2_SRR9062608.fastq.gz,hg19,-,ChIP-Seq,50,1915926950,PRJNA543121,SAMN11654938,Ewing sarcoma cell line,NONE,GSM3768757,SRP198531
+SRR9062605,RING1B,cont-R1Binp,R1,.fastq.gz,RING1B_cont-R1Binp_R1_SRR9062605.fastq.gz,hg19,-,ChIP-Seq,50,1692912200,PRJNA543121,SAMN11654941,Ewing sarcoma cell line,"RING1B (MBL\, D139-3\, lot 017)",GSM3768754,SRP198531
+SRR12017944,input,cont-EWRinp,R1,.fastq.gz,input_cont-EWRinp_R1_SRR12017944.fastq.gz,hg19,-,ChIP-Seq,50,2232780550,PRJNA543121,SAMN15239173,A673,NONE,GSM4616797,SRP198531
+SRR12017943,EWSR1,cont-EWRinp,R1,.fastq.gz,EWSR1_cont-EWRinp_R1_SRR12017943.fastq.gz,hg19,-,ChIP-Seq,50,2588989550,PRJNA543121,SAMN15239174,A673,Abcam ab15289,GSM4616796,SRP198531

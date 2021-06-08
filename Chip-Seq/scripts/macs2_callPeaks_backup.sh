@@ -24,7 +24,7 @@ fi
 ## Check correct organism 
 if [[ "$ORG" != "hs" || "$ORG" != "mm" ]]
 then
-	echo 'Second argument must be either:
+	echo 'Third argument must be either:
 	1) hs for "Homo sapiens" samples
 	2) mm for "Mus musculus" samples
 Using hs  as default'

@@ -8,7 +8,7 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "config/delete-config-ToUse.yaml"
+configfile: "config/config-ToUse.yaml"
 
 
 ## 
@@ -523,7 +523,7 @@ rule create_bw_mergedReplicates:
 		bw = RESDIR + "bw/{Prot_Cond}_RPKM_merged.bw",
 	params:
 		genomeSize= lambda wildcards: expand("{genome_size}", 
-			genome_size=data.Genome_size[(data.Prot_Cond==wildcards.ProtCond)].values[0])
+			genome_size=data.Genome_size[(data.Prot_Cond==wildcards.Prot_Cond)].values[0])
 	threads:
 		get_resource("create_bigWig", "threads")
 	conda:
@@ -537,7 +537,7 @@ rule create_bw_mergedReplicates:
 		'''
 		bamCoverage --effectiveGenomeSize {params.genomeSize} \
 		--normalizeUsing RPKM -p {threads} \
-		-b {input.nodup_bam} -o {output.bw} |& tee -a {log} 
+		-b {input.merged_bam} -o {output.bw} |& tee -a {log} 
 		'''
 
 rule create_bigWig_InputNorm:
@@ -678,38 +678,3 @@ rule unique_summits_merged:
 	shell:
 		'scripts/all_unique_summits.sh {params.outFilename} \
 		{params.summitsBed} |& tee {log}'
-
-
-## For rule compute matrix we need to generate lists with filenames and labels
-matrixFiles = data.Samples[data.Protein != 'input'].unique()
-matrixLabels = " ".join(matrixFiles)
-
-rule compute_matrix:
-	input:
-		bw = expand(RESDIR + "bw/{MatFile}_RPKM_scaled.bw",
-				  MatFile=matrixFiles),
-		regions = regionsFile ## View right before rule all
-	output:
-		matrix = RESDIR + "deeptools/matrix_all_samples_"+regionsType+".gz",
-		#sortRegions = RESDIR + "deeptools/regions_all_samples_TSS_sorted.bed"
-	threads:
-		get_resource("compute_matrix", "threads")
-	params:
-		labels = matrixLabels
-	conda:
-		"envs/deeptools.yaml"
-	resources:
-		mem_mb=get_resource("compute_matrix", "mem_mb"),
-		walltime=get_resource("compute_matrix", "walltime")
-	shell:
-		'computeMatrix reference-point --referencePoint center \
-			--scoreFileName {input.bw} \
-			--regionsFileName {input.regions} \
-			--upstream 2500 --downstream 2500 \
-			--binSize 50 \
-			--missingDataAsZero \
-			--samplesLabel {params.labels} \
-			--numberOfProcessors {threads} \
-			--outFileName {output.matrix} '
-
-
