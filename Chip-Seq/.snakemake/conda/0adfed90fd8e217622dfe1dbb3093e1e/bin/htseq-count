@@ -1,0 +1,5 @@
+#!/home/aquevedo/snakemake_workflows/Chip-Seq/.snakemake/conda/0adfed90fd8e217622dfe1dbb3093e1e/bin/python
+
+import HTSeq.scripts.count
+
+HTSeq.scripts.count.main()

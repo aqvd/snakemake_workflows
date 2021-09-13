@@ -7,20 +7,20 @@ import re
 ##################################################
 ##				Configutation					##
 ##################################################
-configfile: "config/config-ToUse-RNAseq.yaml"
+configfile: "/home/aquevedo/projects/SUIT2control_rna_exome/config.yaml"
 
 FASTQDIR = config["fastqdir"]
 DATADIR = config["datadir"]
 RESDIR = config["resdir"]
 LOGDIR = config["logdir"]
 TABLE_NAME = config["tableName"]
+
 ## add this to configToUse
-GTF = config["gtf"]
 FEATURE = config ["feature"]
 ID_COUNTS = config ["id_counts"]
 STRANDNESS = config ["strandness"]
 
-## Function to create directories unless they already exist
+##Function to create directories unless they already exist
 def tryMkdir(path):
 	try:
 		os.makedirs(path,exist_ok=False) # raise error if exists
@@ -29,39 +29,47 @@ def tryMkdir(path):
 
 [tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, RESDIR + "fastQC")]
 
-## Genome bowtie2 index prefixes paths
+## Genome hisat2 index prefixes paths
 genome_path = {
 	"mm9":"",
-    "mm10":"/storage/scratch01/users/aquevedo/genomes/mouse/mm10/hisat/genome" ,
-    "hg19":"/storage/scratch01/users/aquevedo/genomes/human/hg19/hisat/hg19/genome",
-    "hg38":"",
+    "mm10":"/home/aquevedo/genomes/mouse/mm38/GRCm38.p6_standardAndMito" ,
+    "mm38":"/home/aquevedo/genomes/mouse/mm38/GRCm38.p6_standardAndMito" ,
+    "hg19":"",
+    "hg38":"/home/aquevedo/genomes/human/GRCh38/GRCh38.p12_standardAndMito",
     "-":""}
 
-refSeq_genes_path = {
+gtf_path = {
 	"mm9" : "",
-	"mm10" : "",
-	"hg19" : "/storage/scratch01/users/aquevedo/genomes/human/hg19/hg19_RefSeqCuratedGenes.bed",
-	"hg38" : ""
+	"mm10" : "/home/aquevedo/genomes/mouse/mm38/Mus_musculus.GRCm38.102_chrUCSC.gtf",
+	"mm38" : "/home/aquevedo/genomes/mouse/mm38/Mus_musculus.GRCm38.102_chrUCSC.gtf",
+	"hg19" : "",
+	"hg38" : "/home/aquevedo/genomes/human/GRCh38/Homo_sapiens.GRCh38.97.gtf_chrUCSC.gtf"
 }
 ## Genome sizes for big wig computation
-genome_size={"mm9":2620345972,
+genome_size={
+	"mm9":2620345972,
     "mm10":2652783500,
+    "mm38":2652783500,
     "hg19":2864785220,
     "hg38":2913022398}
 
 ##################################################
 ## 				READ METADATA					##
 ##################################################
-data = pd.read_csv(TABLE_NAME,sep="\t")
+data = pd.read_csv(TABLE_NAME,sep=",")
 data[["Protein","Condition","Rep"]] = data[["Protein","Condition","Rep"]].astype(str)
-## Add extra cols for salecting the appropriate wildcards path to files
 
+## Add extra cols for salecting the appropriate wildcards path to files
 data["Samples"] = data.Protein +"_"+ data.Condition +"_"+ data.Rep
 
+# raw reads filenames and R1/R2 if paired
 data["fqBasename"] = [f.replace(".fastq.gz","") for f in data["File"]]
+data["R1"] = [FASTQDIR + fq.replace(".fastq.gz","_R1.fastq.gz") for fq in data.File]
+data["R2"] = [FASTQDIR + fq.replace(".fastq.gz","_R2.fastq.gz") for fq in data.File]
 
 data["HisatIx_path"] = [genome_path[i] for i in data.Genome]
 data["Genome_size"] = [genome_size[i] for i in data.Genome] 
+data["GTF_path"] = [gtf_path[i] for i in data.Genome] 
 
 # All different Prot_Cond prosibilities to merge replicates
 data["Prot_Cond"] = ["_".join((Prot,Cond)) for Prot,Cond in zip(data.Protein,data.Condition)]
@@ -88,6 +96,7 @@ else:
 	regionsFile = refSeq_genes_path["hg19"]
 
 print(data.Samples.unique())
+print(data.R1.values)
 
 
 def get_resource(rule,resource):
@@ -107,19 +116,59 @@ rule all:
 			sample=data.Samples[data.MergeReplicates == False].unique()),
 		RESDIR + 'count_matrix.tsv'
 
-rule hisat2_align_and_sortBam:
+def is_paired(sample, data):
+	is_paired = data.LibraryLayout[data.Samples == sample].values[0] == "PAIRED"
+	if is_paired:
+		return "PAIRED"
+	else:
+		return "UNPAIRED"
+
+def get_mate(fq_list, mate_id):
+	for fq in fq_list:
+		if fq.endswith(str(mate_id) + ".fastq.gz"):
+			return fq
+		else:
+			return 0
+
+def get_hisat_reads(wildcards):
+	ix = data.Samples == wildcards.sample
+	is_paired = data.LibraryLayout[ix].values[0] == "PAIRED"
+	if is_paired:
+		R1 = data.R1[ix].values[0]
+		R2 = data.R2[ix].values[0]
+		return [R1, R2]
+
+	else:
+		return data.File[ix]
+
+def get_hisat_reads_DELETE(wildcards):
+	ix = data.Samples == wildcards
+	is_paired = data.LibraryLayout[ix].values[0] == "PAIRED"
+	if is_paired:
+		R1 = data.R1[ix].values[0]
+		R2 = data.R2[ix].values[0]
+		return [R1, R2]
+
+	else:
+		return data.File[ix]
+print(get_hisat_reads_DELETE("SUIT2_cont_R1"))
+
+rule hisat2_align:
 	input:
-		fq = lambda wildcards: expand(FASTQDIR + '{fq_file}', 
-			fq_file=data.File[data.Samples==wildcards.sample].values)
+		# fq = lambda wildcards: expand(FASTQDIR + '{fq_file}', 
+		# 	fq_file=data.File[data.Samples==wildcards.sample].values)
+		get_hisat_reads
 	output:
-		bam = DATADIR + "align/{sample}_sorted.bam",
+		bam = DATADIR + "align/{sample}_all.bam",
 		stats = DATADIR + "align/stats/{sample}_hisat2stats.txt"
 	params:
 		genomeIx = lambda wildcards: expand("{genome}",
 			genome=data.HisatIx_path[data.Samples==wildcards.sample].values[0]),
-		reads =lambda wildcards, input: ','.join(input.fq)
+		is_paired = lambda wildcards: is_paired(wildcards.sample, data)#,
+		# m1 = lambda wildcards, input: get_mate(input.fq, "1"),
+		# m2 = lambda wildcards, input: get_mate(input.fq, "2")
 	threads: 
-		get_resource("hisat2", "threads") - 3
+		get_resource("hisat2", "threads")
 	resources:
 		mem_mb = get_resource("hisat2", "mem_mb"),
 		time = get_resource("hisat2", "walltime")
@@ -129,12 +178,41 @@ rule hisat2_align_and_sortBam:
 		LOGDIR + "hisat2_{sample}.log"
 	shell:
 		'''
-		( hisat2 --time --summary-file {output.stats} \
-			--threads {threads} \
-			-x {params.genomeIx} \
-			-U {params.reads} | \
-		samtools view -h -@ 3 -F 4 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
-		tee {log}
+		if [ "{params.is_paired}" == "UNPAIRED" ]; then
+		    ( hisat2 --time --summary-file {output.stats} \
+		    	--threads {threads} \
+		    	-x {params.genomeIx} \
+		    	-U {input} | \
+		    samtools view -h -@ 3 -F 4 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+		    tee {log}
+		elif [ "{params.is_paired}" == "PAIRED" ]; then
+		   ( hisat2 --time --summary-file {output.stats} \
+			        --threads {threads} \
+			        -x {params.genomeIx} \
+			        -1 {input[0]} -2 {input[1]} | \
+		    samtools view -h -@ 3 -F 4 -O bam - > {output.bam} ) 3>&2 2>&1 1>&3 | \
+		    tee {log}
+		fi
+		'''
+
+rule sort_sam:
+	input:
+		bam=DATADIR + "align/{sample}_all.bam"
+	output:
+		sorted_bam=DATADIR + "align/{sample}_sorted.bam"
+	log:
+		LOGDIR + "gatk/sortSam_{sample}.log"
+	threads: 
+		1
+	resources:
+		mem_mb=get_resource("gatk","mem_mb"),
+		walltime=get_resource("gatk","walltime")
+	shell:
+		'''
+		gatk SortSam --java-options "-Xmx{resources.mem_mb}M" \
+		-I {input.bam} \
+		-O {output.sorted_bam} \
+		--SORT_ORDER coordinate |& tee {log}
 		'''
 
 rule index_bam:
@@ -157,14 +235,18 @@ rule index_bam:
 rule htseq_count:
 	input:
 		bams = expand(DATADIR + 'align/{sample}_sorted.bam', 
+			sample = data.Samples.unique()),
+		baix = expand(DATADIR + 'align/{sample}_sorted.bai', 
 			sample = data.Samples.unique())
 	output:
 		RESDIR + 'count_matrix.tsv'
 	params:
-		gtf = GTF ,
+		gtf = lambda wildcards: expand("{gtf}",
+			gtf=gtf_path[data.Genome.values[0]]),
 		type_feature = FEATURE,
 		ID_in_countMatrix = ID_COUNTS,
-		is_stranded = STRANDNESS
+		is_stranded = STRANDNESS,
+		tmp_counts = RESDIR + 'count_matrix.tmp'
 	threads: 1
 	resources:
 		mem_mb = 2000,
@@ -178,7 +260,9 @@ rule htseq_count:
 		htseq-count --format=bam --order=pos --stranded={params.is_stranded} \
 		--type={params.type_feature} --idattr={params.ID_in_countMatrix} \
 		--mode=union --secondary-alignments=ignore \
-		{input.bams} {params.gtf} > {output} 3>&2 2>&1 1>&3 | tee {log}
+		{input.bams} {params.gtf} 2> {params.tmp_counts} 3>&2 2>&1 1>&3 | tee {log} && \
+        files="{input.bams}" && cat <(echo $files | sed -E -e's/^/gene\t/') {params.tmp_counts} > {output} && \
+        rm {params.tmp_counts}
  		'''
 
 def Input_merge_bam(bams):

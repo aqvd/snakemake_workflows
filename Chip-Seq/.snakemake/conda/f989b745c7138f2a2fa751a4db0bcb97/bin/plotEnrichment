@@ -1,0 +1,12 @@
+#!/home/aquevedo/snakemake_workflows/Chip-Seq/.snakemake/conda/f989b745c7138f2a2fa751a4db0bcb97/bin/python
+# -*- coding: utf-8 -*-
+
+import deeptools.misc
+from deeptools.plotEnrichment import main
+import sys
+
+if __name__ == "__main__":
+    args = None
+    if len(sys.argv) == 1:
+        args = ["--help"]
+    main(args)

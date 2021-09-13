@@ -3,10 +3,10 @@ import pandas as pd
 import glob
 
 ## Directories must end with "/" !!!!!
-FASTQDIR="/storage/scratch01/users/aquevedo/fastq/A673_chip_reanalysis/"
-ACC_TABLE="/home/aquevedo/SRA_RunTables/SraRunTable_A673Chip_reanalysis.csv"
+FASTQDIR="/home/aquevedo/fastq/SraRunTable-GSE144833_SUIT2control_rna_exome/"
+ACC_TABLE="/home/aquevedo/projects/SUIT2control_rna_exome/SraRunTable_SUIT2cont_GSE144833.csv"
 
-## Function to create directories unless they already exist
+##Function to create directories unless they already exist
 def tryMkdir(path):
 	try:
 		os.makedirs(path,exist_ok=False) # raise error if exists
@@ -38,10 +38,9 @@ rule fastERq_dump:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
 	threads: 5
 	shell:
-		'fasterq-dump --log-level 5 --threads {threads} --temp {params.Dir} \
-		--outfile {params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq \
+		'fasterq-dump --threads {threads} --temp {params.Dir} --split-3 --skip-technical \
 		--outdir {params.Dir} {params.srr} |& tee {log} && \
-		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
+		scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} {params.cond} {params.rep} |& tee -a {log} && \
 		touch {output} |& tee -a {log}'
 
 rule prefetch_fastq_dump:
@@ -55,13 +54,12 @@ rule prefetch_fastq_dump:
 		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0]
 	log:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
-	threads: 5
+	threads: 1
 	shell:
 		'prefetch {params.srr} |& tee {log} && \
-		fastq-dump --log-level 6 --outdir {params.Dir} {params.srr} |& tee -a {log} && \
-		mv {params.Dir}{params.srr}.fastq \
-		{params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
-		gzip {params.Dir}{params.prot}_{params.cond}_{params.rep}_{params.srr}.fastq |& tee -a {log} && \
+		fastq-dump --log-level 6 --split-3 --skip-technical --dumpbase --clip \
+		--outdir {params.Dir} {params.srr} |& tee -a {log} && \
+		scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} {params.cond} {params.rep} |& tee -a {log} && \
 		touch {output} |& tee -a {log}'
 
 	

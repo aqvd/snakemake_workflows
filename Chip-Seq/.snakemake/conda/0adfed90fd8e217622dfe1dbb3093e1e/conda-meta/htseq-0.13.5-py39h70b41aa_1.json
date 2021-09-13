@@ -1,0 +1,303 @@
+{
+  "build": "py39h70b41aa_1",
+  "build_number": 1,
+  "channel": "https://conda.anaconda.org/bioconda/linux-64",
+  "constrains": [],
+  "depends": [
+    "libgcc-ng >=9.3.0",
+    "libstdcxx-ng >=9.3.0",
+    "python_abi 3.9.* *_cp39",
+    "python >=3.9,<3.10.0a0",
+    "numpy >=1.19.5,<2.0a0",
+    "matplotlib-base >=1.4",
+    "pysam >=0.15.1"
+  ],
+  "extracted_package_dir": "/home/aquevedo/mambaforge/pkgs/htseq-0.13.5-py39h70b41aa_1",
+  "features": "",
+  "files": [
+    "bin/htseq-count",
+    "bin/htseq-count-barcodes",
+    "bin/htseq-qa",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/INSTALLER",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/METADATA",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/RECORD",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/REQUESTED",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/WHEEL",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/direct_url.json",
+    "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/top_level.txt",
+    "lib/python3.9/site-packages/HTSeq/StepVector.py",
+    "lib/python3.9/site-packages/HTSeq/_HTSeq.cpython-39-x86_64-linux-gnu.so",
+    "lib/python3.9/site-packages/HTSeq/_HTSeq_internal.py",
+    "lib/python3.9/site-packages/HTSeq/_StepVector.cpython-39-x86_64-linux-gnu.so",
+    "lib/python3.9/site-packages/HTSeq/__init__.py",
+    "lib/python3.9/site-packages/HTSeq/__pycache__/StepVector.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/__pycache__/_HTSeq_internal.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/__pycache__/__init__.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/__pycache__/_version.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/__pycache__/features.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/__pycache__/utils.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/_version.py",
+    "lib/python3.9/site-packages/HTSeq/features.py",
+    "lib/python3.9/site-packages/HTSeq/scripts/__init__.py",
+    "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/__init__.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/count.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/count_with_barcodes.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/qa.cpython-39.pyc",
+    "lib/python3.9/site-packages/HTSeq/scripts/count.py",
+    "lib/python3.9/site-packages/HTSeq/scripts/count_with_barcodes.py",
+    "lib/python3.9/site-packages/HTSeq/scripts/qa.py",
+    "lib/python3.9/site-packages/HTSeq/utils.py"
+  ],
+  "fn": "htseq-0.13.5-py39h70b41aa_1.tar.bz2",
+  "license": "GPL-3.0",
+  "link": {
+    "source": "/home/aquevedo/mambaforge/pkgs/htseq-0.13.5-py39h70b41aa_1",
+    "type": 1
+  },
+  "md5": "a5e8800d104ba4da3ba10b5e95976190",
+  "name": "htseq",
+  "package_tarball_full_path": "/home/aquevedo/mambaforge/pkgs/htseq-0.13.5-py39h70b41aa_1.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "bin/htseq-count",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/conda/conda-bld/htseq_1617207357043/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placeho",
+        "sha256": "573ef1e242d36997b8529a611427f8185a164cbba0ed1d1cb473740e7c05341e",
+        "sha256_in_prefix": "10ccc896cca8360153a05c7da4f9eb4af05340145e6c8f4e4bef34617276e10e",
+        "size_in_bytes": 325
+      },
+      {
+        "_path": "bin/htseq-count-barcodes",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/conda/conda-bld/htseq_1617207357043/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placeho",
+        "sha256": "d015f6a2b02c05bf2665b9c3631116b93a32ac156819e7c5cfd8a5be1df561b0",
+        "sha256_in_prefix": "00153902a514ec992db2da04a4a1eea3271f1fbe077bd1c0de263fee3d3de243",
+        "size_in_bytes": 353
+      },
+      {
+        "_path": "bin/htseq-qa",
+        "file_mode": "text",
+        "path_type": "hardlink",
+        "prefix_placeholder": "/opt/conda/conda-bld/htseq_1617207357043/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placeho",
+        "sha256": "3c5cb70c22d7432e3f9d1e02c51d40c973f89b61738b4939dca7275956d6d1e1",
+        "sha256_in_prefix": "3bc559433a549539cc13dbd18eeda2513a937e9cce0601d69250e3931b4456ec",
+        "size_in_bytes": 319
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/INSTALLER",
+        "path_type": "hardlink",
+        "sha256": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "sha256_in_prefix": "d0edee15f91b406f3f99726e44eb990be6e34fd0345b52b910c568e0eef6a2a8",
+        "size_in_bytes": 5
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/METADATA",
+        "path_type": "hardlink",
+        "sha256": "fd2827a406bb064dd7d8394b45d3301afeb9684db1a4eae509e85f462a608c33",
+        "sha256_in_prefix": "fd2827a406bb064dd7d8394b45d3301afeb9684db1a4eae509e85f462a608c33",
+        "size_in_bytes": 2667
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/RECORD",
+        "path_type": "hardlink",
+        "sha256": "6e3fd7abd8d1d66b175851e2a1ace0b1999c03f566b4842a393bf2a26a5a64c0",
+        "sha256_in_prefix": "6e3fd7abd8d1d66b175851e2a1ace0b1999c03f566b4842a393bf2a26a5a64c0",
+        "size_in_bytes": 2304
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/REQUESTED",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/WHEEL",
+        "path_type": "hardlink",
+        "sha256": "8d1fc321f87460fad37b3ee2dd8a81cc662e29d56cef916364c74cb6f2308a83",
+        "sha256_in_prefix": "8d1fc321f87460fad37b3ee2dd8a81cc662e29d56cef916364c74cb6f2308a83",
+        "size_in_bytes": 103
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/direct_url.json",
+        "path_type": "hardlink",
+        "sha256": "eceb21db693ef76407ccb8227d4382338737f96bfaa8ece1cf63b287cd09424c",
+        "sha256_in_prefix": "eceb21db693ef76407ccb8227d4382338737f96bfaa8ece1cf63b287cd09424c",
+        "size_in_bytes": 79
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq-0.13.5.dist-info/top_level.txt",
+        "path_type": "hardlink",
+        "sha256": "5b7638c374b16ca37a61ff13175257bd5b598a7ec5e9f2d0a7e98c0bdea6fa60",
+        "sha256_in_prefix": "5b7638c374b16ca37a61ff13175257bd5b598a7ec5e9f2d0a7e98c0bdea6fa60",
+        "size_in_bytes": 6
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/StepVector.py",
+        "path_type": "hardlink",
+        "sha256": "9224cf6697fd1b2bc22e9f1563274654d0c5279d5ed7b5e9d9231288ec2ee294",
+        "sha256_in_prefix": "9224cf6697fd1b2bc22e9f1563274654d0c5279d5ed7b5e9d9231288ec2ee294",
+        "size_in_bytes": 21410
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/_HTSeq.cpython-39-x86_64-linux-gnu.so",
+        "path_type": "hardlink",
+        "sha256": "c7b52cf33d805e04737b7005252eac918d41f8b188f2c84dcca23152beb33b91",
+        "sha256_in_prefix": "c7b52cf33d805e04737b7005252eac918d41f8b188f2c84dcca23152beb33b91",
+        "size_in_bytes": 674928
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/_HTSeq_internal.py",
+        "path_type": "hardlink",
+        "sha256": "55809a87c7dd9e0fd668b224ab0995e057004e1cb5e585ef8b0c655ebe89c2f3",
+        "sha256_in_prefix": "55809a87c7dd9e0fd668b224ab0995e057004e1cb5e585ef8b0c655ebe89c2f3",
+        "size_in_bytes": 1504
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/_StepVector.cpython-39-x86_64-linux-gnu.so",
+        "path_type": "hardlink",
+        "sha256": "80992f004db55d418fdc0e8c1342541ae6cd271fd0ceb63b48bc76fac0afb40a",
+        "sha256_in_prefix": "80992f004db55d418fdc0e8c1342541ae6cd271fd0ceb63b48bc76fac0afb40a",
+        "size_in_bytes": 141664
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "3a3f67887d5f57cf7b7493a70de2024c69e02cdca8eb64383455afd2d831b4ea",
+        "sha256_in_prefix": "3a3f67887d5f57cf7b7493a70de2024c69e02cdca8eb64383455afd2d831b4ea",
+        "size_in_bytes": 38973
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__pycache__/StepVector.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "7a5431adafad16f5e023773f1d45ff78a3ba8b5c541bdeeff1228647a2cc1ed4",
+        "sha256_in_prefix": "7a5431adafad16f5e023773f1d45ff78a3ba8b5c541bdeeff1228647a2cc1ed4",
+        "size_in_bytes": 24582
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__pycache__/_HTSeq_internal.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "52254cb34ef9bf564c5dd622f10a59179f701f12f0a17042dfb3273b9f0ec8dc",
+        "sha256_in_prefix": "52254cb34ef9bf564c5dd622f10a59179f701f12f0a17042dfb3273b9f0ec8dc",
+        "size_in_bytes": 1468
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__pycache__/__init__.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "7a7cc9332df8bef11b1f72319ea2135b2a3d7441c574aa4f52735d62e63163ff",
+        "sha256_in_prefix": "7a7cc9332df8bef11b1f72319ea2135b2a3d7441c574aa4f52735d62e63163ff",
+        "size_in_bytes": 32684
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__pycache__/_version.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "d4abca6dacd36a47539cf8c36f267abb519000a756734c4aa916ef2cd435240b",
+        "sha256_in_prefix": "d4abca6dacd36a47539cf8c36f267abb519000a756734c4aa916ef2cd435240b",
+        "size_in_bytes": 158
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__pycache__/features.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "f1c6fdaacdfddb8a96c0847470594e93469b0b6d73596d0ab2835bdcefb2ead2",
+        "sha256_in_prefix": "f1c6fdaacdfddb8a96c0847470594e93469b0b6d73596d0ab2835bdcefb2ead2",
+        "size_in_bytes": 11428
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/__pycache__/utils.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "d731ce341beb642ee66346122207b09b581f6cac3a62cea4f5627bc07491bb61",
+        "sha256_in_prefix": "d731ce341beb642ee66346122207b09b581f6cac3a62cea4f5627bc07491bb61",
+        "size_in_bytes": 2811
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/_version.py",
+        "path_type": "hardlink",
+        "sha256": "b34f0ae48f65f8d4337369b8faa28fa4dc86216eeb1179910bf40e7a748bf9a1",
+        "sha256_in_prefix": "b34f0ae48f65f8d4337369b8faa28fa4dc86216eeb1179910bf40e7a748bf9a1",
+        "size_in_bytes": 22
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/features.py",
+        "path_type": "hardlink",
+        "sha256": "b4a1f8eeecdfa44e601c0e107b508b38e3bd784fc8cb0d11030ee6fb303d12f6",
+        "sha256_in_prefix": "b4a1f8eeecdfa44e601c0e107b508b38e3bd784fc8cb0d11030ee6fb303d12f6",
+        "size_in_bytes": 13551
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/__init__.py",
+        "path_type": "hardlink",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha256_in_prefix": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_in_bytes": 0
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/__init__.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "312588b180c053267f504f51dacaaaf10e5392bb0d8a9562260739d4d488ab86",
+        "sha256_in_prefix": "312588b180c053267f504f51dacaaaf10e5392bb0d8a9562260739d4d488ab86",
+        "size_in_bytes": 144
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/count.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "8084ece4e131623f69794f32f9510e634511a197be39ab36fe53792be8ef1553",
+        "sha256_in_prefix": "8084ece4e131623f69794f32f9510e634511a197be39ab36fe53792be8ef1553",
+        "size_in_bytes": 15802
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/count_with_barcodes.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "09944e30d840d5902d9510e8cd2fb1b36de17b08b0e55437ba7af7225fed8245",
+        "sha256_in_prefix": "09944e30d840d5902d9510e8cd2fb1b36de17b08b0e55437ba7af7225fed8245",
+        "size_in_bytes": 14651
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/__pycache__/qa.cpython-39.pyc",
+        "path_type": "hardlink",
+        "sha256": "6386ef10bda302564cd1bb5c4b21473b7cf55fbd290d1b830bac9e9d50216d35",
+        "sha256_in_prefix": "6386ef10bda302564cd1bb5c4b21473b7cf55fbd290d1b830bac9e9d50216d35",
+        "size_in_bytes": 7202
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/count.py",
+        "path_type": "hardlink",
+        "sha256": "3d73a8e5b3444a11bce76ed1c63c9ca6a4c7f3a2a25d2e84cb8b0833d371d82c",
+        "sha256_in_prefix": "3d73a8e5b3444a11bce76ed1c63c9ca6a4c7f3a2a25d2e84cb8b0833d371d82c",
+        "size_in_bytes": 25933
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/count_with_barcodes.py",
+        "path_type": "hardlink",
+        "sha256": "097ac60c703e213e6b472de2d082636163c04c2c11350a00a3f0ad1a451284de",
+        "sha256_in_prefix": "097ac60c703e213e6b472de2d082636163c04c2c11350a00a3f0ad1a451284de",
+        "size_in_bytes": 24277
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/scripts/qa.py",
+        "path_type": "hardlink",
+        "sha256": "b5ee2774c3af7423a90cf4fef2c11d2c332aafdc5c0d3d65655c85c068917717",
+        "sha256_in_prefix": "b5ee2774c3af7423a90cf4fef2c11d2c332aafdc5c0d3d65655c85c068917717",
+        "size_in_bytes": 10427
+      },
+      {
+        "_path": "lib/python3.9/site-packages/HTSeq/utils.py",
+        "path_type": "hardlink",
+        "sha256": "8bc14b9d3bee4e46b484c6a3e4691c085424d2ddec4445c692aefd56e185968b",
+        "sha256_in_prefix": "8bc14b9d3bee4e46b484c6a3e4691c085424d2ddec4445c692aefd56e185968b",
+        "size_in_bytes": 2621
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "htseq==0.13.5=py39h70b41aa_1",
+  "sha256": "a303c5747b7ea3271c037acff47f740c3bb5ed32f518646217969b9d70587708",
+  "size": 343211,
+  "subdir": "linux-64",
+  "timestamp": 1617208205000,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/bioconda/linux-64/htseq-0.13.5-py39h70b41aa_1.tar.bz2",
+  "version": "0.13.5"
+}

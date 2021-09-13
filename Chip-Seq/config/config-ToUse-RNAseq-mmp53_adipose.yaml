@@ -1,0 +1,52 @@
+fastqdir: "/home/aquevedo/fastq/GSE132715_mm_p53_adipose/"
+datadir: "/home/aquevedo/projects/mm_p53_adipose_RNAseq/data/"
+resdir: "/home/aquevedo/projects/mm_p53_adipose_RNAseq/res/"
+logdir: "/home/aquevedo/projects/mm_p53_adipose_RNAseq/log/"
+
+tableName: "/home/aquevedo/snakemake_workflows/Chip-Seq/config/table_mmp53_adipose_GSE132175.csv"
+regions: "summits" # possible values: <summits | genes>
+mergedRegions: "no" # possible values: <yes | no>
+
+gtf: "/home/aquevedo/genomes/mouse/mm38/Mus_musculus.GRCm38.102_chrUCSC.gtf"
+feature: "exon" ## must appear in column 3 of gtf
+id_counts: "gene_id" ## id to sum htseq counts and to appear in countMatrix 1 row
+strandness: "no" ## is RNAseq stranded? <yes | no>
+
+rules:
+    default:
+        res:
+            threads: 1
+            mem_mb: 8000 #in MB
+            walltime: 480   
+    fastQC:
+        res:
+            threads: 8   
+    fastQScreen:
+        res:
+            mem_mb: 10000
+            threads: 12
+    bowtie2:
+        res:
+            threads: 15
+            mem_mb: 10000
+    hisat2:
+        res:
+            walltime: 300
+            threads: 19
+            mem_mb: 15000
+    gatk:
+        res:
+            mem_mb: 4096 #in MB
+            walltime: 40
+    create_bigWig:
+        res:
+            mem_mb: 8000
+            threads: 30
+    
+    compute_matrix:
+        res:
+            threads: 20
+            mem_mb: 8000
+            walltime: 60
+
+

@@ -1,0 +1,26 @@
+==> 2021-09-08 18:53:10 <==
+# cmd: /home/aquevedo/mambaforge/condabin/mamba create --quiet --file /home/aquevedo/snakemake_workflows/Chip-Seq/.snakemake/conda/f84f9d8e7b298d3124857647b24cc4d9.yaml --prefix /home/aquevedo/snakemake_workflows/Chip-Seq/.snakemake/conda/f84f9d8e7b298d3124857647b24cc4d9
+# conda version: 4.10.3
++bioconda/linux-64::c-ares-1.11.0-h470a237_1
++bioconda/linux-64::htslib-1.11-hd3b49d5_0
++bioconda/linux-64::samtools-1.11-h6270b1f_0
++conda-forge/linux-64::_libgcc_mutex-0.1-conda_forge
++conda-forge/linux-64::_openmp_mutex-4.5-1_gnu
++conda-forge/linux-64::bzip2-1.0.8-h516909a_3
++conda-forge/linux-64::ca-certificates-2020.6.20-hecda079_0
++conda-forge/linux-64::krb5-1.17.1-hfafb76e_3
++conda-forge/linux-64::libcurl-7.71.1-hcdd3856_8
++conda-forge/linux-64::libdeflate-1.6-h516909a_0
++conda-forge/linux-64::libedit-3.1.20191231-he28a2e2_2
++conda-forge/linux-64::libev-4.33-h516909a_1
++conda-forge/linux-64::libgcc-ng-9.3.0-h5dbcf3e_17
++conda-forge/linux-64::libgomp-9.3.0-h5dbcf3e_17
++conda-forge/linux-64::libnghttp2-1.41.0-hab1572f_1
++conda-forge/linux-64::libssh2-1.9.0-hab1572f_5
++conda-forge/linux-64::libstdcxx-ng-9.3.0-h2ae2ef3_17
++conda-forge/linux-64::ncurses-6.2-he1b5a44_2
++conda-forge/linux-64::openssl-1.1.1h-h516909a_0
++conda-forge/linux-64::tk-8.6.10-hed695b0_1
++conda-forge/linux-64::xz-5.2.5-h516909a_1
++conda-forge/linux-64::zlib-1.2.11-h516909a_1010
+# update specs: ['_libgcc_mutex==0.1=conda_forge', '_openmp_mutex==4.5=1_gnu', 'bzip2==1.0.8=h516909a_3', 'c-ares==1.11.0=h470a237_1', 'ca-certificates==2020.6.20=hecda079_0', 'htslib==1.11=hd3b49d5_0', 'krb5==1.17.1=hfafb76e_3', 'libcurl==7.71.1=hcdd3856_8', 'libdeflate==1.6=h516909a_0', 'libedit==3.1.20191231=he28a2e2_2', 'libev==4.33=h516909a_1', 'libgcc-ng==9.3.0=h5dbcf3e_17', 'libgomp==9.3.0=h5dbcf3e_17', 'libnghttp2==1.41.0=hab1572f_1', 'libssh2==1.9.0=hab1572f_5', 'libstdcxx-ng==9.3.0=h2ae2ef3_17', 'ncurses==6.2=he1b5a44_2', 'openssl==1.1.1h=h516909a_0', 'samtools==1.11=h6270b1f_0', 'tk==8.6.10=hed695b0_1', 'xz==5.2.5=h516909a_1', 'zlib==1.2.11=h516909a_1010']

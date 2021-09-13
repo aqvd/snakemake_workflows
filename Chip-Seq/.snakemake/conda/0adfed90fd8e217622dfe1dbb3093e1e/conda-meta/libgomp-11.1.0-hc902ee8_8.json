@@ -1,0 +1,58 @@
+{
+  "build": "hc902ee8_8",
+  "build_number": 8,
+  "channel": "https://conda.anaconda.org/conda-forge/linux-64",
+  "constrains": [],
+  "depends": [
+    "_libgcc_mutex 0.1 conda_forge"
+  ],
+  "extracted_package_dir": "/home/aquevedo/mambaforge/pkgs/libgomp-11.1.0-hc902ee8_8",
+  "features": "",
+  "files": [
+    "lib/libgomp.so",
+    "lib/libgomp.so.1.0.0",
+    "share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION.gomp_copy"
+  ],
+  "fn": "libgomp-11.1.0-hc902ee8_8.tar.bz2",
+  "license": "GPL-3.0-only WITH GCC-exception-3.1",
+  "link": {
+    "source": "/home/aquevedo/mambaforge/pkgs/libgomp-11.1.0-hc902ee8_8",
+    "type": 1
+  },
+  "md5": "f2dd961d1ae80d9d81b3d5068807f11b",
+  "name": "libgomp",
+  "package_tarball_full_path": "/home/aquevedo/mambaforge/pkgs/libgomp-11.1.0-hc902ee8_8.tar.bz2",
+  "paths_data": {
+    "paths": [
+      {
+        "_path": "lib/libgomp.so",
+        "path_type": "softlink",
+        "sha256": "69ce33df840fb109e36e43e94104501bbcab0f03296e92f9fe6f704fad7c7c6c",
+        "size_in_bytes": 941848
+      },
+      {
+        "_path": "lib/libgomp.so.1.0.0",
+        "path_type": "hardlink",
+        "sha256": "69ce33df840fb109e36e43e94104501bbcab0f03296e92f9fe6f704fad7c7c6c",
+        "sha256_in_prefix": "69ce33df840fb109e36e43e94104501bbcab0f03296e92f9fe6f704fad7c7c6c",
+        "size_in_bytes": 941848
+      },
+      {
+        "_path": "share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION.gomp_copy",
+        "path_type": "hardlink",
+        "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+        "sha256_in_prefix": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+        "size_in_bytes": 3324
+      }
+    ],
+    "paths_version": 1
+  },
+  "requested_spec": "libgomp==11.1.0=hc902ee8_8",
+  "sha256": "b6a3d511fb425ff50143f51020f5c216295d1abcf3a71adf976283152da9caa7",
+  "size": 436961,
+  "subdir": "linux-64",
+  "timestamp": 1628139761000,
+  "track_features": "",
+  "url": "https://conda.anaconda.org/conda-forge/linux-64/libgomp-11.1.0-hc902ee8_8.tar.bz2",
+  "version": "11.1.0"
+}
