@@ -1,0 +1,48 @@
+# Directories must end with "/" !!!!
+tableName: "test_tableName.txt"
+condadir: "/Users/aqo/Desktop/snakemake_workflows/WGS/env/"
+
+fastqdir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/"
+datadir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/data/"
+resdir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/res/"
+logdir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/log/"
+
+
+gatk_folder: "/Users/aqo/Desktop/ALVARO/Software/gatk/"
+picard_folder: "/Users/aqo/Desktop/"
+
+tmp_folder: "/tmp/"
+
+
+rules:
+    default:
+        res:
+            threads: 1
+            mem_mb: 8000 #in MB
+            walltime: 480   
+    fastQC:
+        res:
+            threads: 8   
+    fastQScreen:
+        res:
+            mem_mb: 10000
+            threads: 12
+    bowtie2:
+        res:
+            threads: 18
+            mem_mb: 10000
+            walltime: 200
+    hisat2:
+        res:
+            threads: 15
+            mem_mb: 15000
+    gatk:
+        res:
+            mem_mb: 4096 #in MB
+            walltime: 25
+    
+    create_bigWig:
+        res:
+            mem_mb: 8000
+            threads: 30
+

@@ -17,6 +17,8 @@ DATADIR = config["datadir"]
 RESDIR = config["resdir"]
 LOGDIR = config["logdir"]
 
+CONDADIR = config["condadir"]
+
 ## Function to create directories unless they already exist
 def tryMkdir(path):
 	try:
@@ -31,10 +33,10 @@ def tryMkdir(path):
 
 # BAM_SUFIX =
 
-GATK_FOLDER = "/Users/aqo/Desktop/ALVARO/Software/gatk/"
-PICARD_FOLDER = "/Users/aqo/Desktop/"
+GATK_FOLDER = config["gatk_folder"]
+PICARD_FOLDER = config["picard_folder"]
 
-TMP_FOLDER = "/tmp"
+TMP_FOLDER = config["tmp_folder"]
 
 # REALIGNED_MERGED_BAM =
 # REALIGNED_MERGED_BAI =
@@ -128,8 +130,8 @@ rule bwa_map:
 	threads:
 		get_resource("bwa", "threads") + get_resource("samtools_sort", "threads")
 	resources:
-		mem_mb=get_resource("bwa", "mem_mb"),
-		walltime=get_resource("bwa", "walltime")
+		mem_mb = get_resource("bwa", "mem_mb"),
+		walltime = get_resource("bwa", "walltime")
 	params:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
@@ -159,8 +161,8 @@ rule add_readGroup:
 	threads:
 		4
 	resources:
-		mem_mb=get_resource("samtools","mem_mb"),
-		walltime=get_resource("samtools","walltime")
+		mem_mb = get_resource("samtools","mem_mb"),
+		walltime = get_resource("samtools","walltime")
 	params:
 		RG = lambda wildcards: expand(data.RG[data.Samples == wildcards.sample]),
 		PLATFORM = lambda wildcards: expand(data.PLATFORM[data.Samples == wildcards.sample])
@@ -183,11 +185,13 @@ rule remove_duplicates:
 	threads: 
 		1
 	resources:
-		mem_mb=get_resource("gatk", "mem_mb"),
-		walltime=get_resource("gatk","walltime")
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
 	params:
 		tmp = TMP_FOLDER,
 		picard = PICARD_FOLDER
+	conda:
+		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + "gatk/markDup_{sample}.log"
 	shell:
@@ -208,8 +212,8 @@ rule createBQSR_before:
 	threads: 
 		1
 	resources:
-		mem_mb=get_resource("gatk", "mem_mb"),
-		walltime=get_resource("gatk","walltime")
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
 	params:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER,
@@ -219,6 +223,8 @@ rule createBQSR_before:
 			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample]),
 		db_snp = lambda wildcards: expand("{db_snp}",
 			    db_snp = data.DbSNP[data.Samples == wildcards.sample])
+	conda:
+		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + 'gatk/createBQSR_before_{sample}.log'
 	shell:
@@ -242,13 +248,15 @@ rule applyBQSR:
 	threads:
 		1
 	resources:
-		mem_mb=get_resource("gatk", "mem_mb"),
-		walltime=get_resource("gatk","walltime")
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
 	params:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER,
 		ref_fasta = lambda wildcards: expand("{ref_fasta}",
-			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample]),
+			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample])
+	conda:
+		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + 'gatk/applyBQSR_{sample}.log'
 	shell:
@@ -270,8 +278,8 @@ rule createBQSR_after:
 	threads: 
 		1
 	resources:
-		mem_mb=get_resource("gatk", "mem_mb"),
-		walltime=get_resource("gatk","walltime")
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
 	params:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER,
@@ -281,6 +289,8 @@ rule createBQSR_after:
 			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample]),
 		db_snp = lambda wildcards: expand("{db_snp}",
 			    db_snp = data.DbSNP[data.Samples == wildcards.sample])
+	conda:
+		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + 'gatk/createBQSR_after_{sample}.log'
 	shell:
@@ -305,16 +315,27 @@ rule analyzeCovariates:
 	threads:
 		1
 	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
 		gatk_folder = GATK_FOLDER,
-		tmp = TMP_FOLDER,
-		ref_fasta = lambda wildcards: expand("{ref_fasta}",
-			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample]),
-		gold_indels = lambda wildcards: expand("{gold_indels}",
-			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample]),
-		db_snp = lambda wildcards: expand("{db_snp}",
-			    db_snp = data.DbSNP[data.Samples == wildcards.sample])
+		tmp = TMP_FOLDER
+	conda:
+		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + "gatk/analyzeCovariates_{sample}.log"
+	shell:
+		'''
+		{params.gatk_folder}gatk AnalyzeCovariates \
+			--java-options "-Xmx{resources.mem_mb}M" \
+			--tmp-dir {params.tmp} \
+			-before {input.recal_before} \
+			-after {input.recal_after} \
+			-plots {output.plots}
+
+
+		'''
+
 		
 
 
