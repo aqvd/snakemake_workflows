@@ -32,6 +32,11 @@ rules:
             threads: 15
             mem_mb: 12000
             walltime: 200
+    samtools_sort:
+        res:
+            threads: 6
+            mem_mb: 5000
+            walltime: 30
     hisat2:
         res:
             threads: 15

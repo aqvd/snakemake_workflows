@@ -164,11 +164,11 @@ rule bwa_map:
 		R2 = lambda wildcards: expand(FASTQDIR + '{R2}',
 			R2 = data.R2[data.Samples == wildcards.sample].values)
 	output:
-		bam = DATADIR + 'align/{sample}_sorted.bam'
+		bam = temp(DATADIR + 'align/{sample}_unsorted.bam')
 	log:
 		LOGDIR + 'bwa/{sample}.log'
 	threads:
-		get_resource("bwa", "threads") + get_resource("samtools_sort", "threads")
+		get_resource("bwa", "threads") + 3
 	resources:
 		mem_mb = get_resource("bwa", "mem_mb"),
 		walltime = get_resource("bwa", "walltime")
@@ -183,13 +183,30 @@ rule bwa_map:
 		'''
 		(
 			bwa mem -t {params.bwa_threads} \
-					   {params.bwa_ix} \
-			           <(zcat {params.R1}) \
-			           <(zcat {params.R2}) | \
-				samtools view -h -@ 3 -F 4 -O bam - | \
-				samtools sort -@ {params.sort_threads} - > {output.bam}
+				{params.bwa_ix} \
+				<(zcat {params.R1}) \
+				<(zcat {params.R2}) | \
+			samtools view -h -@ 3 -u -O BAM - > {output.bam}
 		) 3>&2 2>&1 1>&3 | tee -a {log}
 		'''
+
+rule sort_bam:
+	input:
+		DATADIR + 'align/{sample}_unsorted.bam'
+	output:
+		bam = DATADIR + 'align/{sample}_sorted.bam'
+	log:
+		LOGDIR + 'sort_bam_{sample}.log'
+	threads:
+		get_resource("samtools_sort", "mem_mb")
+	resources:
+		mem_mb = get_resource("samtools_sort", "mem_mb"),
+		walltime = get_resource("samtools_sort", "walltime")
+	shell:
+		'''
+		samtools sort -@ {threads} -O BAM {input} > {output.bam} 2> {log}
+		'''
+
 
 rule add_readGroup:
 	input:
@@ -199,7 +216,7 @@ rule add_readGroup:
 	log:
 		LOGDIR + 'readGroup/{sample}.log'
 	threads:
-		4
+		3
 	resources:
 		mem_mb = get_resource("samtools","mem_mb"),
 		walltime = get_resource("samtools","walltime")
@@ -208,11 +225,12 @@ rule add_readGroup:
 		PLATFORM = lambda wildcards: expand(data.PLATFORM[data.Samples == wildcards.sample])
 	shell:
 		'''
+		# -F 12 to filter unmaped and mate unmaped
 		(
-			samtools view -F 8 -u -O BAM {input.bam} | \
+			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
-			"@RG\tID:{params.RG}\tPL:{params.PLATFORM}"\
-			 -@ 4 -O BAM -o {output.rg_sorted_bam} - 
+				"@RG\tID:{params.RG}\tPL:{params.PLATFORM}"\
+				-@ 3 -O BAM -o {output.rg_sorted_bam} - 
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''
 
