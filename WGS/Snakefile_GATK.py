@@ -186,8 +186,8 @@ rule bwa_map:
 					   {params.bwa_ix} \
 			           <(zcat {params.R1}) \
 			           <(zcat {params.R2}) | \
-				samtools view -u -b - \
-				samtools sort -@ {params.sort_threads}
+				samtools view -h -@ 3 -F 4 -O bam - | \
+				samtools sort -@ {params.sort_threads} - > {output.bam}
 		) 3>&2 2>&1 1>&3 | tee -a {log}
 		'''
 
