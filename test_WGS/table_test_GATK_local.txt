@@ -1,0 +1,5 @@
+Samples	R1	R2	RG	PLATFORM	Genome	Individual	IsControl	TumorSample	NormalSample
+4447_B_run662_L002	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_B_run662_AAACATCG_S8_L002_R1_001.fastq.gz	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_B_run662_AAACATCG_S8_L002_R2_001.fastq.gz	RG1	illumina	mm10	mouseA	yes	4447_D_run641_L007	-
+4447_C_run662_L002	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_C_run662_GAGTTAGC_S9_L002_R1_001.fastq.gz	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_C_run662_GAGTTAGC_S9_L002_R2_001.fastq.gz	RG2	illumina	mm10	mouseB	yes	4447_E_run641_L002	-
+4447_D_run641_L007	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_D_run641_ATGCCTAA_S12_L007_R1_001.fastq.gz	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_D_run641_ATGCCTAA_S12_L007_R2_001.fastq.gz	RG3	illumina	mm10	mouseA	no	-	4447_B_run662_L002
+4447_E_run641_L002	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_E_run641_ATGCCTAA_S12_L002_R1_001.fastq.gz	/Users/aqo/Desktop/snakemake_workflows/test_WGS/4447_E_run641_ATGCCTAA_S12_L007_R2_002.fastq.gz	RG1	illumina	mm10	mouseB	no	-	4447_C_run662_L002

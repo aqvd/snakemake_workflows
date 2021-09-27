@@ -8,16 +8,23 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "config-test.yaml"
+configfile: "/home/aquevedo/projects/test_GATKsnake/config-test.yaml"
 
 TABLE_NAME = config["tableName"]
 
+# Outpur directories
 FASTQDIR = config["fastqdir"]
 DATADIR = config["datadir"]
 RESDIR = config["resdir"]
 LOGDIR = config["logdir"]
 
+# Software directories
+GATK_FOLDER = config["gatk_folder"]
+PICARD_FOLDER = config["picard_folder"]
+
+# Dir with Conda ennvironment .yaml definintions and tmporary folder
 CONDADIR = config["condadir"]
+TMP_FOLDER = config["tmp_folder"]
 
 ## Function to create directories unless they already exist
 def tryMkdir(path):
@@ -26,42 +33,59 @@ def tryMkdir(path):
 	except FileExistsError:
 		pass
 
-[tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, RESDIR + "fastQC", RESDIR + "plots")]
+[tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, 
+					   RESDIR + "fastQC", RESDIR + "plots", RESDIR + "varaints",
+					   RESDIR + "db")]
 
-# BAM_FOLDER =
-# SAMPLE =
-
-# BAM_SUFIX =
-
-GATK_FOLDER = config["gatk_folder"]
-PICARD_FOLDER = config["picard_folder"]
-
-TMP_FOLDER = config["tmp_folder"]
-
-# REALIGNED_MERGED_BAM =
-# REALIGNED_MERGED_BAI =
 
 ## Genome index prefixes paths
 GENOME_PATH = {
 	"mm9":"",
-    "mm10":"/storage/scratch01/users/aquevedo/genomes/mouse/mm10/hisat/genome" ,
-    "hg19":"/storage/scratch01/users/aquevedo/genomes/human/hg19/hisat/hg19/genome",
-    "hg38":"",
+    "mm10":"" ,
+    "hg19":"",
+    "grch37":"",
+    "hg38":"/data_genome1/References/GenomeIndices/Human/GRCh38_no_alt_plus_hs38d1/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
+    "grch38":"/data_genome1/References/GenomeIndices/Human/GRCh38_no_alt_plus_hs38d1/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
     "-":""}
 
 REF_FASTA_DICT = {
-	"hg38": "/Users/aqo/Desktop",
-	"mm10": "/Users/aqo/Desktop"
+	"hg38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily.fna",
+	"grch38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily.fna",
+	"mm10": ""
 }
 
 DBSNP_DICT = {
-	"hg38": "/Users/aqo/Desktop",
-	"mm10": "/Users/aqo/Desktop"
+	"hg38": "/data_genome1/SharedSoftware/GATK/resources_hg38/dbsnp_146.hg38.vcf",
+	"grch38": "/data_genome1/SharedSoftware/GATK/resources_hg38/dbsnp_146.hg38.vcf",
+	"mm10": "-"
+}
+
+GNOMAD_SITES_DICT = {
+	"hg38": "/data_genome1/SharedSoftware/GATK/resources_Mutect2/af-only-gnomad.hg38.vcf.gz",
+	"grch38": "/data_genome1/SharedSoftware/GATK/resources_Mutect2/af-only-gnomad.hg38.vcf.gz",
+	"mm10" : "-"
 }
 
 GOLD_INDELS_DICT = {
-	"hg38": "/Users/aqo/Desktop",
-	"mm10": "/Users/aqo/Desktop"
+	"hg38": "/data_genome1/SharedSoftware/GATK/resources_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
+	"grch38": "/data_genome1/SharedSoftware/GATK/resources_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
+	"mm10": "-"
+}
+
+PON_DICT = {
+	"hg38": "-",
+	"grch38": "-",
+	"mm10": "-"
+}
+
+# Number chromosomes not including X (Y is discarded)
+NCHR_DIC = {
+	"hg38": 22,
+	"hg19": 22,
+	"grch38": 22,
+	"grch37": 22,
+	"mm10": 19
+	"mm9": 19
 }
 
 ##################################################
@@ -69,7 +93,7 @@ GOLD_INDELS_DICT = {
 ##################################################
 data = pd.read_csv(TABLE_NAME,sep="\t")
 
-def fieldFromSample(Sample, field):
+def field_from_sample(Sample, field):
 	# ?P<group_name> for clarity
 	match = re.match(r"(?P<readID>\w+)_(?P<readLetter>\w+)_(?P<readRun>\w+)_(?P<readLane>\w+)", Sample)
 
@@ -80,17 +104,30 @@ data["R1Basename"] = [f.replace(".fastq.gz","") for f in data["R1"]]
 data["R2Basename"] = [f.replace(".fastq.gz","") for f in data["R2"]]
 
 # Alignment
-data["PATH_genome"] = [GENOME_PATH[i] for i in data.Genome]
+data["PathGenome"] = [GENOME_PATH[i] for i in data.Genome]
 
-data["ReadID"] = [fieldFromSample(sample, "readID") for sample in data.Samples]
-data["ReadLetter"] = [fieldFromSample(sample, "readLetter") for sample in data.Samples]
-data["ReadRun"] = [fieldFromSample(sample, "readRun") for sample in data.Samples]
-data["ReadLane"] = [fieldFromSample(sample, "readLane") for sample in data.Samples]
+data["ReadID"] = [field_from_sample(sample, "readID") for sample in data.Samples]
+data["ReadLetter"] = [field_from_sample(sample, "readLetter") for sample in data.Samples]
+data["ReadRun"] = [field_from_sample(sample, "readRun") for sample in data.Samples]
+data["ReadLane"] = [field_from_sample(sample, "readLane") for sample in data.Samples]
 
 # Base quality score recalibration parame
 data["RefFASTA"] = [REF_FASTA_DICT[i] for i in data.Genome]
 data["GoldIndels"] = [GOLD_INDELS_DICT[i] for i in data.Genome]
 data["DbSNP"] = [DBSNP_DICT[i] for i in data.Genome]
+
+# Mutec2 resources
+data["PanelNormals"] = [PON_DICT[i] for i in data.Genome]
+data["NumChr"] = [NCHR_DIC[i] for i in data.Genome]
+
+# Map Control and Tumor samples
+# /* TO DO */ 
+# First do it by hand, then thinnk if possible to aotomation
+#	- Sample = readID_readLetter_readRun_readLane
+#	- Individual = str To name mutec output
+# 	- IsControl: bool
+#	- NormalSample: if data.isControl == "yes"; data.ControlSample
+#	- MutecOutName: if data.IsControl == "no"; data.Individual + "_somatic.vcf.gz"
 
 ##################################################
 ##					RESOURCES					##
@@ -109,7 +146,8 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
-		expand(DATADIR + "align/{sample}_rg_dedup_recal.bam", sample = data.Samples.unique())
+		expand(DATADIR + "align/{sample}_rg_dedup.bam", sample = data.Samples.unique()),
+		expand(DATADIR + "align/stats/remove_duplicates_{sample}.txt", indiv = data.Samples.unique())
 
 
 def get_readPair(pairID, fq_list):
@@ -135,7 +173,7 @@ rule bwa_map:
 	params:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
-		bwa_ix = lambda wildcards: expand(data.PATH_genome[data.Samples == wildcards.sample].values[0]),
+		bwa_ix = lambda wildcards: expand(data.PathGenome[data.Samples == wildcards.sample].values[0]),
 		bwa_threads = get_resource("bwa", "threads"),
 		sort_threads = get_resource("samtools_sort", "threads")
 
@@ -196,8 +234,10 @@ rule remove_duplicates:
 		LOGDIR + "gatk/markDup_{sample}.log"
 	shell:
 		'''
-		{params.gatk_folder}gatk gatk MarkDuplicates \
+		{params.gatk_folder}gatk gatk \
 		--java-options "-Xmx{resources.mem_mb}M" \
+		--tmp-dir {params.tmp} \
+		MarkDuplicates \
 		--REMOVE_DUPLICATES true \
 		-I {input.sorted_bam} \
 		-O {output.nodup_bam} \
@@ -229,14 +269,15 @@ rule createBQSR_before:
 		LOGDIR + 'gatk/createBQSR_before_{sample}.log'
 	shell:
 		'''
-		{params.gatk_folder}gatk BaseRecalibrator \
+		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M" \
 		--tmp-dir {params.tmp} \
+		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
 		--known_sites {params.gold_indels} \
 		--known_sites {params.db_snp} \
-		-O {output.recal_tab} |& {log}
+		-O {output.recal_tab} |& tee {log}
 		'''
 
 rule applyBQSR:
@@ -261,13 +302,14 @@ rule applyBQSR:
 		LOGDIR + 'gatk/applyBQSR_{sample}.log'
 	shell:
 		'''
-		{params.gatk_folder}gatk ApplyBSQR \
+		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M" \
 		--tmp-dir {params.tmp} \
+		ApplyBSQR \
 		-R {params.ref_fasta} \
 		-I {input.nodup_bam} \
 		--bsqr-recal-file {input.recal_tab}
-		-O {output.recal_bam} |& {log}
+		-O {output.recal_bam} |& tee {log}
 		'''
 
 rule createBQSR_after:
@@ -295,14 +337,15 @@ rule createBQSR_after:
 		LOGDIR + 'gatk/createBQSR_after_{sample}.log'
 	shell:
 		'''
-		{params.gatk_folder}gatk BaseRecalibrator \
+		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M" \
 		--tmp-dir {params.tmp} \
+		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
 		--known_sites {params.gold_indels} \
 		--known_sites {params.db_snp} \
-		-O {output.recal_tab} |& {log}
+		-O {output.recal_tab} |& tee {log}
 		'''
 
 
@@ -311,7 +354,8 @@ rule analyzeCovariates:
 		recal_before = DATADIR + "align/{sample}_BSQR_before.table",
 		recal_afer = DATADIR + "align/{sample}_BSQR_after.table"
 	output:
-		plots = RESDIR + "plots/{sample}_analyzeCovariates.pdf"
+		plots = RESDIR + "plots/{sample}_analyzeCovariates.pdf",
+		csv = LOGDIR + "gatk/analyzeCovariates_csv_{sample}.log"
 	threads:
 		1
 	resources:
@@ -326,17 +370,17 @@ rule analyzeCovariates:
 		LOGDIR + "gatk/analyzeCovariates_{sample}.log"
 	shell:
 		'''
-		{params.gatk_folder}gatk AnalyzeCovariates \
+		{params.gatk_folder}gatk \
 			--java-options "-Xmx{resources.mem_mb}M" \
 			--tmp-dir {params.tmp} \
+			AnalyzeCovariates
 			-before {input.recal_before} \
 			-after {input.recal_after} \
-			-plots {output.plots}
-
-
+			-plots {output.plots} \
+			-csv {output.csv} |& tee {log}
 		'''
 
-		
+
 
 
 

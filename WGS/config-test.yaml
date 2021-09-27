@@ -1,15 +1,15 @@
 # Directories must end with "/" !!!!
-tableName: "test_tableName.txt"
-condadir: "/Users/aqo/Desktop/snakemake_workflows/WGS/env/"
+tableName: "/home/aquevedo/projects/test_GATKsnake/table_test_GATK.txt"
+condadir: "/home/aquevedo/snakemake_workflows/WGS/env/"
 
-fastqdir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/"
-datadir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/data/"
-resdir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/res/"
-logdir: "/Users/aqo/Desktop/snakemake_workflows/test_WGS/log/"
+fastqdir: "/data/projects/MB044_gastric_clones/seqs/DNA/MPIPZ_2020-02/"
+datadir: "/home/aquevedo/projects/test_GATKsnake/data/"
+resdir: "/home/aquevedo/projects/test_GATKsnake/res/"
+logdir: "/home/aquevedo/projects/test_GATKsnake/log/"
 
 
-gatk_folder: "/Users/aqo/Desktop/ALVARO/Software/gatk/"
-picard_folder: "/Users/aqo/Desktop/"
+gatk_folder: "/data_genome1/SharedSoftware/GATK/gatk-4.1.9.0/"
+picard_folder: "/data_genome1/SharedSoftware/Picard/"
 
 tmp_folder: "/tmp/"
 
@@ -39,7 +39,7 @@ rules:
     gatk:
         res:
             mem_mb: 4096 #in MB
-            walltime: 25
+            walltime: 60
     
     create_bigWig:
         res:

@@ -1,5 +1,5 @@
 import os
-import  pandas as pd
+import pandas as pd
 import numpy as np
 import glob
 import re
@@ -52,6 +52,7 @@ genome_size={
     "mm38":2652783500,
     "hg19":2864785220,
     "hg38":2913022398}
+
 
 ##################################################
 ## 				READ METADATA					##
@@ -247,7 +248,7 @@ rule htseq_count:
 		ID_in_countMatrix = ID_COUNTS,
 		is_stranded = STRANDNESS,
 		tmp_counts = RESDIR + 'count_matrix.tmp'
-	threads: 1
+	threads: 6
 	resources:
 		mem_mb = 2000,
 		walltime = lambda wildcards, input: 40 * len(input.bams) 
@@ -259,9 +260,13 @@ rule htseq_count:
 		'''
 		htseq-count --format=bam --order=pos --stranded={params.is_stranded} \
 		--type={params.type_feature} --idattr={params.ID_in_countMatrix} \
-		--mode=union --secondary-alignments=ignore \
+		--mode=union --secondary-alignments=ignore --nprocesses {threads} \
 		{input.bams} {params.gtf} 2> {params.tmp_counts} 3>&2 2>&1 1>&3 | tee {log} && \
-        files="{input.bams}" && cat <(echo $files | sed -E -e's/^/gene\t/') {params.tmp_counts} > {output} && \
+        files="{input.bams}" && \
+        cat <(echo $files | \
+        		xargs -n 1 basename -s "_sorted.bam" |
+        		sed ':a;N;!$ba;s/\n/\t/g' | \
+        		sed -E -e's/^/gene\t/') {params.tmp_counts} > {output} && \
         rm {params.tmp_counts}
  		'''
 
