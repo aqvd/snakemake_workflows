@@ -84,7 +84,7 @@ NCHR_DIC = {
 	"hg19": 22,
 	"grch38": 22,
 	"grch37": 22,
-	"mm10": 19
+	"mm10": 19,
 	"mm9": 19
 }
 
@@ -147,7 +147,7 @@ def get_resource(rule,resource):
 rule all:
 	input:
 		expand(DATADIR + "align/{sample}_rg_dedup.bam", sample = data.Samples.unique()),
-		expand(DATADIR + "align/stats/remove_duplicates_{sample}.txt", indiv = data.Samples.unique())
+		expand(DATADIR + "align/stats/remove_duplicates_{sample}.txt", sample = data.Samples.unique())
 
 
 def get_readPair(pairID, fq_list):
@@ -159,8 +159,10 @@ def get_readPair(pairID, fq_list):
 
 rule bwa_map:
 	input:
-		R1 = lambda wildcards: expand('{R1}', R1 = data.R1[data.Samples == wildcards.sample].values),
-		R2 = lambda wildcards: expand('{R2}', R2 = data.R2[data.Samples == wildcards.sample].values)
+		R1 = lambda wildcards: expand(FASTQDIR + '{R1}',
+			R1 = data.R1[data.Samples == wildcards.sample].values),
+		R2 = lambda wildcards: expand(FASTQDIR + '{R2}',
+			R2 = data.R2[data.Samples == wildcards.sample].values)
 	output:
 		bam = DATADIR + 'align/{sample}_sorted.bam'
 	log:
@@ -227,19 +229,19 @@ rule remove_duplicates:
 		walltime = get_resource("gatk","walltime")
 	params:
 		tmp = TMP_FOLDER,
-		picard = PICARD_FOLDER
+		gatk_folder = GATK_FOLDER
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + "gatk/markDup_{sample}.log"
 	shell:
 		'''
-		{params.gatk_folder}gatk gatk \
+		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M" \
 		--tmp-dir {params.tmp} \
 		MarkDuplicates \
 		--REMOVE_DUPLICATES true \
-		-I {input.sorted_bam} \
+		-I {input.rg_sorted_bam} \
 		-O {output.nodup_bam} \
 		-M {output.metrics} |& tee {log}
 		'''
