@@ -241,6 +241,7 @@ rule remove_duplicates:
 		--tmp-dir {params.tmp} \
 		MarkDuplicates \
 		--REMOVE_DUPLICATES true \
+		--CREATE_INDEX true \
 		-I {input.rg_sorted_bam} \
 		-O {output.nodup_bam} \
 		-M {output.metrics} |& tee {log}
