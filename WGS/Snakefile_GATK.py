@@ -33,7 +33,7 @@ def tryMkdir(path):
 	except FileExistsError:
 		pass
 
-[tryMkdir(p) for p in (DATADIR, RESDIR, LOGDIR, 
+[tryMkdir(p) for p in (DATADIR + "stats", LOGDIR, 
 					   RESDIR + "fastQC", RESDIR + "plots", RESDIR + "varaints",
 					   RESDIR + "db")]
 
@@ -255,8 +255,7 @@ rule remove_duplicates:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M" \
-		--tmp-dir {params.tmp} \
+		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
 		MarkDuplicates \
 		--REMOVE_DUPLICATES true \
 		--CREATE_INDEX true \
@@ -291,8 +290,7 @@ rule createBQSR_before:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M" \
-		--tmp-dir {params.tmp} \
+		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
@@ -324,8 +322,7 @@ rule applyBQSR:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M" \
-		--tmp-dir {params.tmp} \
+		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
 		ApplyBSQR \
 		-R {params.ref_fasta} \
 		-I {input.nodup_bam} \
@@ -359,8 +356,7 @@ rule createBQSR_after:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M" \
-		--tmp-dir {params.tmp} \
+		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
@@ -392,8 +388,7 @@ rule analyzeCovariates:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-			--java-options "-Xmx{resources.mem_mb}M" \
-			--tmp-dir {params.tmp} \
+			--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
 			AnalyzeCovariates
 			-before {input.recal_before} \
 			-after {input.recal_after} \

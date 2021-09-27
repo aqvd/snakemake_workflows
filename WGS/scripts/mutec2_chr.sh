@@ -42,6 +42,7 @@ export indiv
 export gatk_dir
 export vcf_dir
 export db_dir
+export threads
 
 all_chroms="$(printf "%s " $(seq 1 ${n_chr})) X"
 
@@ -79,5 +80,5 @@ export -f run_mutec2
 # 2- Input all f2r2 files to model orientation bias. 
 #all_fqr2_input=`for chr in ${all_chroms}; do printf -- "-I ${db_dir}${indiv}_chr${chr}-fir2.tar.gz "; done`
 
-echo "${all_chroms}" | sed -E -e 's/ /\n/g' | parallel
+echo "${all_chroms}" | sed -E -e 's/ /\n/g' | parallel -j ${threads} run_mutec2 :::: ${chr}
 
