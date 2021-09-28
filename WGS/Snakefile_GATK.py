@@ -221,9 +221,10 @@ rule add_readGroup:
 		mem_mb = get_resource("samtools","mem_mb"),
 		walltime = get_resource("samtools","walltime")
 	params:
-		LIBRARY = lambda wildcards: expand(data.Library[data.Samples == wildcards.sample]),
-		PLATFORM = lambda wildcards: expand(data.Platform[data.Samples == wildcards.sample]),
-		PLAT_UNIT = lambda wildcards: expand(data.PlatformUnit[data.Samples == wildcards.sample]),
+		RG = lambda wildcards: expand(data.RedGroup[data.Samples == wildcards.sample]),
+		PL = lambda wildcards: expand(data.Platform[data.Samples == wildcards.sample]),
+		PU = lambda wildcards: expand(data.PlatformUnit[data.Samples == wildcards.sample]),
+		LB = lambda wildcards: expand(data.Library[data.Samples == wildcards.sample]),
 		SM = lambda wildcards: wildcards.sample
 	shell:
 		'''
@@ -232,7 +233,7 @@ rule add_readGroup:
 		(
 			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
-				"@RG\tLB:{params.LIBRARY}\tPL:{params.PLATFORM}\tPU:{params.PLAT_UNIT}\tSM:{params.SM}"\
+				"@RG\tID:{params.RG}\tPL:{params.PL}\tPU:{params.PU}\tLB:{params.LB}\tSM:{params.SM}"\
 				-@ 3 -O BAM -o {output.rg_sorted_bam} - 
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''

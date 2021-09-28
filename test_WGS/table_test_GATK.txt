@@ -1,7 +1,7 @@
-Samples	R1	R2	Library	Platform	PlatformUnit	Genome	Individual	IsControl	TumorSample	NormalSample	LibraryLayout
-4447_D_run641_L007	4447_D_run641_ATGCCTAA_S12_L007_R1_001.fastq.gz	4447_D_run641_ATGCCTAA_S12_L007_R2_001.fastq.gz	lib1	Ilumina	run641	hg38	indivA	no	-	4447_N_run641_L007	PAIRED
-4447_K_run641_L007	4447_K_run641_ATTGGCTC_S18_L007_R1_001.fastq.gz	4447_K_run641_ATTGGCTC_S18_L007_R2_001.fastq.gz	lib1	Ilumina	run641	hg38	indivB	no	-	4447_O_run641_L007	PAIRED
-4447_N_run641_L007	4447_N_run641_AGCAGGAA_S20_L007_R1_001.fastq.gz	4447_N_run641_AGCAGGAA_S20_L007_R2_001.fastq.gz	lib1	Ilumina	run641	hg38	indivA	yes	4447_D_run641_L007	-	PAIRED
-4447_O_run641_L007	4447_O_run641_GAGCTGAA_S21_L007_R1_001.fastq.gz	4447_O_run641_GAGCTGAA_S21_L007_R2_001.fastq.gz	lib1	Ilumina	run641	hg38	indivB	yes	4447_K_run641_L007	-	PAIRED
-4447_H_run641_L007	4447_H_run641_CACTTCGA_S15_L007_R1_001.fastq.gz	4447_H_run641_CACTTCGA_S15_L007_R2_001.fastq.gz	lib1	Ilumina	run641	hg38	indivA	no	-	4447_N_run641_L007	PAIRED
-4447_I_run641_L007	4447_I_run641_GCCAAGAC_S16_L007_R1_001.fastq.gz	4447_I_run641_GCCAAGAC_S16_L007_R2_001.fastq.gz	lib1	Ilumina	run641	hg38	indivB	no	-	4447_O_run641_L007	PAIRED
+Samples	R1	R2	ReadGroup	Library	Platform	PlatformUnit	Genome	Individual	IsControl	TumorSample	NormalSample	LibraryLayout
+4447_D_run641_L007	4447_D_run641_ATGCCTAA_S12_L007_R1_001.fastq.gz	4447_D_run641_ATGCCTAA_S12_L007_R2_001.fastq.gz	rg1	lib1	Ilumina	run641	hg38	indivA	no	-	4447_N_run641_L007	PAIRED
+4447_K_run641_L007	4447_K_run641_ATTGGCTC_S18_L007_R1_001.fastq.gz	4447_K_run641_ATTGGCTC_S18_L007_R2_001.fastq.gz	rg2	lib1	Ilumina	run641	hg38	indivB	no	-	4447_O_run641_L007	PAIRED
+4447_N_run641_L007	4447_N_run641_AGCAGGAA_S20_L007_R1_001.fastq.gz	4447_N_run641_AGCAGGAA_S20_L007_R2_001.fastq.gz	rg3	lib1	Ilumina	run641	hg38	indivA	yes	4447_D_run641_L007	-	PAIRED
+4447_O_run641_L007	4447_O_run641_GAGCTGAA_S21_L007_R1_001.fastq.gz	4447_O_run641_GAGCTGAA_S21_L007_R2_001.fastq.gz	rg4	lib1	Ilumina	run641	hg38	indivB	yes	4447_K_run641_L007	-	PAIRED
+4447_H_run641_L007	4447_H_run641_CACTTCGA_S15_L007_R1_001.fastq.gz	4447_H_run641_CACTTCGA_S15_L007_R2_001.fastq.gz	rg5	lib1	Ilumina	run641	hg38	indivA	no	-	4447_N_run641_L007	PAIRED
+4447_I_run641_L007	4447_I_run641_GCCAAGAC_S16_L007_R1_001.fastq.gz	4447_I_run641_GCCAAGAC_S16_L007_R2_001.fastq.gz	rg6	lib1	Ilumina	run641	hg38	indivB	no	-	4447_O_run641_L007	PAIRED
