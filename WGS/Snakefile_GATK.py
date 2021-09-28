@@ -221,15 +221,18 @@ rule add_readGroup:
 		mem_mb = get_resource("samtools","mem_mb"),
 		walltime = get_resource("samtools","walltime")
 	params:
-		RG = lambda wildcards: expand(data.RG[data.Samples == wildcards.sample]),
-		PLATFORM = lambda wildcards: expand(data.PLATFORM[data.Samples == wildcards.sample])
+		LIBRARY = lambda wildcards: expand(data.Library[data.Samples == wildcards.sample]),
+		PLATFORM = lambda wildcards: expand(data.Platform[data.Samples == wildcards.sample]),
+		PLAT_UNIT = lambda wildcards: expand(data.PlatformUnit[data.Samples == wildcards.sample]),
+		SM = lambda wildcards: wildcards.sample
 	shell:
 		'''
 		# -F 12 to filter unmaped and mate unmaped
+		# view GATK AddReplaceReadGRoup to understand the tags
 		(
 			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
-				"@RG\tID:{params.RG}\tPL:{params.PLATFORM}"\
+				"@RG\tLB:{params.RG}\tPL:{params.PLATFORM}\tPU:{params.PLAT_UNIT}\tSM:{params.SM}"\
 				-@ 3 -O BAM -o {output.rg_sorted_bam} - 
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''
