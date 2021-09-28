@@ -232,7 +232,7 @@ rule add_readGroup:
 		(
 			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
-				"@RG\tLB:{params.RG}\tPL:{params.PLATFORM}\tPU:{params.PLAT_UNIT}\tSM:{params.SM}"\
+				"@RG\tLB:{params.LIBRARY}\tPL:{params.PLATFORM}\tPU:{params.PLAT_UNIT}\tSM:{params.SM}"\
 				-@ 3 -O BAM -o {output.rg_sorted_bam} - 
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''
