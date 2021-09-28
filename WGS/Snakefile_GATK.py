@@ -146,8 +146,7 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
-		expand(DATADIR + "align/{sample}_rg_dedup.bam", sample = data.Samples.unique()),
-		expand(DATADIR + "align/stats/remove_duplicates_{sample}.txt", sample = data.Samples.unique())
+		expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique())
 
 
 def get_readPair(pairID, fq_list):
@@ -168,7 +167,7 @@ rule bwa_map:
 	log:
 		LOGDIR + 'bwa/{sample}.log'
 	threads:
-		get_resource("bwa", "threads") + 3
+		get_resource("bwa", "threads") + 4
 	resources:
 		mem_mb = get_resource("bwa", "mem_mb"),
 		walltime = get_resource("bwa", "walltime")
@@ -176,9 +175,7 @@ rule bwa_map:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
 		bwa_ix = lambda wildcards: expand(data.PathGenome[data.Samples == wildcards.sample].values[0]),
-		bwa_threads = get_resource("bwa", "threads"),
-		sort_threads = get_resource("samtools_sort", "threads")
-
+		bwa_threads = get_resource("bwa", "threads") - 4
 	shell:
 		'''
 		(
@@ -186,7 +183,7 @@ rule bwa_map:
 				{params.bwa_ix} \
 				<(zcat {params.R1}) \
 				<(zcat {params.R2}) | \
-			samtools view -h -@ 3 -u -O BAM - > {output.bam}
+			samtools view -h -@ 4 -u -O BAM - > {output.bam}
 		) 3>&2 2>&1 1>&3 | tee -a {log}
 		'''
 
@@ -196,7 +193,7 @@ rule sort_bam:
 	output:
 		bam = DATADIR + 'align/{sample}_sorted.bam'
 	log:
-		LOGDIR + 'sort_bam_{sample}.log'
+		LOGDIR + 'samtools/sort_{sample}.log'
 	threads:
 		get_resource("samtools_sort", "mem_mb")
 	resources:
@@ -214,14 +211,14 @@ rule add_readGroup:
 	output:
 		rg_sorted_bam = DATADIR + 'align/{sample}_rg.bam'
 	log:
-		LOGDIR + 'readGroup/{sample}.log'
+		LOGDIR + 'samtools/readGroup_{sample}.log'
 	threads:
-		3
+		4
 	resources:
 		mem_mb = get_resource("samtools","mem_mb"),
 		walltime = get_resource("samtools","walltime")
 	params:
-		RG = lambda wildcards: expand(data.RedGroup[data.Samples == wildcards.sample]),
+		RG = lambda wildcards: expand(data.ReadGroup[data.Samples == wildcards.sample]),
 		PL = lambda wildcards: expand(data.Platform[data.Samples == wildcards.sample]),
 		PU = lambda wildcards: expand(data.PlatformUnit[data.Samples == wildcards.sample]),
 		LB = lambda wildcards: expand(data.Library[data.Samples == wildcards.sample]),
@@ -234,7 +231,7 @@ rule add_readGroup:
 			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
 				"@RG\tID:{params.RG}\tPL:{params.PL}\tPU:{params.PU}\tLB:{params.LB}\tSM:{params.SM}"\
-				-@ 3 -O BAM -o {output.rg_sorted_bam} - 
+				-@ 4 -O BAM -o {output.rg_sorted_bam} - 
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''
 
