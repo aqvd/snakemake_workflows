@@ -11,14 +11,14 @@ logdir: "/home/aquevedo/projects/test_GATKsnake/log/"
 gatk_folder: "/data_genome1/SharedSoftware/GATK/gatk-4.1.9.0/"
 picard_folder: "/data_genome1/SharedSoftware/Picard/"
 
-tmp_folder: "/tmp/"
+tmp_folder: "/home/aquevedo/projects/test_GATKsnake/data/tmp/"
 
 
 rules:
     default:
         res:
             threads: 1
-            mem_mb: 8000 #in MB
+            mem_mb: 8192 #in MB
             walltime: 480   
     fastQC:
         res:
@@ -36,7 +36,7 @@ rules:
         res:
             threads: 6
             mem_mb: 5000
-            walltime: 30
+            walltime: 40
     hisat2:
         res:
             threads: 15
@@ -44,7 +44,7 @@ rules:
     gatk:
         res:
             mem_mb: 8192 #in MB
-            walltime: 60
+            walltime: 480
     
     create_bigWig:
         res:

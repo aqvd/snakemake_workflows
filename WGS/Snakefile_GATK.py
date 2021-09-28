@@ -150,6 +150,9 @@ rule all:
 
 
 def get_readPair(pairID, fq_list):
+	"""
+	In case several .fastq per read mate, get all to concatenate with zcat prior bwa
+	"""
 	search = [re.match(r".+_{}_.+".format(pairID), fq) for fq in fq_list]
 	filtered = list(filter(lambda x: x != None, search))
 
@@ -167,7 +170,7 @@ rule bwa_map:
 	log:
 		LOGDIR + 'bwa/{sample}.log'
 	threads:
-		get_resource("bwa", "threads") + 4
+		get_resource("bwa", "threads") + 5
 	resources:
 		mem_mb = get_resource("bwa", "mem_mb"),
 		walltime = get_resource("bwa", "walltime")
@@ -175,7 +178,7 @@ rule bwa_map:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
 		bwa_ix = lambda wildcards: expand(data.PathGenome[data.Samples == wildcards.sample].values[0]),
-		bwa_threads = get_resource("bwa", "threads") - 4
+		bwa_threads = get_resource("bwa", "threads") - 5
 	shell:
 		'''
 		(
@@ -183,7 +186,7 @@ rule bwa_map:
 				{params.bwa_ix} \
 				<(zcat {params.R1}) \
 				<(zcat {params.R2}) | \
-			samtools view -h -@ 4 -u -O BAM - > {output.bam}
+			samtools view -h -@ 5 -O BAM - > {output.bam}
 		) 3>&2 2>&1 1>&3 | tee -a {log}
 		'''
 
@@ -195,7 +198,7 @@ rule sort_bam:
 	log:
 		LOGDIR + 'samtools/sort_{sample}.log'
 	threads:
-		get_resource("samtools_sort", "mem_mb")
+		get_resource("samtools_sort", "threads")
 	resources:
 		mem_mb = get_resource("samtools_sort", "mem_mb"),
 		walltime = get_resource("samtools_sort", "walltime")
@@ -231,7 +234,7 @@ rule add_readGroup:
 			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
 				"@RG\tID:{params.RG}\tPL:{params.PL}\tPU:{params.PU}\tLB:{params.LB}\tSM:{params.SM}"\
-				-@ 4 -O BAM -o {output.rg_sorted_bam} - 
+				-@ {threads} -O BAM - > {output.rg_sorted_bam}
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''
 
@@ -256,7 +259,7 @@ rule remove_duplicates:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		MarkDuplicates \
 		--REMOVE_DUPLICATES true \
 		--CREATE_INDEX true \
@@ -291,7 +294,7 @@ rule createBQSR_before:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
@@ -323,7 +326,7 @@ rule applyBQSR:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		ApplyBSQR \
 		-R {params.ref_fasta} \
 		-I {input.nodup_bam} \
@@ -357,7 +360,7 @@ rule createBQSR_after:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-		--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
@@ -389,7 +392,7 @@ rule analyzeCovariates:
 	shell:
 		'''
 		{params.gatk_folder}gatk \
-			--java-options "-Xmx{resources.mem_mb}M --Djava.io.tmpdir={params.tmp}" \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 			AnalyzeCovariates
 			-before {input.recal_before} \
 			-after {input.recal_after} \
