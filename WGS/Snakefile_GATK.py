@@ -49,8 +49,8 @@ GENOME_PATH = {
     "-":""}
 
 REF_FASTA_DICT = {
-	"hg38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily.fna",
-	"grch38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily.fna",
+	"hg38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
+	"grch38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
 	"mm10": ""
 }
 
@@ -364,8 +364,8 @@ rule createBQSR_after:
 		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
-		--known_sites {params.gold_indels} \
-		--known_sites {params.db_snp} \
+		--known-sites {params.gold_indels} \
+		--known-sites {params.db_snp} \
 		-O {output.recal_tab} |& tee {log}
 		'''
 
