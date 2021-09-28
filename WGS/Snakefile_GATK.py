@@ -298,8 +298,8 @@ rule createBQSR_before:
 		BaseRecalibrator \
 		-I {input.nodup_bam} \
 		-R {params.ref_fasta} \
-		--known_sites {params.gold_indels} \
-		--known_sites {params.db_snp} \
+		--known-sites {params.gold_indels} \
+		--known-sites {params.db_snp} \
 		-O {output.recal_tab} |& tee {log}
 		'''
 
