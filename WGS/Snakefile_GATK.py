@@ -33,24 +33,24 @@ def tryMkdir(path):
 	except FileExistsError:
 		pass
 
-[tryMkdir(p) for p in (DATADIR + "stats", LOGDIR, 
+[tryMkdir(p) for p in (DATADIR + "stats", LOGDIR, TMP_FOLDER,
 					   RESDIR + "fastQC", RESDIR + "plots", RESDIR + "varaints",
 					   RESDIR + "db")]
 
 
 ## Genome index prefixes paths
-GENOME_PATH = {
+GENOME_IX_PREFIX_DICT = {
 	"mm9":"",
     "mm10":"" ,
     "hg19":"",
     "grch37":"",
-    "hg38":"/data_genome1/References/GenomeIndices/Human/GRCh38_no_alt_plus_hs38d1/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
-    "grch38":"/data_genome1/References/GenomeIndices/Human/GRCh38_no_alt_plus_hs38d1/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
+    "hg38":"/home/aquevedo/resources/references/GRCh38/Verily_decoy/bwa-0.7.12/GRCh38_Verily_v1.genome.fa",
+    "grch38":"/home/aquevedo/resources/references/GRCh38/Verily_decoy/bwa-0.7.12/GRCh38_Verily_v1.genome.fa",
     "-":""}
 
 REF_FASTA_DICT = {
-	"hg38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
-	"grch38": "/data_genome1/References/Human/Sequences/Genome/GRCh38_no_alt_plus_hs38d1_Verily/GCA_000001405.15_GRCh38_no_alt_plus_hs38d1_analysis_set.fna",
+	"hg38": "/home/aquevedo/resources/references/GRCh38/Verily_decoy/GRCh38_Verily_v1.genome.fa",
+	"grch38": "/home/aquevedo/resources/references/GRCh38/Verily_decoy/GRCh38_Verily_v1.genome.fa",
 	"mm10": ""
 }
 
@@ -73,8 +73,8 @@ GOLD_INDELS_DICT = {
 }
 
 PON_DICT = {
-	"hg38": "-",
-	"grch38": "-",
+	"hg38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz.tbi",
+	"grch38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz.tbi",
 	"mm10": "-"
 }
 
@@ -104,7 +104,7 @@ data["R1Basename"] = [f.replace(".fastq.gz","") for f in data["R1"]]
 data["R2Basename"] = [f.replace(".fastq.gz","") for f in data["R2"]]
 
 # Alignment
-data["PathGenome"] = [GENOME_PATH[i] for i in data.Genome]
+data["IxPrefPath"] = [GENOME_IX_PREFIX_DICT[i] for i in data.Genome]
 
 data["ReadID"] = [field_from_sample(sample, "readID") for sample in data.Samples]
 data["ReadLetter"] = [field_from_sample(sample, "readLetter") for sample in data.Samples]
@@ -177,7 +177,7 @@ rule bwa_map:
 	params:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
-		bwa_ix = lambda wildcards: expand(data.PathGenome[data.Samples == wildcards.sample].values[0]),
+		bwa_ix = lambda wildcards: expand(data.IxPrefPath[data.Samples == wildcards.sample].values[0]),
 		bwa_threads = get_resource("bwa", "threads") - 5
 	shell:
 		'''
