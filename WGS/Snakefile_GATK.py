@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import glob
 import re
+from utils_snakemake_workflows import *
 
 ##################################################
 ##				Configutation					##
@@ -25,6 +26,7 @@ PICARD_FOLDER = config["picard_folder"]
 # Dir with Conda ennvironment .yaml definintions and tmporary folder
 CONDADIR = config["condadir"]
 TMP_FOLDER = config["tmp_folder"]
+SCRIPT_FOLDER = config["script_folder"]
 
 ## Function to create directories unless they already exist
 def tryMkdir(path):
@@ -78,6 +80,12 @@ PON_DICT = {
 	"mm10": "-"
 }
 
+REGIONS_MUTECT_DIC = {
+	"hg38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
+	"grch38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
+	"mm10": "-"
+}
+
 # Number chromosomes not including X (Y is discarded)
 NCHR_DIC = {
 	"hg38": 22,
@@ -114,11 +122,13 @@ data["ReadLane"] = [field_from_sample(sample, "readLane") for sample in data.Sam
 # Base quality score recalibration parame
 data["RefFASTA"] = [REF_FASTA_DICT[i] for i in data.Genome]
 data["GoldIndels"] = [GOLD_INDELS_DICT[i] for i in data.Genome]
+data["Gnomad"] = [GNOMAD_SITES_DICT[i] for i in data.Genome]
 data["DbSNP"] = [DBSNP_DICT[i] for i in data.Genome]
 
 # Mutec2 resources
 data["PanelNormals"] = [PON_DICT[i] for i in data.Genome]
 data["NumChr"] = [NCHR_DIC[i] for i in data.Genome]
+data["RegionsMutect"] = [REGIONS_MUTECT_DIC[i] for i in data.Genome]
 
 # Map Control and Tumor samples
 # /* TO DO */ 
@@ -146,7 +156,7 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
-		expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique())
+		expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique())
 
 
 def get_readPair(pairID, fq_list):
@@ -177,7 +187,7 @@ rule bwa_map:
 	params:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
-		bwa_ix = lambda wildcards: expand(data.IxPrefPath[data.Samples == wildcards.sample].values[0]),
+		bwa_ix = lambda wildcards: data.IxPrefPath[data.Samples == wildcards.sample].values[0],
 		bwa_threads = get_resource("bwa", "threads") - 5
 	shell:
 		'''
@@ -362,7 +372,7 @@ rule createBQSR_after:
 		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
-		-I {input.nodup_bam} \
+		-I {input.recal_bam} \
 		-R {params.ref_fasta} \
 		--known-sites {params.gold_indels} \
 		--known-sites {params.db_snp} \
@@ -400,7 +410,73 @@ rule analyzeCovariates:
 			-csv {output.csv} |& tee {log}
 		'''
 
+rule mutec2_tumor_vs_normal:
+	input:
+		tumor = lambda wildcards: 
+			expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
+				   sample = get_column_df(data, "Samples", "", 
+				   					      Individual = wildcards.indiv,
+				   					      IsControl = "no")),
+		normal = lambda wildcards: 
+			expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
+				   sample = get_column_df(data, "Samples", "", 
+				   					      Individual = wildcards.indiv,
+				   					      IsControl = "yes")),
+	output:
+		RESDIR + "variants/{indiv}_somatic.vcf.gz",
+		RESDIR + "db/{indiv}_read-orientation-model.tar.gz"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime"),
+	params:
+		reference = lambda wildcards: data.IxPrefPath[data.Individual == wildcards.indiv].values[0],
 
+		tumor_I_param = lambda wildcards: 
+			expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
+						    data, "Samples", "", "-I ", Individual = "indivA", IsControl = "no"),
+		normal_I_param = lambda wildcards: 
+			expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
+						    data, "Samples", "", "-I ", Individual = "indivA", IsControl = "yes"),
+		normal_name = lambda wildcards:
+			get_column_df(data, "Samples", "", Individual = wildcards.indiv, IsControl = "yes"),
+
+		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
+		pon = lambda wildcards: data.PanelNormals[data.Individual == wildcards.indiv].values[0],
+		regions = "chr_paralell",
+
+		n_chroms = lambda wildcards: data.NumChr[data.Individual == wildcards.indiv].values[0],
+		
+		vcf_dir = RESDIR + "variants/",
+		gatk_folder = GATK_FOLDER,
+		db_dir = RESDIR + "db/",
+		
+		script_folder = SCRIPT_FOLDER,
+		tmp = TMP_FOLDER
+	conda:
+		CONDADIR + "gatk-4.2.2.0.yaml"
+	log:
+		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}.log"
+	shell:
+		'''
+		{params.scrpit_folder}mutect2_chr.sh \
+			{params.reference} \
+			{params.tumor_I_param} \
+			{params.normal_I_param} \
+			{params.normal_name} \
+			{params.gnomad} \
+			{params.pon} \
+			{params.regions} \
+			{wildcards.indiv}
+			{params.n_chroms} \
+			{threads} \
+			{resources.mem_mb} \
+			{params.vcf_dir} \
+			{params.gatk_folder} \
+			{params.db_dir} \
+			{params.tmp} 	
+		'''
 
 
 
