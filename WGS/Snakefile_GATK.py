@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import glob
 import re
-from utils_snakemake_workflows import *
+from utils_snakemake_workflows.utils import *
 
 ##################################################
 ##				Configutation					##
