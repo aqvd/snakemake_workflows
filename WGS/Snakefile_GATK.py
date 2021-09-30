@@ -156,7 +156,11 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
-		expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique())
+		expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
+		expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
+		expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
+		# expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
+		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
 
 
 def get_readPair(pairID, fq_list):
