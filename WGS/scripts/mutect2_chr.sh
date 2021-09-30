@@ -27,7 +27,8 @@ usage="Usage:
 Notes: ¡¡¡ Directories must end with '/' !!!
 "
 
-[[ $# -ne 15 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
+if [[ $# -ne 15 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
+	echo "Number arguments: $# != 15"
 	echo "${usage}"; exit 01
 fi
 
@@ -53,26 +54,33 @@ db_dir=${14}
 tmp_dir=${15}
 
 export ref_fa
-export tumor
-export normal
+
+export tumor_I
+export normal_I
 export normal_sample
+
 export gnomad
 export pon
+
 export indiv
+
+export threads
+export mem_gatk
+
 export gatk_dir
 export vcf_dir
 export db_dir
-export threads
 
-all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) X"
+# all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) chrX"
+all_chroms="$(printf "chr%s " $(seq 10 11)) chrX"
 
-function run_mutec2 {
+function run_mutect2 {
 	local chr=$1
 
 	echo "ref_fa = ${ref_fa}" 
 
-	echo "tumor = ${tumor}" 
-	echo "normal = ${normal}" 
+	echo "tumor = ${tumor_I}" 
+	echo "normal = ${normal_I}" 
 	echo "normal_sample = ${normal_sample}" 
 	echo "gnomad = ${gnomad}" 
 	echo "pon = ${pon}" 
@@ -81,46 +89,46 @@ function run_mutec2 {
 	echo "vcf_dir = ${vcf_dir}" 
 	echo "db_dir = ${db_dir}"
 
-	local out_mutec2="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
+	local out_mutect2="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
 	local output_f1r2="${db_dir}${indiv}_${chr}-f1r2.tar.gz"
 
-	echo "out_mutec2 = ${out_mutec2}"
+	echo "out_mutect2 = ${out_mutect2}"
 	echo "output_f1r2 = ${output_f1r2}"
 
-	# 1- run Mutec2 with --f1r2 argument to detect strand bias later
+	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
 	echo -e "Starting Mutect2: Individual: ${indiv}:${chr}"
 	
-	${gatk_dir}/gatk Mutec2 \
-		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+	${gatk_dir}/gatk Mutect2 \
+		--java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
 		-R "${ref_fa}" \
-		-I "${tumor}" \
-		-I "${normal}" \
+		-I "${tumor_I}" \
+		-I "${normal_I}" \
 		-L "${chr}" \
 		--f1r2-tar-gz "${output_f1r2}" \
 		-normal "${normal}" \
 		--germline-resource "${gnomad}" \
 		--panel-of-normals "${pon}" \
-		-O "${out_mutec2}" &&
+		-O "${out_mutect2}" &&
 	
 	echo -e "\n Finised Mutect2"
-	echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
+	# echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
 
-	local out_filter_mutec2="${vcf_dir}${indiv}_${chr}_filtered.vcf.gz"
+	# local out_filter_mutect2="${vcf_dir}${indiv}_${chr}_filtered.vcf.gz"
 	
-	${gatk_dir}/gatk FilterMutectCalls -R "${ref_fa}" \
-		-V "${out_mutec2}" \
-		-O "${out_filter_mutec2}" &&
+	# ${gatk_dir}/gatk FilterMutectCalls -R "${ref_fa}" \
+	# 	-V "${out_mutect2}" \
+	# 	-O "${out_filter_mutect2}" &&
 
-	echo -e " << Finished FilterMutectCalls"
+	# echo -e " << Finished FilterMutectCalls"
 }
 
 # Function must be exported to use parallel 
-export -f run_mutec2
+export -f run_mutect2
 
 if [[ "${regions}" == "chr_paralell" ]]; then
 	
 	echo -e "\n        -> Runing in parallel in all chromosomes: ${all_chroms}"
-	echo "${all_chroms}" | sed -E -e 's/ /\n/g' | parallel -j ${threads} run_mutec2 &&
+	echo "${all_chroms}" | sed -E -e 's/ /\n/g' | parallel -j ${threads} run_mutect2 &&
 	echo -e "\n...Finised parallel mutect2..."
 
 	# 2- Concatenate per chr results
@@ -134,7 +142,7 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 	echo -e "<< LearnReadOrientationModel Finised\n"
 
 	all_mutect_files=`for chr in ${all_chroms}; do 
-		printf -- "${vcf_dir}${indiv}_${chr}_filtered.vcf.gz "; done`
+		printf -- "${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
 
 	echo -e "\n\t>> bcftools merge VCF files\nINPUT FILES:\n${all_f1r2_input}"
 		bcftools merge ${all_mutect_files} -Oz -o ${vcf_dir}${indiv}_somatic.vcf.gz &&
@@ -145,7 +153,7 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 elif [[ -e ${regions} ]]; then
 	
 	echo -e "\n        -> Runing mutect2 in exome regions ${regions}"
-	run_mutec2 ${regions} 
+	run_mutect2 ${regions} 
 	echo -e "\n...Finised Mutect2"
 
 	exit 0

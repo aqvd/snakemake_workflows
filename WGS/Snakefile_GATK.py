@@ -156,11 +156,11 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
-		expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
-		expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
-		expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
-		# expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
-		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
+		# expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
+		# expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
+		# expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
+		expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
+		expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
 
 
 def get_readPair(pairID, fq_list):
@@ -320,7 +320,7 @@ rule createBQSR_before:
 rule applyBQSR:
 	input:
 		nodup_bam = DATADIR + "align/{sample}_rg_dedup.bam",
-		recal_tab = DATADIR + "align/{sample}_BSQR.table"
+		recal_tab = DATADIR + "align/{sample}_BSQR_before.table"
 	output:
 		recal_bam = DATADIR + "align/{sample}_rg_dedup_recal.bam"
 	threads:
@@ -341,10 +341,10 @@ rule applyBQSR:
 		'''
 		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
-		ApplyBSQR \
+		ApplyBQSR \
 		-R {params.ref_fasta} \
 		-I {input.nodup_bam} \
-		--bsqr-recal-file {input.recal_tab}
+		--bqsr-recal-file {input.recal_tab} \
 		-O {output.recal_bam} |& tee {log}
 		'''
 
@@ -387,7 +387,7 @@ rule createBQSR_after:
 rule analyzeCovariates:
 	input:
 		recal_before = DATADIR + "align/{sample}_BSQR_before.table",
-		recal_afer = DATADIR + "align/{sample}_BSQR_after.table"
+		recal_after = DATADIR + "align/{sample}_BSQR_after.table"
 	output:
 		plots = RESDIR + "plots/{sample}_analyzeCovariates.pdf",
 		csv = LOGDIR + "gatk/analyzeCovariates_csv_{sample}.log"
@@ -407,7 +407,7 @@ rule analyzeCovariates:
 		'''
 		{params.gatk_folder}gatk \
 			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
-			AnalyzeCovariates
+			AnalyzeCovariates \
 			-before {input.recal_before} \
 			-after {input.recal_after} \
 			-plots {output.plots} \
@@ -435,7 +435,7 @@ rule mutec2_tumor_vs_normal:
 		mem_mb = get_resource("gatk", "mem_mb"),
 		walltime = get_resource("gatk","walltime"),
 	params:
-		reference = lambda wildcards: data.IxPrefPath[data.Individual == wildcards.indiv].values[0],
+		reference = lambda wildcards: data.RefFASTA[data.Individual == wildcards.indiv].values[0],
 
 		tumor_I_param = lambda wildcards: 
 			expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
@@ -444,7 +444,7 @@ rule mutec2_tumor_vs_normal:
 			expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
 						    data, "Samples", "", "-I ", Individual = "indivA", IsControl = "yes"),
 		normal_name = lambda wildcards:
-			get_column_df(data, "Samples", "", Individual = wildcards.indiv, IsControl = "yes"),
+			get_column_df(data, "Samples", "", Individual = wildcards.indiv, IsControl = "yes")[0],
 
 		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
 		pon = lambda wildcards: data.PanelNormals[data.Individual == wildcards.indiv].values[0],
@@ -464,11 +464,11 @@ rule mutec2_tumor_vs_normal:
 		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}.log"
 	shell:
 		'''
-		{params.scrpit_folder}mutect2_chr.sh \
+		{params.script_folder}mutect2_chr.sh \
 			{params.reference} \
-			{params.tumor_I_param} \
-			{params.normal_I_param} \
-			{params.normal_name} \
+			"{params.tumor_I_param}" \
+			"{params.normal_I_param}" \
+			"{params.normal_name}" \
 			{params.gnomad} \
 			{params.pon} \
 			{params.regions} \
