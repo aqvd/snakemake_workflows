@@ -164,10 +164,18 @@ def expand_argument(path, string_to_expand,
 
     return(res)
 
-DATADIR="/home/aquevedo/projects/p1/data/"
+DATADIR="/home/aquevedo/projects/test_GATKsnake/data/"
+RESDIR="/home/aquevedo/projects/test_GATKsnake/res/"
+
+get_column_df(data, "Samples", "", Individual = data.Individual[1], IsControl = "yes")[0]
 
 expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
      data, "Samples", "", "-I ", Individual = "indivA", IsControl = "no")
 
+expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
+                   sample = get_column_df(data, "Samples", "", 
+                                          Individual = data.Individual.values[0],
+                                          IsControl = "no"))
+expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique())
 
 

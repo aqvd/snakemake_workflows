@@ -27,8 +27,8 @@ usage="Usage:
 Notes: ¡¡¡ Directories must end with '/' !!!
 "
 
-if [[ $# -ne 15 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
-	echo "Number arguments: $# != 15"
+if [[ $# -lt 15 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
+	echo "Number arguments: $# < 15"
 	echo "${usage}"; exit 01
 fi
 
@@ -82,9 +82,12 @@ function run_mutect2 {
 	echo "tumor = ${tumor_I}" 
 	echo "normal = ${normal_I}" 
 	echo "normal_sample = ${normal_sample}" 
+
 	echo "gnomad = ${gnomad}" 
 	echo "pon = ${pon}" 
+
 	echo "indiv = ${indiv}" 
+	
 	echo "gatk_dir = ${gatk_dir}" 
 	echo "vcf_dir = ${vcf_dir}" 
 	echo "db_dir = ${db_dir}"
@@ -97,18 +100,20 @@ function run_mutect2 {
 
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
 	echo -e "Starting Mutect2: Individual: ${indiv}:${chr}"
+
+	command="${gatk_dir}/gatk Mutect2 \
+		--java-options \"-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}\" \
+		-R \"${ref_fa}\" \
+		${tumor_I} \
+		${normal_I} \
+		-normal ${normal_sample} \
+		-L \"${chr}\" \
+		--f1r2-tar-gz \"${output_f1r2}\" \
+		--germline-resource \"${gnomad}\" \
+		--panel-of-normals \"${pon}\" \
+		-O \"${out_mutect2}\"" #&&
 	
-	${gatk_dir}/gatk Mutect2 \
-		--java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
-		-R "${ref_fa}" \
-		-I "${tumor_I}" \
-		-I "${normal_I}" \
-		-L "${chr}" \
-		--f1r2-tar-gz "${output_f1r2}" \
-		-normal "${normal}" \
-		--germline-resource "${gnomad}" \
-		--panel-of-normals "${pon}" \
-		-O "${out_mutect2}" &&
+	echo ${command}
 	
 	echo -e "\n Finised Mutect2"
 	# echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
@@ -132,6 +137,7 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 	echo -e "\n...Finised parallel mutect2..."
 
 	# 2- Concatenate per chr results
+	#    2.1- LearnReadOrientation model for all chromosomes
 	all_f1r2_input=`for chr in ${all_chroms}; do 
 		printf -- "-I ${db_dir}${indiv}_${chr}-f1r2.tar.gz "; done`
 
@@ -141,11 +147,12 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 			-O ${db_dir}${indiv}_read-orientation-model.tar.gz &&
 	echo -e "<< LearnReadOrientationModel Finised\n"
 
+	#    2.2- 
 	all_mutect_files=`for chr in ${all_chroms}; do 
 		printf -- "${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
 
 	echo -e "\n\t>> bcftools merge VCF files\nINPUT FILES:\n${all_f1r2_input}"
-		bcftools merge ${all_mutect_files} -Oz -o ${vcf_dir}${indiv}_somatic.vcf.gz &&
+		bcftools merge ${all_mutect_files} -Oz -o "${vcf_dir}${indiv}_somatic.vcf.gz" &&
 	echo -e "<< Merge VCF files Finised\n"
 
 	exit 0
