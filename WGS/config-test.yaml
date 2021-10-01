@@ -46,7 +46,11 @@ rules:
         res:
             mem_mb: 8192 #in MB
             walltime: 480
-    
+    Mutect2:
+        res:
+            threads: 6
+            mem_mb: 8192 #in MB
+            walltime: 480    
     create_bigWig:
         res:
             mem_mb: 8000

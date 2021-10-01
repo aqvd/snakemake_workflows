@@ -36,7 +36,7 @@ def tryMkdir(path):
 		pass
 
 [tryMkdir(p) for p in (DATADIR + "stats", LOGDIR, TMP_FOLDER,
-					   RESDIR + "fastQC", RESDIR + "plots", RESDIR + "varaints",
+					   RESDIR + "fastQC", RESDIR + "plots", RESDIR + "variants",
 					   RESDIR + "db")]
 
 
@@ -75,8 +75,8 @@ GOLD_INDELS_DICT = {
 }
 
 PON_DICT = {
-	"hg38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz.tbi",
-	"grch38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz.tbi",
+	"hg38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz",
+	"grch38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz",
 	"mm10": "-"
 }
 
@@ -84,6 +84,12 @@ REGIONS_MUTECT_DIC = {
 	"hg38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
 	"grch38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
 	"mm10": "-"
+}
+
+EXOME_TARGETS_DICT = {
+	"hg38":
+	"grch38":
+	"mm10":
 }
 
 # Number chromosomes not including X (Y is discarded)
@@ -383,7 +389,6 @@ rule createBQSR_after:
 		-O {output.recal_tab} |& tee {log}
 		'''
 
-
 rule analyzeCovariates:
 	input:
 		recal_before = DATADIR + "align/{sample}_BSQR_before.table",
@@ -430,7 +435,7 @@ rule mutec2_tumor_vs_normal:
 		RESDIR + "variants/{indiv}_somatic.vcf.gz",
 		RESDIR + "db/{indiv}_read-orientation-model.tar.gz"
 	threads:
-		1
+		get_resource("Mutect2", "threads")
 	resources:
 		mem_mb = get_resource("gatk", "mem_mb"),
 		walltime = get_resource("gatk","walltime"),

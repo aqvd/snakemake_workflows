@@ -90,6 +90,7 @@ function run_mutect2 {
 	
 	echo "gatk_dir = ${gatk_dir}" 
 	echo "vcf_dir = ${vcf_dir}" 
+	echo "tmp_dir = ${tmp_dir}" 
 	echo "db_dir = ${db_dir}"
 
 	local out_mutect2="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
@@ -101,7 +102,7 @@ function run_mutect2 {
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
 	echo -e "Starting Mutect2: Individual: ${indiv}:${chr}"
 
-	command="${gatk_dir}/gatk Mutect2 \
+	command="${gatk_dir}gatk Mutect2 \
 		--java-options \"-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}\" \
 		-R \"${ref_fa}\" \
 		${tumor_I} \
@@ -114,6 +115,8 @@ function run_mutect2 {
 		-O \"${out_mutect2}\"" #&&
 	
 	echo ${command}
+
+	${command} &&
 	
 	echo -e "\n Finised Mutect2"
 	# echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
