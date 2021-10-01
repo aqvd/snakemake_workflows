@@ -80,7 +80,7 @@ function run_mutect2 {
 
 	echo "ref_fa = ${ref_fa}" 
 	echo "regions = $chr"
-	
+
 	echo "tumor = ${tumor_I}" 
 	echo "normal = ${normal_I}" 
 	echo "normal_sample = ${normal_sample}" 
@@ -104,8 +104,9 @@ function run_mutect2 {
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
 	echo -e "\n\t >> ======= Starting Mutect2: Individual: ${indiv}:${chr} ========= <<"
 
-	command="${gatk_dir}gatk Mutect2 \
+	command="${gatk_dir}gatk \
 		--java-options \"-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}\" \
+		Mutect2 \
 		-R \"${ref_fa}\" \
 		${tumor_I} \
 		${normal_I} \
@@ -114,11 +115,21 @@ function run_mutect2 {
 		--f1r2-tar-gz \"${output_f1r2}\" \
 		--germline-resource \"${gnomad}\" \
 		--panel-of-normals \"${pon}\" \
-		-O \"${out_mutect2}\"" #&&
+		-O \"${out_mutect2}\""
 	
 	echo ${command}
 
-	${command} &&
+	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+		Mutect2 \
+		-R "${ref_fa}" \
+		${tumor_I} \
+		${normal_I} \
+		-normal "${normal_sample}" \
+		-L "${chr}" \
+		--f1r2-tar-gz "${output_f1r2}" \
+		--germline-resource "${gnomad}" \
+		--panel-of-normals "${pon}" \
+		-O "${out_mutect2}" &&
 	
 	echo -e "\n Finised Mutect2"
 	# echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
