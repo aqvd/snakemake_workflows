@@ -70,6 +70,7 @@ export mem_gatk
 export gatk_dir
 export vcf_dir
 export db_dir
+export tmp_dir
 
 # all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) chrX"
 all_chroms="$(printf "chr%s " $(seq 10 11)) chrX"
@@ -78,7 +79,8 @@ function run_mutect2 {
 	local chr=$1
 
 	echo "ref_fa = ${ref_fa}" 
-
+	echo "regions = $chr"
+	
 	echo "tumor = ${tumor_I}" 
 	echo "normal = ${normal_I}" 
 	echo "normal_sample = ${normal_sample}" 
@@ -100,7 +102,7 @@ function run_mutect2 {
 	echo "output_f1r2 = ${output_f1r2}"
 
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
-	echo -e "Starting Mutect2: Individual: ${indiv}:${chr}"
+	echo -e "\n\t >> ======= Starting Mutect2: Individual: ${indiv}:${chr} ========= <<"
 
 	command="${gatk_dir}gatk Mutect2 \
 		--java-options \"-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}\" \
