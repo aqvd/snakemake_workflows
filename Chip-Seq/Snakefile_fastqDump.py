@@ -57,7 +57,7 @@ rule prefetch_fastq_dump:
 		--outdir {params.Dir} {params.srr} |& tee -a {log} \
 		touch {output} |& tee -a {log}'
 
-rule gzip_rename_fq:
+rule pigz_and_rename_fq:
 	input:
 		FASTQDIR + "{SRR}_{method}.finished"
 	output:
@@ -69,7 +69,7 @@ rule gzip_rename_fq:
 		cond=lambda wildcards: data.Condition[data.Run == wildcards.SRR].values[0],
 		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0]
 	log:
-		FASTQDIR + 'log/fastqDump/{SRR}_gzip.log'
+		FASTQDIR + 'log/fastqDump/{SRR}_{method}_gzip.log'
 	threads: 3
 	shell:
 		'scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} \
