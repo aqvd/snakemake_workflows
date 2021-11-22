@@ -73,7 +73,7 @@ rule pigz_and_rename_fq:
 	threads: 3
 	shell:
 		'scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} \
-								params.cond} {params.rep} {threads} |& tee -a {log}'
+								{params.cond} {params.rep} {threads} |& tee -a {log}'
 
 
 
