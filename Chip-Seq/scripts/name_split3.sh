@@ -22,17 +22,22 @@ THREADS=$6
 
 for f in ${DIR}${SRA}*.fastq ; do
 	if [ -e "${f}" ]; then
-		mate_id="${f##*${SRA}_}"
-		echo -e "Processing mate: ${mate_id} \n"
+		# If paired mates SRR_R1/R2. Grep "_"
+		if ! [[ -z $(echo "${f##*/}" | grep -E "_") ]]; then
+			mate_id="${f##*${SRA}_}"
+			echo -e "Processing mate: ${mate_id} \n"
 
-		new_filename="${DIR}${PROT}_${COND}_${REP}_${SRA}_R${mate_id}"
+			new_filename="${DIR}${PROT}_${COND}_${REP}_${SRA}_R${mate_id}"
 
-		mv "${f}" "${new_filename}" &&
-		echo -e "renaming ${f##*/} to ${new_filename##*/} \n"
+			mv "${f}" "${new_filename}" &&
+			echo -e "renaming ${f##*/} to ${new_filename##*/} \n"
 
-		pigz -p ${THREADS} "${new_filename}" && 
-		echo -e "compressing ${new_filename} using pigz \n"
-		
+			pigz -p ${THREADS} "${new_filename}" && 
+			echo -e "compressing ${new_filename} using pigz \n"
+		else
+			echo -e "${f##*/} is SINGLE library"
+		fi
+
 	else
 		echo -e "File ${f} does not exist"
 		continue
