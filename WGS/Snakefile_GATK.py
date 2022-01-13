@@ -9,7 +9,7 @@ from utils_snakemake_workflows.utils import *
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "/home/aquevedo/snakemake_workflows/test_W/config-test.yaml"
+configfile: "/home/aquevedo/snakemake_workflows/test_WGS/config-test.yaml"
 
 TABLE_NAME = config["tableName"]
 
