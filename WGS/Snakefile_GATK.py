@@ -128,12 +128,12 @@ data["R2Basename"] = [f.replace(".fastq.gz","") for f in data["R2"]]
 data["IxPrefPath"] = [GENOME_IX_PREFIX_DICT[i] for i in data.Genome]
 
 # To add reag group in SAM files
-data["ReadID"] = [field_from_sample(sample, "readID") for sample in SamplesIDalign]
-data["ReadLetter"] = [field_from_sample(sample, "readLetter") for sample in SamplesIDalign]
-data["ReadRun"] = [field_from_sample(sample, "readRun") for sample in SamplesIDalign]
-data["ReadLane"] = [field_from_sample(sample, "readLane") for sample in SamplesIDalign]
+data["ReadID"] = [field_from_sample(sample, "readID") for sample in data.SamplesIDalign]
+data["ReadLetter"] = [field_from_sample(sample, "readLetter") for sample in data.SamplesIDalign]
+data["ReadRun"] = [field_from_sample(sample, "readRun") for sample in data.SamplesIDalign]
+data["ReadLane"] = [field_from_sample(sample, "readLane") for sample in data.SamplesIDalign]
 data["RunLane"] = data.ReadRun + "_" + data.ReadLane
-data["ReadGroupID"] = data.RunLane + "_" + data.Samples
+data["ReadGroupID"] = data.RunLane + "_" + data.SamplesIDalign
 
 # Base quality score recalibration parame
 data["RefFASTA"] = [REF_FASTA_DICT[i] for i in data.Genome]
