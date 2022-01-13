@@ -42,8 +42,10 @@ def tryMkdir(path):
 
 ## Genome index prefixes paths
 GENOME_IX_PREFIX_DICT = {
-	"mm9":"",
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/GRCm38.p6_standardAndMito_bwa",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/GRCm38.p6_standardAndMito_bwa",
     "mm10":"" ,
+    "mm39": "",
     "hg19":"",
     "grch37":"",
     "hg38":"/home/aquevedo/resources/references/GRCh38/Verily_decoy/bwa-0.7.12/GRCh38_Verily_v1.genome.fa",
@@ -51,9 +53,14 @@ GENOME_IX_PREFIX_DICT = {
     "-":""}
 
 REF_FASTA_DICT = {
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/GRCm38.p6_standardAndMito.fa",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/GRCm38.p6_standardAndMito.fa",
+    "mm10":"/home/aquevedo/genomes/mouse/mm39/mm39.fa" ,
+    "mm39": "/home/aquevedo/genomes/mouse/mm39/mm39.fa",
+    "hg19":"",
+    "grch37":"",
 	"hg38": "/home/aquevedo/resources/references/GRCh38/Verily_decoy/GRCh38_Verily_v1.genome.fa",
 	"grch38": "/home/aquevedo/resources/references/GRCh38/Verily_decoy/GRCh38_Verily_v1.genome.fa",
-	"mm10": ""
 }
 
 DBSNP_DICT = {
@@ -120,10 +127,13 @@ data["R2Basename"] = [f.replace(".fastq.gz","") for f in data["R2"]]
 # Alignment
 data["IxPrefPath"] = [GENOME_IX_PREFIX_DICT[i] for i in data.Genome]
 
-data["ReadID"] = [field_from_sample(sample, "readID") for sample in data.Samples]
-data["ReadLetter"] = [field_from_sample(sample, "readLetter") for sample in data.Samples]
-data["ReadRun"] = [field_from_sample(sample, "readRun") for sample in data.Samples]
-data["ReadLane"] = [field_from_sample(sample, "readLane") for sample in data.Samples]
+# To add reag group in SAM files
+data["ReadID"] = [field_from_sample(sample, "readID") for sample in SamplesIDalign]
+data["ReadLetter"] = [field_from_sample(sample, "readLetter") for sample in SamplesIDalign]
+data["ReadRun"] = [field_from_sample(sample, "readRun") for sample in SamplesIDalign]
+data["ReadLane"] = [field_from_sample(sample, "readLane") for sample in SamplesIDalign]
+data["RunLane"] = data.ReadRun + "_" + data.ReadLane
+data["ReadGroupID"] = data.RunLane + "_" + data.Samples
 
 # Base quality score recalibration parame
 data["RefFASTA"] = [REF_FASTA_DICT[i] for i in data.Genome]
@@ -241,10 +251,10 @@ rule add_readGroup:
 		mem_mb = get_resource("samtools","mem_mb"),
 		walltime = get_resource("samtools","walltime")
 	params:
-		RG = lambda wildcards: expand(data.ReadGroup[data.Samples == wildcards.sample]),
+		ID = lambda wildcards: expand(data.ReadGroupID[data.Samples == wildcards.sample]),
 		PL = lambda wildcards: expand(data.Platform[data.Samples == wildcards.sample]),
-		PU = lambda wildcards: expand(data.PlatformUnit[data.Samples == wildcards.sample]),
-		LB = lambda wildcards: expand(data.Library[data.Samples == wildcards.sample]),
+		PU = lambda wildcards: expand(data.RunLane[data.Samples == wildcards.sample]),
+		LB = lambda wildcards: wildcards.sample,
 		SM = lambda wildcards: wildcards.sample
 	shell:
 		'''
@@ -253,7 +263,7 @@ rule add_readGroup:
 		(
 			samtools view -@ 3 -F 12 -u -O BAM {input.bam} | \
 			samtools addreplacerg -r \
-				"@RG\tID:{params.RG}\tPL:{params.PL}\tPU:{params.PU}\tLB:{params.LB}\tSM:{params.SM}"\
+				"@RG\tID:{params.ID}\tPL:{params.PL}\tPU:{params.PU}\tLB:{params.LB}\tSM:{params.SM}"\
 				-@ {threads} -O BAM - > {output.rg_sorted_bam}
 		) 3>&2 2>&1 1>&3 | tee {log}
 		'''
@@ -432,13 +442,13 @@ rule mutec2_tumor_vs_normal:
 				   					      Individual = wildcards.indiv,
 				   					      IsControl = "yes")),
 	output:
-		RESDIR + "variants/{indiv}_somatic.vcf.gz",
-		RESDIR + "db/{indiv}_read-orientation-model.tar.gz"
+		RESDIR + "variants/{indiv}_{chr}_somatic_unfilt.vcf.gz",
+		RESDIR + "db/{indiv}_{chr}-f1r2.tar.gz"
 	threads:
 		get_resource("Mutect2", "threads")
 	resources:
-		mem_mb = get_resource("gatk", "mem_mb"),
-		walltime = get_resource("gatk","walltime"),
+		mem_mb = get_resource("Mutect2", "mem_mb"),
+		walltime = get_resource("Mutect2","walltime")
 	params:
 		reference = lambda wildcards: data.RefFASTA[data.Individual == wildcards.indiv].values[0],
 
@@ -487,8 +497,105 @@ rule mutec2_tumor_vs_normal:
 			{params.tmp} 	
 		'''
 
+rule learn_read_orientation_model:
+	input:
+		lambda wildcards: expand(RESDIR + "db/" + "{indiv}_{chr}-f1r2.tar.gz", 
+			indiv = wildcards.indiv, 
+			chr = ["chr" + str(x) for x in (range(1, data.NumChr[data.Individual == wildcards.indiv] + 1), "X")])
+	output:
+		RESDIR + "db/" + "{indiv}_read-orientation-model.tar.gz"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("Mutect2", "mem_mb"),
+		walltime = get_resource("Mutect2","walltime")
+	params:
+		I = lambda wildcards, innput: repeat_argument("-I ", input),
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			LearnReadOrientationModel \
+			{params.I} \
+			-O {output}		
+		'''
 
+rule get_pileup_summaries_tumor:
+	input:
+		tumor_bam = lambda wildcards: 
+		expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
+			   sample = data.Samples[(data.Individual == wildcads.indiv) & (data.IsControl == "no") ])
+	output:
+		RESDIR + "db/{indiv}_pileups.table"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			GetPileupSummaries \
+			-I {input.tumor_bam} \
+			-L {params.gnomad} \
+			-V {params.gnomad} \
+			-O {output}
+		'''
 
+rule calculate_contamination_tumor:
+	input:
+		RESDIR + "db/{indiv}_pileups.table"
+	output:
+		RESDIR + "db/{indiv}_contamination.table"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			CalculateContamination \
+			-I {input} \
+			-O {output}
+		'''
+
+rule filter_mutect_calls:
+	input:
+		vcf = RESDIR + "variants/{indiv}_{chr}_somatic_unfilt.vcf.gz",
+		read_orient = RESDIR + "db/{indiv}_{chr}-f1r2.tar.gz",
+		contam = RESDIR + "db/{indiv}_contamination.table"
+	output:
+		RESDIR + "variants/{indiv}_{chr}_somatic_filtered.vcf.gz"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			FilterMutectCalls \
+			-V {input.vcf} \
+	        --contamination-table {input.contam} \
+	        --ob-priors {input.read_orient} \
+	        -O {output}
+		'''
 
 
 

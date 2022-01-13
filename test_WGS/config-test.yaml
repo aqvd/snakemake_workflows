@@ -1,10 +1,18 @@
-# Directories must end with "/" !!!!
-fastqdir: "Users/aqo/Desktop/snakemake_workflows/test_WGS/"
-datadir: "Users/aqo/Desktop/snakemake_workflows/test_WGS/data/"
-resdir: "Users/aqo/Desktop/snakemake_workflows/test_WGS/res/"
-logdir: "Users/aqo/Desktop/snakemake_workflows/test_WGS/log/"
+tableName: "/home/aquevedo/snakemake_workflows/test_WGS/table_test_GATK_WXA_mouse.txt"
 
-tableName: "test_tableName.txt"
+# Directories must end with "/" !!!!
+fastqdir: "/home/aquevedo/snakemake_workflows/test_WGS/"
+datadir: "/home/aquevedo/snakemake_workflows/test_WGS/data/"
+resdir: "/home/aquevedo/snakemake_workflows/test_WGS/res/"
+logdir: "/home/aquevedo/snakemake_workflows/test_WGS/log/"
+
+gatk_folder: "/home/aquevedo/software/gatk-4.2.2.0/"
+picard_folder: ""
+
+condadir: "/home/aquevedo/snakemake_workflows/WGS/env/"
+tmp_folder: "/home/aquevedo/snakemake_workflows/test_WGS/tmp/"
+script_folder: "/home/aquevedo/snakemake_workflows/WGS/scripts/"
+
 
 rules:
     default:
