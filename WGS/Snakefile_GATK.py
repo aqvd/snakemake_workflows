@@ -94,9 +94,9 @@ REGIONS_MUTECT_DIC = {
 }
 
 EXOME_TARGETS_DICT = {
-	"hg38":
-	"grch38":
-	"mm10":
+	"hg38": "",
+	"grch38": "",
+	"mm10": ""
 }
 
 # Number chromosomes not including X (Y is discarded)
@@ -192,9 +192,9 @@ def get_readPair(pairID, fq_list):
 rule bwa_map:
 	input:
 		R1 = lambda wildcards: expand(FASTQDIR + '{R1}',
-			R1 = data.R1[data.Samples == wildcards.sample].values),
+			R1 = data.R1[data.SamplesIDalign == wildcards.sample].values),
 		R2 = lambda wildcards: expand(FASTQDIR + '{R2}',
-			R2 = data.R2[data.Samples == wildcards.sample].values)
+			R2 = data.R2[data.SamplesIDalign == wildcards.sample].values)
 	output:
 		bam = temp(DATADIR + 'align/{sample}_unsorted.bam')
 	log:
@@ -207,7 +207,7 @@ rule bwa_map:
 	params:
 		R1 = lambda wildcards, input: get_readPair("R1", input.R1),
 		R2 = lambda wildcards, input: get_readPair("R2", input.R2),
-		bwa_ix = lambda wildcards: data.IxPrefPath[data.Samples == wildcards.sample].values[0],
+		bwa_ix = lambda wildcards: data.IxPrefPath[data.SamplesIDalign == wildcards.sample].values[0],
 		bwa_threads = get_resource("bwa", "threads") - 5
 	shell:
 		'''
