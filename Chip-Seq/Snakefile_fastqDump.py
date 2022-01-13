@@ -6,6 +6,9 @@ import glob
 FASTQDIR="/home/aquevedo/fastq/SraRunTable-GSE144833_SUIT2control_rna_exome/"
 ACC_TABLE="/home/aquevedo/projects/SUIT2control_rna_exome/SraRunTable_SUIT2cont_GSE144833.csv"
 
+SCRIPTDIR="/home/aquevedo/snakemake_workflows/Chip-Seq/scripts/"
+
+
 ##Function to create directories unless they already exist
 def tryMkdir(path):
 	try:
@@ -72,7 +75,7 @@ rule pigz_and_rename_fq:
 		FASTQDIR + 'log/fastqDump/{SRR}_{method}_gzip.log'
 	threads: 3
 	shell:
-		'scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} \
+		SCRIPTDIR + 'name_split3.sh {params.Dir} {params.srr} {params.prot} \
 								{params.cond} {params.rep} {threads} |& \
 		tee -a {log} && \
 		touch {output}'

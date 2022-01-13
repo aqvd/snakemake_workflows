@@ -432,13 +432,13 @@ rule mutec2_tumor_vs_normal:
 				   					      Individual = wildcards.indiv,
 				   					      IsControl = "yes")),
 	output:
-		RESDIR + "variants/{indiv}_somatic.vcf.gz",
-		RESDIR + "db/{indiv}_read-orientation-model.tar.gz"
+		RESDIR + "variants/{indiv}_{chr}_somatic_unfilt.vcf.gz",
+		RESDIR + "db/{indiv}_{chr}-f1r2.tar.gz"
 	threads:
 		get_resource("Mutect2", "threads")
 	resources:
-		mem_mb = get_resource("gatk", "mem_mb"),
-		walltime = get_resource("gatk","walltime"),
+		mem_mb = get_resource("Mutect2", "mem_mb"),
+		walltime = get_resource("Mutect2","walltime")
 	params:
 		reference = lambda wildcards: data.RefFASTA[data.Individual == wildcards.indiv].values[0],
 
@@ -487,8 +487,105 @@ rule mutec2_tumor_vs_normal:
 			{params.tmp} 	
 		'''
 
+rule learn_read_orientation_model:
+	input:
+		lambda wildcards: expand(RESDIR + "db/" + "{indiv}_{chr}-f1r2.tar.gz", 
+			indiv = wildcards.indiv, 
+			chr = ["chr" + str(x) for x in (range(1, data.NumChr[data.Individual == wildcards.indiv] + 1), "X")])
+	output:
+		RESDIR + "db/" + "{indiv}_read-orientation-model.tar.gz"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("Mutect2", "mem_mb"),
+		walltime = get_resource("Mutect2","walltime")
+	params:
+		I = lambda wildcards, innput: repeat_argument("-I ", input),
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			LearnReadOrientationModel \
+			{params.I} \
+			-O {output}		
+		'''
 
+rule get_pileup_summaries_tumor:
+	input:
+		tumor_bam = lambda wildcards: 
+		expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
+			   sample = data.Samples[(data.Individual == wildcads.indiv) & (data.IsControl == "no") ])
+	output:
+		RESDIR + "db/{indiv}_pileups.table"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			GetPileupSummaries \
+			-I {input.tumor_bam} \
+			-L {params.gnomad} \
+			-V {params.gnomad} \
+			-O {output}
+		'''
 
+rule calculate_contamination_tumor:
+	input:
+		RESDIR + "db/{indiv}_pileups.table"
+	output:
+		RESDIR + "db/{indiv}_contamination.table"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			CalculateContamination \
+			-I {input} \
+			-O {output}
+		'''
+
+rule filter_mutect_calls:
+	input:
+		vcf = RESDIR + "variants/{indiv}_{chr}_somatic_unfilt.vcf.gz",
+		read_orient = RESDIR + "db/{indiv}_{chr}-f1r2.tar.gz",
+		contam = RESDIR + "db/{indiv}_contamination.table"
+	output:
+		RESDIR + "variants/{indiv}_{chr}_somatic_filtered.vcf.gz"
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		gatk_folder = GATK_FOLDER,
+		tmp = TMP_FOLDER
+	shell:
+		'''
+		{params.gatk_folder}/gatk \
+			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			FilterMutectCalls \
+			-V {input.vcf} \
+	        --contamination-table {input.contam} \
+	        --ob-priors {input.read_orient} \
+	        -O {output}
+		'''
 
 
 

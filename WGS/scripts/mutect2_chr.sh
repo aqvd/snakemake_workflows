@@ -73,13 +73,13 @@ export db_dir
 export tmp_dir
 
 # all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) chrX"
-all_chroms="$(printf "chr%s " $(seq 10 11)) chrX"
+all_chroms="$(printf "chr%s " $(seq 10 11))chrX"
 
 function run_mutect2 {
 	local chr=$1
 
 	echo "ref_fa = ${ref_fa}" 
-	echo "regions = $chr"
+	echo "regions = ${chr}"
 
 	echo "tumor = ${tumor_I}" 
 	echo "normal = ${normal_I}" 
@@ -95,7 +95,7 @@ function run_mutect2 {
 	echo "tmp_dir = ${tmp_dir}" 
 	echo "db_dir = ${db_dir}"
 
-	local out_mutect2="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
+	local out_mutect2="${vcf_dir}${indiv}_${chr}_somatic_unfilt.vcf.gz"
 	local output_f1r2="${db_dir}${indiv}_${chr}-f1r2.tar.gz"
 
 	echo "out_mutect2 = ${out_mutect2}"
@@ -154,22 +154,22 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 
 	# 2- Concatenate per chr results
 	#    2.1- LearnReadOrientation model for all chromosomes
-	all_f1r2_input=`for chr in ${all_chroms}; do 
-		printf -- "-I ${db_dir}${indiv}_${chr}-f1r2.tar.gz "; done`
+	# all_f1r2_input=`for chr in ${all_chroms}; do 
+	# 	printf -- "-I ${db_dir}${indiv}_${chr}-f1r2.tar.gz "; done`
 
-	echo -e "\n\t>> LearnReadOrientationModel\nINPUT FILES:\n${all_f1r2_input}"
-		${gatk_dir}/gatk LearnReadOrientationModel 
-			$all_f1_r2_input \
-			-O ${db_dir}${indiv}_read-orientation-model.tar.gz &&
-	echo -e "<< LearnReadOrientationModel Finised\n"
+	# echo -e "\n\t>> LearnReadOrientationModel\nINPUT FILES:\n${all_f1r2_input}\n"
+	# 	${gatk_dir}/gatk LearnReadOrientationModel 
+	# 		${all_f1r2_input} \
+	# 		-O ${db_dir}${indiv}_read-orientation-model.tar.gz &&
+	# echo -e "<< LearnReadOrientationModel Finised\n"
 
-	#    2.2- 
-	all_mutect_files=`for chr in ${all_chroms}; do 
-		printf -- "${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
+	# #    2.2- 
+	# all_mutect_files=`for chr in ${all_chroms}; do 
+	# 	printf -- "${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
 
-	echo -e "\n\t>> bcftools merge VCF files\nINPUT FILES:\n${all_f1r2_input}"
-		bcftools merge ${all_mutect_files} -Oz -o "${vcf_dir}${indiv}_somatic.vcf.gz" &&
-	echo -e "<< Merge VCF files Finised\n"
+	# echo -e "\n\t>> bcftools merge VCF files\nINPUT FILES:\n${all_mutect_files}\n"
+	# 	bcftools merge ${all_mutect_files} -Oz -o "${vcf_dir}${indiv}_somatic.vcf.gz" &&
+	# echo -e "<< Merge VCF files Finised\n"
 
 	exit 0
 
