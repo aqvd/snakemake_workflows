@@ -64,39 +64,57 @@ REF_FASTA_DICT = {
 }
 
 DBSNP_DICT = {
+	"mm9":"",
+	"mm38": "",
+    "mm10":"" ,
+    "mm39": "",
 	"hg38": "/data_genome1/SharedSoftware/GATK/resources_hg38/dbsnp_146.hg38.vcf",
 	"grch38": "/data_genome1/SharedSoftware/GATK/resources_hg38/dbsnp_146.hg38.vcf",
-	"mm10": "-"
 }
 
 GNOMAD_SITES_DICT = {
+	"mm9":"",
+	"mm38": "",
+    "mm10":"" ,
+    "mm39": "",
 	"hg38": "/data_genome1/SharedSoftware/GATK/resources_Mutect2/af-only-gnomad.hg38.vcf.gz",
 	"grch38": "/data_genome1/SharedSoftware/GATK/resources_Mutect2/af-only-gnomad.hg38.vcf.gz",
-	"mm10" : "-"
 }
 
 GOLD_INDELS_DICT = {
+	"mm9":"",
+	"mm38": "",
+    "mm10":"" ,
+    "mm39": "",
 	"hg38": "/data_genome1/SharedSoftware/GATK/resources_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
 	"grch38": "/data_genome1/SharedSoftware/GATK/resources_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
-	"mm10": "-"
 }
 
 PON_DICT = {
+	"mm9":"",
+	"mm38": "",
+    "mm10":"" ,
+    "mm39": "",
 	"hg38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz",
 	"grch38": "/home/aquevedo/resources/GATK_public_data/1000g_pon.hg38.vcf.gz",
-	"mm10": "-"
 }
 
 REGIONS_MUTECT_DIC = {
+	"mm9":"",
+	"mm38": "",
+    "mm10":"" ,
+    "mm39": "",
 	"hg38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
 	"grch38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
-	"mm10": "-"
 }
 
 EXOME_TARGETS_DICT = {
+	"mm9":"",
+	"mm38": "",
+    "mm10":"" ,
+    "mm39": "",
 	"hg38": "",
 	"grch38": "",
-	"mm10": ""
 }
 
 # Number chromosomes not including X (Y is discarded)
