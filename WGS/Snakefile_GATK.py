@@ -106,6 +106,7 @@ REGIONS_MUTECT_DIC = {
     "mm39": "",
 	"hg38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
 	"grch38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
+	"chr_parallel": "chr_parallel"
 }
 
 EXOME_TARGETS_DICT = {
@@ -158,7 +159,6 @@ data["DbSNP"] = [DBSNP_DICT[i] for i in data.Genome]
 # Mutec2 resources
 data["PanelNormals"] = [PON_DICT[i] for i in data.Genome]
 data["NumChr"] = [NCHR_DIC[i] for i in data.Genome]
-data["RegionsMutect"] = [REGIONS_MUTECT_DIC[i] for i in data.Genome]
 
 # Map Control and Tumor samples
 # /* TO DO */ 
