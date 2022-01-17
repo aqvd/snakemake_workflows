@@ -25,13 +25,12 @@ usage="Usage:
 			15	<tmp_dir> 	tmp dir for GATK
 
 				<vcf_out>	name of final genome-wide unfiltered vcf
-				<f1r2_out>	name of genome-wide orientation bias model
 
 Notes: ¡¡¡ Directories must end with '/' !!!
 "
 
-if [[ $# -lt 17 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
-	echo "Number arguments: $# < 17"
+if [[ $# -lt 16 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
+	echo "Number arguments: $# < 16"
 	echo "${usage}"; exit 01
 fi
 
@@ -42,17 +41,9 @@ normal_I=$3
 normal_sample=$4
 
 # If not empty parameters for gnomad and panel of normals
-gnomad=`if [ -n ${5} ]; then
-	echo "--germline-resource ${5}"; 
-else
-	""
-fi`
+gnomad=${5:+"--germline-resource ${5}"}
+pon=${6:+"--panel-of-normals ${6}"}
 
-pon=`if [ -n ${6} ]; then
-	echo "--panel-of-normals ${6}"; 
-else
-	""
-fi`
 regions=$7
 
 indiv=$8
@@ -67,7 +58,6 @@ db_dir=${14}
 tmp_dir=${15}
 
 vcf_out=${16}
-f1r2_out=${17}
 
 export ref_fa
 
@@ -112,10 +102,10 @@ function run_mutect2 {
 	echo "db_dir = ${db_dir}"
 
 	local out_unfilt="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
-	local output_f1r2="${db_dir}${indiv}_${chr}-f1r2.tar.gz"
+# !	local output_f1r2="${db_dir}${indiv}_${chr}-f1r2.tar.gz" !
 
 	echo "out_unfilt = ${out_unfilt}"
-	echo "output_f1r2 = ${output_f1r2}"
+# !  echo "output_f1r2 = ${output_f1r2}"  
 
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
 	echo -e "\n\t >> ======= Starting Mutect2: Individual: ${indiv}:${chr} ========= <<"
@@ -128,7 +118,6 @@ function run_mutect2 {
 		${normal_I} \
 		-normal ${normal_sample} \
 		-L \"${chr}\" \
-		--f1r2-tar-gz \"${output_f1r2}\" \
 		${gnomad} \
 		${pon} \
 		-O \"${out_unfilt}\""
@@ -142,10 +131,10 @@ function run_mutect2 {
 		${normal_I} \
 		-normal "${normal_sample}" \
 		-L "${chr}" \
-		--f1r2-tar-gz "${output_f1r2}" \
 		"${gnomad}" \
 		"${pon}" \
 		-O "${out_unfilt}" &&
+	 	# --f1r2-tar-gz "${output_f1r2}" \
 	
 	echo -e "\n Finised Mutect2"
 
@@ -172,14 +161,14 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 
 	# 2- Concatenate per chr results
 	#    2.1- LearnReadOrientation model for all chromosomes
-	all_f1r2_input=`for chr in ${all_chroms}; do 
-		printf -- "-I ${db_dir}${indiv}_${chr}-f1r2.tar.gz "; done`
+	# all_f1r2_input=`for chr in ${all_chroms}; do 
+	# 	printf -- "-I ${db_dir}${indiv}_${chr}-f1r2.tar.gz "; done`
 
-	echo -e "\n\t>> LearnReadOrientationModel\nINPUT FILES:\n${all_f1r2_input}"
-		${gatk_dir}/gatk LearnReadOrientationModel 
-			$all_f1_r2_input \
-			-O ${f1r2_out} &&
-	echo -e "<< LearnReadOrientationModel Finised\n"
+	# echo -e "\n\t>> LearnReadOrientationModel\nINPUT FILES:\n${all_f1r2_input}"
+	# 	${gatk_dir}/gatk LearnReadOrientationModel 
+	# 		$all_f1_r2_input \
+	# 		-O ${f1r2_out} &&
+	# echo -e "<< LearnReadOrientationModel Finised\n"
 
 	#    2.2- Merge unfiltered VCFs
 	all_mutect_files=`for chr in ${all_chroms}; do 
@@ -212,17 +201,31 @@ elif [[ -e ${regions} ]]; then
 	
 	echo -e "\n        -> Runing mutect2 in exome regions ${regions}\n"
 	
-	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+	command="${gatk_dir}gatk \
+		--java-options \"-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}\" \
 		Mutect2 \
-		-R "${ref_fa}" \
+		-R \"${ref_fa}\" \
 		${tumor_I} \
 		${normal_I} \
-		-normal "${normal_sample}" \
-		-L "${regions}" \
-		--f1r2-tar-gz "${output_f1r2}" \
-		"${gnomad}" \
-		"${pon}" \
-		-O "${vcf_out}"
+		-normal ${normal_sample} \
+		-L \"${regions}\" \
+		${gnomad} \
+		${pon} \
+		-O \"${vcf_out}\""
+
+	echo $command
+
+	# ${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+	# 	Mutect2 \
+	# 	-R "${ref_fa}" \
+	# 	${tumor_I} \
+	# 	${normal_I} \
+	# 	-normal "${normal_sample}" \
+	# 	-L "${regions}" \
+	# 	--f1r2-tar-gz "${fir2_out}" \
+	# 	"${gnomad}" \
+	# 	"${pon}" \
+	# 	-O "${vcf_out}"
 	
 	echo -e "\n...Finised Mutect2"
 

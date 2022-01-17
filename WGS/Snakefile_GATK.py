@@ -548,11 +548,12 @@ rule mutec2_tumor_vs_normal:
 						    IsControl = "yes"),
 
 		normal_name = lambda wildcards:
-			get_column_df(df = data, 
-						  column = "Samples", 
-						  filt_out = "", 
-						  Individual = wildcards.indiv, 
-						  IsControl = "yes")[0],
+			repeat_argument( "-normal ",
+							get_column_df(df = data, 
+									  column = "SamplesIDalign", 
+									  filt_out = "", 
+									  Individual = wildcards.indiv, 
+									  IsControl = "yes")),
 
 		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
 		pon = lambda wildcards: data.PanelNormals[data.Individual == wildcards.indiv].values[0],

@@ -16,7 +16,10 @@ def field_from_sample(Sample, field):
 def get_column_df(df , column, filt_out, **kwags):
     """
     Get column, eg TumorSample or NormalSample, for individual.
-    Optional filter value for the results
+    
+    Optional: filter value for the results as **kwags in the form of:
+              ColName = Val. ¡gets ROWS where ColName has value Val!
+              
     """
     # Filter using **kwags
     row_filters = []
@@ -59,8 +62,8 @@ def expand_argument(path, string_to_expand,
     # get the values from df
     to_expand = get_column_df(df, column, filt_out, **kwags)
 
-    # expand them to file paths
-    arg_value_l = expand(path + string_to_expand, expansion= to_expand)
+    # expand them to file paths and remove duplicates by using set()
+    arg_value_l = list(set(expand(path + string_to_expand, expansion= to_expand)))
 
     # Join using the argument
     res = repeat_argument(argument, arg_value_l)
