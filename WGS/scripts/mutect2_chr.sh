@@ -142,15 +142,15 @@ function run_mutect2 {
 		-O "${out_mutect2}" &&
 	
 	echo -e "\n Finised Mutect2"
-	# echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
+	echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
 
-	# local out_filter_mutect2="${vcf_dir}${indiv}_${chr}_filtered.vcf.gz"
+	local out_filter_mutect2="${vcf_dir}${indiv}_${chr}_filtered.vcf.gz"
 	
-	# ${gatk_dir}/gatk FilterMutectCalls -R "${ref_fa}" \
-	# 	-V "${out_mutect2}" \
-	# 	-O "${out_filter_mutect2}" &&
+	${gatk_dir}/gatk FilterMutectCalls -R "${ref_fa}" \
+		-V "${out_mutect2}" \
+		-O "${out_filter_mutect2}" &&
 
-	# echo -e " << Finished FilterMutectCalls"
+	echo -e " << Finished FilterMutectCalls"
 }
 
 # Function must be exported to use parallel 

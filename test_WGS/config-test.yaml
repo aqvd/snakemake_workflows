@@ -1,16 +1,16 @@
 tableName: "/home/aquevedo/snakemake_workflows/test_WGS/table_test_GATK_WXA_mouse.txt"
 
 # Directories must end with "/" !!!!
-fastqdir: "/home/aquevedo/snakemake_workflows/test_WGS/"
-datadir: "/home/aquevedo/snakemake_workflows/test_WGS/data/"
-resdir: "/home/aquevedo/snakemake_workflows/test_WGS/res/"
-logdir: "/home/aquevedo/snakemake_workflows/test_WGS/log/"
+fastqdir: "/home/aquevedo/fastq/test_GATK_WXS_mouse/"
+datadir: "/home/aquevedo/projects/test_WGS/data/"
+resdir: "/home/aquevedo/projects/test_WGS/res/"
+logdir: "/home/aquevedo/projects/test_WGS/log/"
 
 gatk_folder: "/home/aquevedo/software/gatk-4.2.2.0/"
 picard_folder: ""
 
 condadir: "/home/aquevedo/snakemake_workflows/WGS/env/"
-tmp_folder: "/home/aquevedo/snakemake_workflows/test_WGS/tmp/"
+tmp_folder: "/home/aquevedo/projects/test_WGS/tmp/"
 script_folder: "/home/aquevedo/snakemake_workflows/WGS/scripts/"
 
 
@@ -27,6 +27,10 @@ rules:
         res:
             mem_mb: 10000
             threads: 12
+    bwa:
+        res:
+            threads: 8
+            mem_mb: 8192
     bowtie2:
         res:
             threads: 18

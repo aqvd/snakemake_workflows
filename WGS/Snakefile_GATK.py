@@ -109,8 +109,8 @@ REGIONS_MUTECT_DIC = {
 }
 
 EXOME_TARGETS_DICT = {
-	"mm9":"",
-	"mm38": "",
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/S0276129_Regions.bed",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/S0276129_Regions.bed",
     "mm10":"" ,
     "mm39": "",
 	"hg38": "",
@@ -133,12 +133,6 @@ NCHR_DIC = {
 ## 				    METADATA					##
 ##################################################
 data = pd.read_csv(TABLE_NAME,sep="\t")
-
-def field_from_sample(Sample, field):
-	# ?P<group_name> for clarity
-	match = re.match(r"(?P<readID>\w+)_(?P<readLetter>\w+)_(?P<readRun>\w+)_(?P<readLane>\w+)", Sample)
-
-	return match.group(field)
 
 ## Remove .fastq.gz to use basename with expand() in rule "all"
 data["R1Basename"] = [f.replace(".fastq.gz","") for f in data["R1"]]
@@ -197,7 +191,9 @@ rule all:
 		# expand(DATADIR + 'align/{sample}_rg_dedup_merged.bam',sample = data.Samples.unique())
 		# expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
 		# expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
-		expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
+		# expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
+		expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
+		expand(RESDIR + "db/{indiv}_f1r2.tar.gz", indiv = data.Individual.unique())
 		# expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
 		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
 
@@ -507,18 +503,22 @@ rule analyzeCovariates:
 rule mutec2_tumor_vs_normal:
 	input:
 		tumor = lambda wildcards: 
-			expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
-				   sample = get_column_df(data, "Samples", "", 
+			expand(DATADIR + "align/{sample}_rg_dedup_merged_recal.bam",
+				   sample = get_column_df(data, 
+				   						  column = "Samples",
+				   						  filt_out = "", 
 				   					      Individual = wildcards.indiv,
-				   					      IsControl = "no")),
+				   					      IsControl = "no"))[0],
 		normal = lambda wildcards: 
-			expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
-				   sample = get_column_df(data, "Samples", "", 
+			expand(DATADIR + "align/{sample}_rg_dedup_merged_recal.bam",
+				   sample = get_column_df(data, 
+				   						  column = "Samples",
+				   						  filt_out = "", 
 				   					      Individual = wildcards.indiv,
-				   					      IsControl = "yes")),
+				   					      IsControl = "yes"))[0],
 	output:
-		RESDIR + "variants/{indiv}_{chr}_somatic_unfilt.vcf.gz",
-		RESDIR + "db/{indiv}_{chr}-f1r2.tar.gz"
+		RESDIR + "variants/{indiv}_somatic.vcf.gz",
+		RESDIR + "db/{indiv}_f1r2.tar.gz"
 	threads:
 		get_resource("Mutect2", "threads")
 	resources:
@@ -528,17 +528,35 @@ rule mutec2_tumor_vs_normal:
 		reference = lambda wildcards: data.RefFASTA[data.Individual == wildcards.indiv].values[0],
 
 		tumor_I_param = lambda wildcards: 
-			expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
-						    data, "Samples", "", "-I ", Individual = "indivA", IsControl = "no"),
+			expand_argument(path = DATADIR + "align/", 
+							string_to_expand = "{expansion}_rg_dedup_merged_recal.bam",
+						    df = data, 
+						    column = "Samples", 
+						    filt_out = "", 
+						    argument = "-I ", 
+						    Individual = wildcards.indiv, 
+						    IsControl = "no"),
+
 		normal_I_param = lambda wildcards: 
-			expand_argument(DATADIR + "align", "{expansion}_rg_dedup_recal.bam",
-						    data, "Samples", "", "-I ", Individual = "indivA", IsControl = "yes"),
+			expand_argument(path = DATADIR + "align/", 
+							string_to_expand = "{expansion}_rg_dedup_merged_recal.bam",
+						    df = data, 
+						    column = "Samples", 
+						    filt_out = "", 
+						    argument = "-I ",
+						    Individual = wildcards.indiv, 
+						    IsControl = "yes"),
+
 		normal_name = lambda wildcards:
-			get_column_df(data, "Samples", "", Individual = wildcards.indiv, IsControl = "yes")[0],
+			get_column_df(df = data, 
+						  column = "Samples", 
+						  filt_out = "", 
+						  Individual = wildcards.indiv, 
+						  IsControl = "yes")[0],
 
 		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
 		pon = lambda wildcards: data.PanelNormals[data.Individual == wildcards.indiv].values[0],
-		regions = "chr_paralell",
+		regions = lambda wildcards: data.RegionsMutect[data.Individual == wildcards.indiv].values[0],
 
 		n_chroms = lambda wildcards: data.NumChr[data.Individual == wildcards.indiv].values[0],
 		
@@ -551,7 +569,7 @@ rule mutec2_tumor_vs_normal:
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
-		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}_{chr}.log"
+		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}.log"
 	shell:
 		'''
 		{params.script_folder}mutect2_chr.sh \
