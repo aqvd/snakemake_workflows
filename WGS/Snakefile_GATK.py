@@ -100,8 +100,8 @@ PON_DICT = {
 }
 
 REGIONS_MUTECT_DIC = {
-	"mm9":"",
-	"mm38": "",
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/S0276129_Regions.bed",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/S0276129_Regions.bed",
     "mm10":"" ,
     "mm39": "",
 	"hg38": "/data_genome1/References/AgilentSureSelect/Human_Exome_V6_UTR/hg38/S07604624_Covered_fixed.bed",
@@ -192,7 +192,7 @@ rule all:
 		# expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
 		# expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
 		# expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
-		expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
+		expand(RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz", indiv = data.Individual.unique()),
 		expand(RESDIR + "db/{indiv}_f1r2.tar.gz", indiv = data.Individual.unique())
 		# expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
 		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
@@ -517,8 +517,8 @@ rule mutec2_tumor_vs_normal:
 				   					      Individual = wildcards.indiv,
 				   					      IsControl = "yes"))[0],
 	output:
-		RESDIR + "variants/{indiv}_somatic.vcf.gz",
-		RESDIR + "db/{indiv}_f1r2.tar.gz"
+		vcf = RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz",
+		f1r2 = RESDIR + "db/{indiv}_f1r2.tar.gz"
 	threads:
 		get_resource("Mutect2", "threads")
 	resources:
@@ -577,8 +577,8 @@ rule mutec2_tumor_vs_normal:
 			"{params.tumor_I_param}" \
 			"{params.normal_I_param}" \
 			"{params.normal_name}" \
-			{params.gnomad} \
-			{params.pon} \
+			"{params.gnomad}" \
+			"{params.pon}" \
 			{params.regions} \
 			{wildcards.indiv}
 			{params.n_chroms} \
@@ -587,7 +587,9 @@ rule mutec2_tumor_vs_normal:
 			{params.vcf_dir} \
 			{params.gatk_folder} \
 			{params.db_dir} \
-			{params.tmp} 	
+			{params.tmp} \
+			{output.vcf} \
+			{output.f1r2}	
 		'''
 
 rule learn_read_orientation_model:

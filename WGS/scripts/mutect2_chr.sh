@@ -24,11 +24,14 @@ usage="Usage:
 				<db_dir> 	directory for models, tables and intermediate files 
 			15	<tmp_dir> 	tmp dir for GATK
 
+				<vcf_out>	name of final genome-wide unfiltered vcf
+				<f1r2_out>	name of genome-wide orientation bias model
+
 Notes: ¡¡¡ Directories must end with '/' !!!
 "
 
-if [[ $# -lt 15 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
-	echo "Number arguments: $# < 15"
+if [[ $# -lt 17 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
+	echo "Number arguments: $# < 17"
 	echo "${usage}"; exit 01
 fi
 
@@ -39,13 +42,13 @@ normal_I=$3
 normal_sample=$4
 
 # If not empty parameters for gnomad and panel of normals
-gnomad=`if [ -n ${5-} ]; then
+gnomad=`if [ -n ${5} ]; then
 	echo "--germline-resource ${5}"; 
 else
 	""
 fi`
 
-pon=`if [ -n ${6-} ]; then
+pon=`if [ -n ${6} ]; then
 	echo "--panel-of-normals ${6}"; 
 else
 	""
@@ -62,6 +65,9 @@ vcf_dir=${12}
 gatk_dir=${13}
 db_dir=${14}
 tmp_dir=${15}
+
+vcf_out=${16}
+f1r2_out=${17}
 
 export ref_fa
 
@@ -105,10 +111,10 @@ function run_mutect2 {
 	echo "tmp_dir = ${tmp_dir}" 
 	echo "db_dir = ${db_dir}"
 
-	local out_mutect2="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
+	local out_unfilt="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
 	local output_f1r2="${db_dir}${indiv}_${chr}-f1r2.tar.gz"
 
-	echo "out_mutect2 = ${out_mutect2}"
+	echo "out_unfilt = ${out_unfilt}"
 	echo "output_f1r2 = ${output_f1r2}"
 
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
@@ -125,7 +131,7 @@ function run_mutect2 {
 		--f1r2-tar-gz \"${output_f1r2}\" \
 		${gnomad} \
 		${pon} \
-		-O \"${out_mutect2}\""
+		-O \"${out_unfilt}\""
 	
 	echo ${command}
 
@@ -139,18 +145,20 @@ function run_mutect2 {
 		--f1r2-tar-gz "${output_f1r2}" \
 		"${gnomad}" \
 		"${pon}" \
-		-O "${out_mutect2}" &&
+		-O "${out_unfilt}" &&
 	
 	echo -e "\n Finised Mutect2"
-	echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
 
-	local out_filter_mutect2="${vcf_dir}${indiv}_${chr}_filtered.vcf.gz"
+	# Filter Variants
+	# echo -e " >> FilterMutectCalls Individual: ${indiv}:${chr}"
+
+	# local out_filter_mutect2="${vcf_dir}${indiv}_${chr}_filtered.vcf.gz"
 	
-	${gatk_dir}/gatk FilterMutectCalls -R "${ref_fa}" \
-		-V "${out_mutect2}" \
-		-O "${out_filter_mutect2}" &&
+	# ${gatk_dir}/gatk FilterMutectCalls -R "${ref_fa}" \
+	# 	-V "${out_unfilt}" \
+	# 	-O "${out_filter_mutect2}" &&
 
-	echo -e " << Finished FilterMutectCalls"
+	# echo -e " << Finished FilterMutectCalls"
 }
 
 # Function must be exported to use parallel 
@@ -170,20 +178,37 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 	echo -e "\n\t>> LearnReadOrientationModel\nINPUT FILES:\n${all_f1r2_input}"
 		${gatk_dir}/gatk LearnReadOrientationModel 
 			$all_f1_r2_input \
-			-O ${db_dir}${indiv}_read-orientation-model.tar.gz &&
+			-O ${f1r2_out} &&
 	echo -e "<< LearnReadOrientationModel Finised\n"
 
-	#    2.2- 
+	#    2.2- Merge unfiltered VCFs
 	all_mutect_files=`for chr in ${all_chroms}; do 
 		printf -- "${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
 
 	echo -e "\n\t>> bcftools merge VCF files\nINPUT FILES:\n${all_f1r2_input}"
-		bcftools merge ${all_mutect_files} -Oz -o "${vcf_dir}${indiv}_somatic.vcf.gz" &&
+		bcftools merge ${all_mutect_files} -O z -o "${vcf_out}"  &&
 	echo -e "<< Merge VCF files Finised\n"
 
 	exit 0
 
 elif [[ -e ${regions} ]]; then
+
+	echo "ref_fa = ${ref_fa}" 
+	echo "regions = ${regions}"
+
+	echo "tumor = ${tumor_I}" 
+	echo "normal = ${normal_I}" 
+	echo "normal_sample = ${normal_sample}" 
+
+	echo "${gnomad}" 
+	echo "${pon}" 
+
+	echo "indiv = ${indiv}" 
+	
+	echo "gatk_dir = ${gatk_dir}" 
+	echo "vcf_dir = ${vcf_dir}" 
+	echo "tmp_dir = ${tmp_dir}" 
+	echo "db_dir = ${db_dir}"
 	
 	echo -e "\n        -> Runing mutect2 in exome regions ${regions}\n"
 	
@@ -197,7 +222,7 @@ elif [[ -e ${regions} ]]; then
 		--f1r2-tar-gz "${output_f1r2}" \
 		"${gnomad}" \
 		"${pon}" \
-		-O "${out_mutect2}"
+		-O "${vcf_out}"
 	
 	echo -e "\n...Finised Mutect2"
 
