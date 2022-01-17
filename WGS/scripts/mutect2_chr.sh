@@ -38,8 +38,18 @@ tumor_I=$2
 normal_I=$3
 normal_sample=$4
 
-gnomad=$5
-pon=$6
+# If not empty parameters for gnomad and panel of normals
+gnomad=`if [ -n ${5-} ]; then
+	echo "--germline-resource ${5}"; 
+else
+	""
+fi`
+
+pon=`if [ -n ${6-} ]; then
+	echo "--panel-of-normals ${6}"; 
+else
+	""
+fi`
 regions=$7
 
 indiv=$8
@@ -72,8 +82,8 @@ export vcf_dir
 export db_dir
 export tmp_dir
 
-# all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) chrX"
-all_chroms="$(printf "chr%s " $(seq 10 11)) chrX"
+all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) chrX"
+# all_chroms="$(printf "chr%s " $(seq 10 11)) chrX"
 
 function run_mutect2 {
 	local chr=$1
@@ -85,8 +95,8 @@ function run_mutect2 {
 	echo "normal = ${normal_I}" 
 	echo "normal_sample = ${normal_sample}" 
 
-	echo "gnomad = ${gnomad}" 
-	echo "pon = ${pon}" 
+	echo "${gnomad}" 
+	echo "${pon}" 
 
 	echo "indiv = ${indiv}" 
 	
@@ -113,8 +123,8 @@ function run_mutect2 {
 		-normal ${normal_sample} \
 		-L \"${chr}\" \
 		--f1r2-tar-gz \"${output_f1r2}\" \
-		--germline-resource \"${gnomad}\" \
-		--panel-of-normals \"${pon}\" \
+		${gnomad} \
+		${pon} \
 		-O \"${out_mutect2}\""
 	
 	echo ${command}
@@ -127,8 +137,8 @@ function run_mutect2 {
 		-normal "${normal_sample}" \
 		-L "${chr}" \
 		--f1r2-tar-gz "${output_f1r2}" \
-		--germline-resource "${gnomad}" \
-		--panel-of-normals "${pon}" \
+		"${gnomad}" \
+		"${pon}" \
 		-O "${out_mutect2}" &&
 	
 	echo -e "\n Finised Mutect2"
@@ -148,7 +158,7 @@ export -f run_mutect2
 
 if [[ "${regions}" == "chr_paralell" ]]; then
 	
-	echo -e "\n        -> Runing in parallel in all chromosomes: ${all_chroms}"
+	echo -e "\n        -> Runing in parallel in all chromosomes: ${all_chroms}\n"
 	echo "${all_chroms}" | sed -E -e 's/ /\n/g' | parallel -j ${threads} run_mutect2 &&
 	echo -e "\n...Finised parallel mutect2..."
 
@@ -175,8 +185,20 @@ if [[ "${regions}" == "chr_paralell" ]]; then
 
 elif [[ -e ${regions} ]]; then
 	
-	echo -e "\n        -> Runing mutect2 in exome regions ${regions}"
-	run_mutect2 ${regions} 
+	echo -e "\n        -> Runing mutect2 in exome regions ${regions}\n"
+	
+	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+		Mutect2 \
+		-R "${ref_fa}" \
+		${tumor_I} \
+		${normal_I} \
+		-normal "${normal_sample}" \
+		-L "${regions}" \
+		--f1r2-tar-gz "${output_f1r2}" \
+		"${gnomad}" \
+		"${pon}" \
+		-O "${out_mutect2}"
+	
 	echo -e "\n...Finised Mutect2"
 
 	exit 0

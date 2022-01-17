@@ -65,7 +65,7 @@ REF_FASTA_DICT = {
 
 DBSNP_DICT = {
 	"mm9":"",
-	"mm38": "",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/dbSNP_UCSC-chr-names.vcf.gz",
     "mm10":"" ,
     "mm39": "",
 	"hg38": "/data_genome1/SharedSoftware/GATK/resources_hg38/dbsnp_146.hg38.vcf",
@@ -192,11 +192,14 @@ def get_resource(rule,resource):
 ##################################################
 rule all:
 	input:
+		# expand(DATADIR + "align/{sample}_unsorted.bam", sample = data.SamplesIDalign.unique())
+		# expand(DATADIR + "align/{sample}_rg_dedup.bam", sample = data.SamplesIDalign.unique()),
+		# expand(DATADIR + 'align/{sample}_rg_dedup_merged.bam',sample = data.Samples.unique())
 		# expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
 		# expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
-		# expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
-		expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
-		expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
+		expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
+		# expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
+		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
 
 
 def get_readPair(pairID, fq_list):
@@ -271,9 +274,9 @@ rule add_readGroup:
 		mem_mb = get_resource("samtools","mem_mb"),
 		walltime = get_resource("samtools","walltime")
 	params:
-		ID = lambda wildcards: expand(data.ReadGroupID[data.Samples == wildcards.sample]),
-		PL = lambda wildcards: expand(data.Platform[data.Samples == wildcards.sample]),
-		PU = lambda wildcards: expand(data.RunLane[data.Samples == wildcards.sample]),
+		ID = lambda wildcards: expand(data.ReadGroupID[data.SamplesIDalign == wildcards.sample]),
+		PL = lambda wildcards: expand(data.Platform[data.SamplesIDalign == wildcards.sample]),
+		PU = lambda wildcards: expand(data.RunLane[data.SamplesIDalign == wildcards.sample]),
 		LB = lambda wildcards: wildcards.sample,
 		SM = lambda wildcards: wildcards.sample
 	shell:
@@ -318,9 +321,36 @@ rule remove_duplicates:
 		-M {output.metrics} |& tee {log}
 		'''
 
+rule mergeBAM:
+	input:
+		lambda wildcards: expand(DATADIR + "align/{sampIDalign}_rg_dedup.bam",
+			sampIDalign = data.SamplesIDalign[wildcards.sample == data.Samples])
+	output:
+		mergedBAM = DATADIR + 'align/{sample}_rg_dedup_merged.bam'
+	threads:
+		1
+	resources:
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		tmp = TMP_FOLDER,
+		gatk_folder = GATK_FOLDER,
+		ip_str = lambda wildcards, input: " -I ".join(input)
+	log:
+		LOGDIR + 'gatk/merge_{sample}.log'
+	shell:
+		'''
+		{params.gatk_folder}gatk \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+		MergeSamFiles \
+			-I {params.ip_str} \
+			-O {output.mergedBAM} 
+		'''
+
+
 rule createBQSR_before:
 	input:
-		nodup_bam = DATADIR + "align/{sample}_rg_dedup.bam"
+		merged_bam = DATADIR + "align/{sample}_rg_dedup_merged.bam"
 	output:
 		recal_tab = DATADIR + "align/{sample}_BSQR_before.table"
 	threads: 
@@ -332,33 +362,46 @@ rule createBQSR_before:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER,
 		ref_fasta = lambda wildcards: expand("{ref_fasta}",
-			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample]),
+			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample])[0],
 		gold_indels = lambda wildcards: expand("{gold_indels}",
-			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample]),
+			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample])[0],
 		db_snp = lambda wildcards: expand("{db_snp}",
-			    db_snp = data.DbSNP[data.Samples == wildcards.sample])
+			    db_snp = data.DbSNP[data.Samples == wildcards.sample])[0]
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + 'gatk/createBQSR_before_{sample}.log'
 	shell:
-		'''
+		''' 
+		#
+		if [ -n "{params.gold_indels}" ]; then
+			gold_indels="--known-sites "{params.gold_indels}
+		else
+			gold_indels=" "
+		fi
+
+		if [ -n "{params.db_snp}" ]; then
+			db_snp="--known-sites "{params.db_snp}
+		else
+			db_snp=" "
+		fi
+
 		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
-		-I {input.nodup_bam} \
+		-I {input.merged_bam} \
 		-R {params.ref_fasta} \
-		--known-sites {params.gold_indels} \
-		--known-sites {params.db_snp} \
+		${{gold_indels}} \
+		${{db_snp}} \
 		-O {output.recal_tab} |& tee {log}
 		'''
 
 rule applyBQSR:
 	input:
-		nodup_bam = DATADIR + "align/{sample}_rg_dedup.bam",
+		nodup_bam = DATADIR + "align/{sample}_rg_dedup_merged.bam",
 		recal_tab = DATADIR + "align/{sample}_BSQR_before.table"
 	output:
-		recal_bam = DATADIR + "align/{sample}_rg_dedup_recal.bam"
+		recal_bam = DATADIR + "align/{sample}_rg_dedup_merged_recal.bam"
 	threads:
 		1
 	resources:
@@ -368,7 +411,7 @@ rule applyBQSR:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER,
 		ref_fasta = lambda wildcards: expand("{ref_fasta}",
-			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample])
+			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample])[0]
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
@@ -386,7 +429,7 @@ rule applyBQSR:
 
 rule createBQSR_after:
 	input:
-		recal_bam = DATADIR + "align/{sample}_rg_dedup_recal.bam"
+		recal_bam = DATADIR + "align/{sample}_rg_dedup_merged_recal.bam"
 	output:
 		recal_tab = DATADIR + "align/{sample}_BSQR_after.table"
 	threads: 
@@ -398,24 +441,36 @@ rule createBQSR_after:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER,
 		ref_fasta = lambda wildcards: expand("{ref_fasta}",
-			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample]),
+			    ref_fasta = data.RefFASTA[data.Samples == wildcards.sample])[0],
 		gold_indels = lambda wildcards: expand("{gold_indels}",
-			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample]),
+			    gold_indels = data.GoldIndels[data.Samples == wildcards.sample])[0],
 		db_snp = lambda wildcards: expand("{db_snp}",
-			    db_snp = data.DbSNP[data.Samples == wildcards.sample])
+			    db_snp = data.DbSNP[data.Samples == wildcards.sample])[0]
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
 		LOGDIR + 'gatk/createBQSR_after_{sample}.log'
 	shell:
 		'''
+		if [ -n "{params.gold_indels}" ]; then
+			gold_indels="--known-sites "{params.gold_indels}
+		else
+			gold_indels=" "
+		fi
+
+		if [ -n "{params.db_snp}" ]; then
+			db_snp="--known-sites "{params.db_snp}
+		else
+			db_snp=" "
+		fi
+
 		{params.gatk_folder}gatk \
 		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 		BaseRecalibrator \
 		-I {input.recal_bam} \
 		-R {params.ref_fasta} \
-		--known-sites {params.gold_indels} \
-		--known-sites {params.db_snp} \
+		${{gold_indels}} \
+		${{db_snp}} \
 		-O {output.recal_tab} |& tee {log}
 		'''
 
@@ -496,7 +551,7 @@ rule mutec2_tumor_vs_normal:
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
-		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}.log"
+		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}_{chr}.log"
 	shell:
 		'''
 		{params.script_folder}mutect2_chr.sh \
