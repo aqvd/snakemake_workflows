@@ -145,7 +145,7 @@ if [[ "${regions}" == "chr_parallel" ]]; then
 
 	# Create also one logfile per chromosome
 	echo "${all_chroms}" | sed -E -e 's/ /\n/g' \
-	|parallel -j ${threads} "run_mutect2 > ${logdir}gatk/mutect2/${indiv}_{}.log" &&
+	|parallel -j ${threads} "run_mutect2 {} > ${logdir}gatk/mutect2/${indiv}_{}.log 2>&1" &&
 	
 	echo -e "\n...Finised parallel mutect2..."
 
@@ -174,6 +174,7 @@ if [[ "${regions}" == "chr_parallel" ]]; then
 	all_stats_files=`for chr in ${all_chroms}; do 
 		printf -- "-stats ${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz.stats "; done`
 	
+	echo -e "\n\t>> GATK merge VCF"
 	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
 		MergeMutectStats \
 		${all_stats_files} \
@@ -183,6 +184,7 @@ if [[ "${regions}" == "chr_parallel" ]]; then
 	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
 		IndexFeatureFile \
 		-I "${vcf_out}"
+	echo -e "<< Merge VCF Finised and indexed \n"
 
 	# remove tmp .vcf files, either without or with .stats or .tbi extensions 
 	parallel rm {1}{2} ::: $all_mutect_files ::: "" ".tbi" ".stats"
