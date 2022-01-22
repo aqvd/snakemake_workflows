@@ -1,6 +1,6 @@
-Samples	SamplesIDalign	R1	R2	Platform	Genome	Individual	IsControl	TumorSample	NormalSample	LibraryLayout	RegionsMutect
-pool	2702_A_run425_L001	2702_A_run425_ATGCCTAA_S1_L001_R1_001.fastq.gz	2702_A_run425_ATGCCTAA_S1_L001_R2_001.fastq.gz	illumina	mm38	mouse2	yes	WNTind	-	PAIRED	chr_parallel
-pool	2702_A_run426_L003	2702_A_run426_ATGCCTAA_S17_L003_R1_001.fastq.gz	2702_A_run426_ATGCCTAA_S17_L003_R2_001.fastq.gz	illumina	mm38	mouse2	yes	WNTind	-	PAIRED	chr_parallel
-pool	2702_A_run430_L002	2702_A_run430_ATGCCTAA_S14_L002_R1_001.fastq.gz	2702_A_run430_ATGCCTAA_S14_L002_R2_001.fastq.gz	illumina	mm38	mouse2	yes	WNTind	-	PAIRED	chr_parallel
-WNTind	2702_D_run425_L001	2702_D_run425_CACTTCGA_S4_L001_R1_001.fastq.gz	2702_D_run425_CACTTCGA_S4_L001_R2_001.fastq.gz	illumina	mm38	mouse2	no	-	pool	PAIRED	chr_parallel
-WNTind	2702_D_run426_L003	2702_D_run426_CACTTCGA_S19_L003_R1_001.fastq.gz	2702_D_run426_CACTTCGA_S19_L003_R2_001.fastq.gz	illumina	mm38	mouse2	no	-	pool	PAIRED	chr_parallel
+Samples	SamplesIDalign	R1	R2	Platform	Genome	Individual	IsControl	TumorSample	NormalSample	LibraryLayout	RegionsMutect	Gnomad	Pon
+pool	2702_A_run425_L001	2702_A_run425_ATGCCTAA_S1_L001_R1_001.fastq.gz	2702_A_run425_ATGCCTAA_S1_L001_R2_001.fastq.gz	illumina	mm38	mouse2	yes	WNTind	-	PAIRED	chr_parallel	-	-
+pool	2702_A_run426_L003	2702_A_run426_ATGCCTAA_S17_L003_R1_001.fastq.gz	2702_A_run426_ATGCCTAA_S17_L003_R2_001.fastq.gz	illumina	mm38	mouse2	yes	WNTind	-	PAIRED	chr_parallel	-	-
+pool	2702_A_run430_L002	2702_A_run430_ATGCCTAA_S14_L002_R1_001.fastq.gz	2702_A_run430_ATGCCTAA_S14_L002_R2_001.fastq.gz	illumina	mm38	mouse2	yes	WNTind	-	PAIRED	chr_parallel	-	-
+WNTind	2702_D_run425_L001	2702_D_run425_CACTTCGA_S4_L001_R1_001.fastq.gz	2702_D_run425_CACTTCGA_S4_L001_R2_001.fastq.gz	illumina	mm38	mouse2	no	-	pool	PAIRED	chr_parallel	-	-
+WNTind	2702_D_run426_L003	2702_D_run426_CACTTCGA_S19_L003_R1_001.fastq.gz	2702_D_run426_CACTTCGA_S19_L003_R2_001.fastq.gz	illumina	mm38	mouse2	no	-	pool	PAIRED	chr_parallel	-	-

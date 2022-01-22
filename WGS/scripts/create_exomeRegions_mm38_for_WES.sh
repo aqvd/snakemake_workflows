@@ -26,3 +26,18 @@ awk '\
 	}
 }' | bgzip > /genomes/mouse/mm39/MouseExome_mm10_liftover_Covered_UCSC-chr-names_sorted.bed.bgz
 
+## GNOMAD resources
+rsync -azvp --human-readable --ignore-times \
+aquevedo@172.22.238.49:/data/aquevedo/resources/genomes/mouse/GRCm38-mm10/variation/mgp_snps_indels/mgp_REL2005_snps_f1-8_AF_chrUCSC_afOnly_bialellelic* \
+~/genomes/mouse/mm38/
+3L-p4pasiT0
+
+bcftools view -h "/home/aquevedo/genomes/mouse/mm38/mgp_REL2005_snps_f1-8_AF_chrUCSC_afOnly_bialellelic.sorted.vcf.gz" \
+| grep -nE "##contig=<ID=" 
+
+
+
+
+
+
+

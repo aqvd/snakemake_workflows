@@ -25,12 +25,19 @@ usage="Usage:
 			15	<tmp_dir> 	tmp dir for GATK
 
 				<vcf_out>	name of final genome-wide unfiltered vcf
+				<f1r2_out>	name of final genome-wide f1r2 orientatino bias
+				<logdir>	log directory
 
 Notes: ¡¡¡ Directories must end with '/' !!!
 "
 
-if [[ $# -lt 16 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
-	echo "Number arguments: $# < 16"
+args=("$@")
+
+if [[ $# -lt 18 ]]; then ## !!!!!!!!!!!!!!!!!!!!!!! put number arguments
+	echo "Less arguments ($#) than needed (17)"
+	for ((i = 0; i < $#; i++)); do 
+		echo "Arg ${i}	->	${args[$i]}"
+	done
 	echo "${usage}"; exit 01
 fi
 
@@ -40,7 +47,7 @@ tumor_I=$2
 normal_I=$3
 normal_sample=$4
 
-# If not empty parameters for gnomad and panel of normals
+# If not empty, add parameter name (--param) for gnomad and panel of normals
 gnomad=${5:+"--germline-resource ${5}"}
 pon=${6:+"--panel-of-normals ${6}"}
 
@@ -58,6 +65,9 @@ db_dir=${14}
 tmp_dir=${15}
 
 vcf_out=${16}
+f1r2_out=${17}
+
+logdir=${18}
 
 export ref_fa
 
@@ -77,8 +87,9 @@ export gatk_dir
 export vcf_dir
 export db_dir
 export tmp_dir
+export logdir
 
-all_chroms="$(printf "chr%s " $(seq 1 ${n_chr})) chrX"
+all_chroms="$(printf "chr%s " $(seq 1 ${n_chr}))chrX"
 # all_chroms="$(printf "chr%s " $(seq 10 11)) chrX"
 
 function run_mutect2 {
@@ -101,11 +112,11 @@ function run_mutect2 {
 	echo "tmp_dir = ${tmp_dir}" 
 	echo "db_dir = ${db_dir}"
 
-	local out_unfilt="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
-# !	local output_f1r2="${db_dir}${indiv}_${chr}-f1r2.tar.gz" !
+	local tmp_unfilt="${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz"
+	local tmp_f1r2="${db_dir}${indiv}_${chr}_f1r2.tar.gz"
 
-	echo "out_unfilt = ${out_unfilt}"
-# !  echo "output_f1r2 = ${output_f1r2}"  
+	echo "tmp_unfilt = ${tmp_unfilt}"
+    echo "tmp_f1r2 = ${tmp_f1r2}"  
 
 	# 1- run Mutect2 with --f1r2 argument to detect strand bias later
 	echo -e "\n\t >> ======= Starting Mutect2: Individual: ${indiv}:${chr} ========= <<"
@@ -119,7 +130,8 @@ function run_mutect2 {
 		-L "${chr}" \
 		${gnomad} \
 		${pon} \
-		-O "${out_unfilt}" &&
+		--f1r2-tar-gz "${tmp_f1r2}" \
+		-O "${tmp_unfilt}" &&
 	
 	echo -e "\n Finised Mutect2"
 }
@@ -128,21 +140,54 @@ function run_mutect2 {
 export -f run_mutect2
 
 if [[ "${regions}" == "chr_parallel" ]]; then
-	
+	## ============================= RUN MUTECT ===================== ##
 	echo -e "\n        -> Runing in parallel in all chromosomes: ${all_chroms}\n"
-	echo "${all_chroms}" | sed -E -e 's/ /\n/g' | parallel -j ${threads} run_mutect2 &&
+
+	# Create also one logfile per chromosome
+	echo "${all_chroms}" | sed -E -e 's/ /\n/g' \
+	|parallel -j ${threads} "run_mutect2 > ${logdir}gatk/mutect2/${indiv}_{}.log" &&
+	
 	echo -e "\n...Finised parallel mutect2..."
 
-	# 2- Concatenate per chr results
+	# =================== Merge chr results ================== ##
+	#  Merge f1r2 
+	all_f1r2_input=`for chr in ${all_chroms}; do 
+		printf -- "-I ${db_dir}${indiv}_${chr}_f1r2.tar.gz "; done`
+	
+	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+		LearnReadOrientationModel \
+		$all_f1r2_input \
+		-O "${f1r2_out}"
 
-	#    2.2- Merge unfiltered VCFs
+	# Merge unfiltered VCFs
 	all_mutect_files=`for chr in ${all_chroms}; do 
-		printf -- "${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
+		printf -- "-I ${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz "; done`
 
-	echo -e "\n\t>> bcftools merge VCF files\nINPUT FILES:\n${all_mutect_files}"
-		bcftools merge ${all_mutect_files} -O z -o "${vcf_out}"  &&
+	echo -e "\n\t>> GATK merge VCF files\nINPUT FILES:\n${all_mutect_files}"
+		${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+		MergeVcfs \
+		${all_mutect_files} \
+		-O "${vcf_out}"  &&
 	echo -e "<< Merge VCF files Finised\n"
 
+	# Merge vcf.gz.stats
+	all_stats_files=`for chr in ${all_chroms}; do 
+		printf -- "-stats ${vcf_dir}${indiv}_${chr}_unfilt.vcf.gz.stats "; done`
+	
+	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+		MergeMutectStats \
+		${all_stats_files} \
+		-O "${vcf_out}.stats"	
+
+	#	2.4 Index (tbi) the resulting vcf
+	${gatk_dir}gatk --java-options "-Xmx${mem_gatk}M -Djava.io.tmpdir=${tmp_dir}" \
+		IndexFeatureFile \
+		-I "${vcf_out}"
+
+	# remove tmp .vcf files, either without or with .stats or .tbi extensions 
+	parallel rm {1}{2} ::: $all_mutect_files ::: "" ".tbi" ".stats"
+
+	parallel rm ${db_dir}{1}_{2}_f1r2.tar.gz ::: ${indiv} ::: ${all_chroms}
 	exit 0
 
 elif [[ -e ${regions} ]]; then
@@ -189,6 +234,7 @@ elif [[ -e ${regions} ]]; then
 		-L "${regions}" \
 		${gnomad} \
 		${pon} \
+		--f1r2-tar-gz "${f1r2_out}" \
 		-O "${vcf_out}"
 	
 	echo -e "\n...Finised Mutect2"

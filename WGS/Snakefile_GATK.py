@@ -64,7 +64,7 @@ REF_FASTA_DICT = {
 }
 
 DBSNP_DICT = {
-	"mm9":"",
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/dbSNP_UCSC-chr-names.vcf.gz",
 	"mm38": "/home/aquevedo/genomes/mouse/mm38/dbSNP_UCSC-chr-names.vcf.gz",
     "mm10":"" ,
     "mm39": "",
@@ -73,8 +73,8 @@ DBSNP_DICT = {
 }
 
 GNOMAD_SITES_DICT = {
-	"mm9":"",
-	"mm38": "",
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/mgp_REL2005_snps_f1-8_AF_chrUCSC_afOnly_bialellelic.sorted.vcf.gz",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/mgp_REL2005_snps_f1-8_AF_chrUCSC_afOnly_bialellelic.sorted.vcf.gz",
     "mm10":"" ,
     "mm39": "",
 	"hg38": "/data_genome1/SharedSoftware/GATK/resources_Mutect2/af-only-gnomad.hg38.vcf.gz",
@@ -82,8 +82,8 @@ GNOMAD_SITES_DICT = {
 }
 
 GOLD_INDELS_DICT = {
-	"mm9":"",
-	"mm38": "",
+	"mm9":"/home/aquevedo/genomes/mouse/mm38/mgp_REL2005_snps_f1-8_AF_chrUCSC_afOnly_bialellelic.sorted.vcf.gz",
+	"mm38": "/home/aquevedo/genomes/mouse/mm38/mgp_REL2005_snps_f1-8_AF_chrUCSC_afOnly_bialellelic.sorted.vcf.gz",
     "mm10":"" ,
     "mm39": "",
 	"hg38": "/data_genome1/SharedSoftware/GATK/resources_hg38/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz",
@@ -192,10 +192,9 @@ rule all:
 		# expand(DATADIR + "align/{sample}_BSQR_before.table", sample = data.Samples.unique()),
 		# expand(DATADIR + "align/{sample}_BSQR_after.table", sample = data.Samples.unique()),
 		# expand(RESDIR + "plots/{sample}_analyzeCovariates.pdf", sample = data.Samples.unique())
-		expand(RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz", indiv = data.Individual.unique()),
-		expand(RESDIR + "db/{indiv}_f1r2.tar.gz", indiv = data.Individual.unique())
-		# expand(RESDIR + "variants/{indiv}_somatic.vcf.gz", indiv = data.Individual.unique()),
-		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique())
+		# expand(RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz", indiv = data.Individual.unique()),
+		# expand(RESDIR + "db/{indiv}_read-orientation-model.tar.gz",indiv = data.Individual.unique()),
+		expand(RESDIR + "variants/{indiv}_somatic_filtered.vcf.gz", indiv = data.Individual.unique()),
 
 
 def get_readPair(pairID, fq_list):
@@ -245,15 +244,28 @@ rule sort_bam:
 	output:
 		bam = DATADIR + 'align/{sample}_sorted.bam'
 	log:
-		LOGDIR + 'samtools/sort_{sample}.log'
-	threads:
-		get_resource("samtools_sort", "threads")
+		LOGDIR + 'gatk/SortSam_{sample}.log'
 	resources:
-		mem_mb = get_resource("samtools_sort", "mem_mb"),
-		walltime = get_resource("samtools_sort", "walltime")
+		mem_mb = get_resource("gatk", "mem_mb"),
+		walltime = get_resource("gatk","walltime")
+	params:
+		tmp = TMP_FOLDER,
+		gatk_folder = GATK_FOLDER
 	shell:
 		'''
-		samtools sort -@ {threads} -O BAM {input} > {output.bam} 2> {log}
+		{params.gatk_folder}gatk \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+			SortSam \
+			-I {input} \
+			-O {output} \
+			--SORT_ORDER coordinate \
+			-VALIDATION_STRINGENCY LENIENT |& tee {log} && 
+       
+        {params.gatk_folder}gatk \
+		--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
+		BuildBamIndex \
+			-I {output} \
+			-VALIDATION_STRINGENCY LENIENT
 		'''
 
 
@@ -518,7 +530,8 @@ rule mutec2_tumor_vs_normal:
 				   					      IsControl = "yes"))[0],
 	output:
 		vcf = RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz",
-		f1r2 = RESDIR + "db/{indiv}_f1r2.tar.gz"
+		f1r2 = RESDIR + "db/{indiv}_f1r2.tar.gz",
+		stats = RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz.stats"
 	threads:
 		get_resource("Mutect2", "threads")
 	resources:
@@ -566,11 +579,12 @@ rule mutec2_tumor_vs_normal:
 		db_dir = RESDIR + "db/",
 		
 		script_folder = SCRIPT_FOLDER,
-		tmp = TMP_FOLDER
+		tmp = TMP_FOLDER,
+		logdir = LOGDIR
 	conda:
 		CONDADIR + "gatk-4.2.2.0.yaml"
 	log:
-		LOGDIR + "gatk/mutec2_tum_vs_norm_{indiv}.log"
+		LOGDIR + "gatk/mutect2/mutec2_tum_vs_norm_{indiv}.log"
 	shell:
 		'''
 		{params.script_folder}mutect2_chr.sh \
@@ -581,7 +595,7 @@ rule mutec2_tumor_vs_normal:
 			"{params.gnomad}" \
 			"{params.pon}" \
 			{params.regions} \
-			{wildcards.indiv}
+			{wildcards.indiv} \
 			{params.n_chroms} \
 			{threads} \
 			{resources.mem_mb} \
@@ -590,39 +604,15 @@ rule mutec2_tumor_vs_normal:
 			{params.db_dir} \
 			{params.tmp} \
 			{output.vcf} \
-			{output.f1r2}	
-		'''
-
-rule learn_read_orientation_model:
-	input:
-		lambda wildcards: expand(RESDIR + "db/" + "{indiv}_{chr}-f1r2.tar.gz", 
-			indiv = wildcards.indiv, 
-			chr = ["chr" + str(x) for x in (range(1, data.NumChr[data.Individual == wildcards.indiv] + 1), "X")])
-	output:
-		RESDIR + "db/" + "{indiv}_read-orientation-model.tar.gz"
-	threads:
-		1
-	resources:
-		mem_mb = get_resource("Mutect2", "mem_mb"),
-		walltime = get_resource("Mutect2","walltime")
-	params:
-		I = lambda wildcards, innput: repeat_argument("-I ", input),
-		gatk_folder = GATK_FOLDER,
-		tmp = TMP_FOLDER
-	shell:
-		'''
-		{params.gatk_folder}/gatk \
-			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
-			LearnReadOrientationModel \
-			{params.I} \
-			-O {output}		
+			{output.f1r2} \
+			{params.logdir} |& tee {log}
 		'''
 
 rule get_pileup_summaries_tumor:
 	input:
 		tumor_bam = lambda wildcards: 
-		expand(DATADIR + "align/{sample}_rg_dedup_recal.bam",
-			   sample = data.Samples[(data.Individual == wildcads.indiv) & (data.IsControl == "no") ])
+		expand(DATADIR + "align/{sample}_rg_dedup_merged_recal.bam",
+			   sample = data.Samples[(data.Individual == wildcards.indiv) & (data.IsControl == "no") ])
 	output:
 		RESDIR + "db/{indiv}_pileups.table"
 	threads:
@@ -631,18 +621,29 @@ rule get_pileup_summaries_tumor:
 		mem_mb = get_resource("gatk", "mem_mb"),
 		walltime = get_resource("gatk","walltime")
 	params:
+		input = lambda wildcards, input: repeat_argument( "-I ", set(input)),
 		gnomad = lambda wildcards: data.Gnomad[data.Individual == wildcards.indiv].values[0],
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER
+	log:
+		LOGDIR + "gatk/pileup_summaries_tumor{indiv}.log"
 	shell:
 		'''
+		if [ -n "{params.gnomad}" ]; then
+			V_param="-V {params.gnomad}"
+			L_param="-L {params.gnomad}"
+		else
+			V_param=""
+			L_param=""
+		fi
+
 		{params.gatk_folder}/gatk \
 			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 			GetPileupSummaries \
-			-I {input.tumor_bam} \
-			-L {params.gnomad} \
-			-V {params.gnomad} \
-			-O {output}
+			{params.input} \
+			${{L_param}} \
+			${{V_param}} \
+			-O {output} |& tee {log}
 		'''
 
 rule calculate_contamination_tumor:
@@ -658,22 +659,26 @@ rule calculate_contamination_tumor:
 	params:
 		gatk_folder = GATK_FOLDER,
 		tmp = TMP_FOLDER
+	log:
+		LOGDIR + "gatk/calculate_contamination_tumor{indiv}.log"
 	shell:
 		'''
 		{params.gatk_folder}/gatk \
 			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 			CalculateContamination \
 			-I {input} \
-			-O {output}
+			-O {output} |& tee {log}
 		'''
 
 rule filter_mutect_calls:
 	input:
-		vcf = RESDIR + "variants/{indiv}_{chr}_somatic_unfilt.vcf.gz",
-		read_orient = RESDIR + "db/{indiv}_{chr}-f1r2.tar.gz",
-		contam = RESDIR + "db/{indiv}_contamination.table"
+		vcf = RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz",
+		read_orient = RESDIR + "db/{indiv}_f1r2.tar.gz",
+		contam = RESDIR + "db/{indiv}_contamination.table",
+		in_stats = RESDIR + "variants/{indiv}_somatic_unfilt.vcf.gz.stats"
 	output:
-		RESDIR + "variants/{indiv}_{chr}_somatic_filtered.vcf.gz"
+		filt = RESDIR + "variants/{indiv}_somatic_filtered.vcf.gz",
+		filt_stats = RESDIR + "variants/{indiv}_somatic_filtering_stats.vcf.gz"
 	threads:
 		1
 	resources:
@@ -681,16 +686,22 @@ rule filter_mutect_calls:
 		walltime = get_resource("gatk","walltime")
 	params:
 		gatk_folder = GATK_FOLDER,
-		tmp = TMP_FOLDER
+		tmp = TMP_FOLDER,
+		reference = lambda wildcards: data.RefFASTA[data.Individual == wildcards.indiv].values[0],
+	log:
+		LOGDIR + "gatk/filter_mutect_calls_{indiv}.log"
 	shell:
 		'''
-		{params.gatk_folder}/gatk \
+		{params.gatk_folder}gatk \
 			--java-options "-Xmx{resources.mem_mb}M -Djava.io.tmpdir={params.tmp}" \
 			FilterMutectCalls \
+			-R {params.reference} \
 			-V {input.vcf} \
+			--stats {input.in_stats} \
 	        --contamination-table {input.contam} \
 	        --ob-priors {input.read_orient} \
-	        -O {output}
+	        --filtering-stats {output.filt_stats} \
+	        -O {output.filt} |& tee {log}
 		'''
 
 
