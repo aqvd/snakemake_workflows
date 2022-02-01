@@ -3,9 +3,9 @@ import pandas as pd
 import glob
 
 ## Directories must end with "/" !!!!!
-FASTQDIR="/home/aquevedo/fastq/SraRunTable-GSE144833_SUIT2control_rna_exome/"
-ACC_TABLE="/home/aquevedo/projects/SUIT2control_rna_exome/SraRunTable_SUIT2cont_GSE144833.csv"
-
+FASTQDIR="/data_genome2/aquevedo/fastq/p53_ARID1A_DKO-GSE164179/"
+ACC_TABLE="/data_genome2/aquevedo/projects/p53_ARID1A_DKO-GSE164179/SraRunTable.csv"
+SCRIPTDIR="/home/aquevedo/snakemake_workflows/Chip-Seq/scripts/"
 ##Function to create directories unless they already exist
 def tryMkdir(path):
 	try:
@@ -33,14 +33,16 @@ rule fastERq_dump:
 		Dir=FASTQDIR,
 		prot=lambda wildcards: data.Protein[data.Run == wildcards.SRR].values[0],
 		cond=lambda wildcards: data.Condition[data.Run == wildcards.SRR].values[0],
-		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0]
+		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0],
+		scriptdir = SCRIPTDIR
 	log:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
 	threads: 5
 	shell:
 		'fasterq-dump --threads {threads} --temp {params.Dir} --split-3 --skip-technical \
 		--outdir {params.Dir} {params.srr} |& tee {log} && \
-		scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} {params.cond} {params.rep} |& tee -a {log} && \
+		{params.scriptdir}name_split3.sh {params.Dir} {params.srr} {params.prot} {params.cond} \
+			{params.rep} {threads} |& tee -a {log} && \
 		touch {output} |& tee -a {log}'
 
 rule prefetch_fastq_dump:
@@ -51,7 +53,9 @@ rule prefetch_fastq_dump:
 		Dir=FASTQDIR,
 		prot=lambda wildcards: data.Protein[data.Run == wildcards.SRR].values[0],
 		cond=lambda wildcards: data.Condition[data.Run == wildcards.SRR].values[0],
-		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0]
+		rep=lambda wildcards: data.Rep[data.Run == wildcards.SRR].values[0],
+		scriptdir = SCRIPTDIR
+
 	log:
 		FASTQDIR + 'log/fastqDump/{SRR}.log'
 	threads: 1
@@ -59,7 +63,8 @@ rule prefetch_fastq_dump:
 		'prefetch {params.srr} |& tee {log} && \
 		fastq-dump --log-level 6 --split-3 --skip-technical --dumpbase --clip \
 		--outdir {params.Dir} {params.srr} |& tee -a {log} && \
-		scripts/name_split3.sh {params.Dir} {params.srr} {params.prot} {params.cond} {params.rep} |& tee -a {log} && \
+		{params.scriptdir}name_split3.sh {params.Dir} {params.srr} {params.prot} {params.cond} \
+		{params.rep} {threads} |& tee -a {log} && \
 		touch {output} |& tee -a {log}'
 
 	
