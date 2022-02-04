@@ -1,13 +1,15 @@
-fastqdir: "/storage/scratch01/users/aquevedo/fastq/NIPBL_mouseHepatocytes_GSE93431/"
-datadir: "/storage/scratch01/users/aquevedo/mouseHepatocytes_NIPBLko/data/"
-resdir: "/storage/scratch01/users/aquevedo/mouseHepatocytes_NIPBLko/res/"
-logdir: "/storage/scratch01/users/aquevedo/mouseHepatocytes_NIPBLko/log/"
+fastqdir: "/data/aquevedo/fastq/AML-p53sh-GSE132245/"
+datadir: "/data/aquevedo/projects/AML-p53sh-GSE132245/data/"
+resdir: "/data/aquevedo/projects/AML-p53sh-GSE132245/res/"
+logdir: "/data/aquevedo/projects/AML-p53sh-GSE132245/log/"
 
-tableName: "config/table-NIPBLko_mouseHepatocytes-RNAseq.txt"
+snakedir: "/home/aquevedo/snakemake_workflows/Chip-Seq/"
+
+tableName: "/data/aquevedo/projects/AML-p53sh-GSE132245/AML-p53sh-GSE132245-table.csv"
 regions: "summits" # possible values: <summits | genes>
 mergedRegions: "no" # possible values: <yes | no>
 
-gtf: "/storage/scratch01/users/aquevedo/dani_files/genes_hg19.gtf"
+gtf: "/data/aquevedo/genomes/human/GRCh38/Homo_sapiens.GRCh38.102.gtf"
 feature: "exon" ## must appear in column 3 of gtf
 id_counts: "gene_id" ## id to sum htseq counts and to appear in countMatrix 1 row
 strandness: "no" ## is RNAseq stranded? <yes | no>
@@ -36,6 +38,7 @@ rules:
             mem_mb: 15000
     gatk:
         res:
+            bin: "/data_genome1/SharedSoftware/GATK/gatk-4.1.9.0/gatk"
             mem_mb: 4096 #in MB
             walltime: 25
     create_bigWig:

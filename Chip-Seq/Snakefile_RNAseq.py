@@ -126,6 +126,7 @@ def is_paired(sample, data):
 	else:
 		return "UNPAIRED"
 
+
 def get_mate(fq_list, mate_id):
 	for fq in fq_list:
 		if fq.endswith(str(mate_id) + ".fastq.gz"):
@@ -147,7 +148,6 @@ def get_hisat_reads(wildcards):
 		# substituting the command inn the IS_PAIRED if condition
 		# Return fake empty file  
 		return data.FilePath[ix]
-
 
 rule hisat2_align:
 	input:
