@@ -1,0 +1,49 @@
+## Directory hierarchy
+# Directories must end with "/" !!!!
+tableName: "/work_beegfs/sukmb552/projects/test_shortBREDsnake/table_test.txt"
+condadir: "/work_beegfs/sukmb552/snakemake_workflows/shortBRED/env/"
+
+fastqdir: "/work_beegfs/sukmb552/fastq/PD_IKMB/"
+datadir: "/work_beegfs/sukmb552/projects/PD_IKMB/data/"
+resdir: "/work_beegfs/sukmb552/projects/PD_IKMB/res/"
+logdir: "/work_beegfs/sukmb552/projects/PD_IKMB/log/"
+
+tmp_folder: "/work_beegfs/sukmb552/projects/PD_IKMB/data/tmp/"
+
+conda_dir: "/home/sukmb552/mambaforge/envs/biobakery"
+
+## software
+bbtools_folder: "/home/sukmb552/software/bbmap"
+
+rules:
+    default:
+        res:
+            threads: 1
+            mem_mb: 8192 #in MB
+            walltime: 480   
+    fastQC:
+        res:
+            threads: 8   
+    fastQScreen:
+        res:
+            mem_mb: 10000
+            threads: 12
+    bbduk_trim:
+        res:
+            threads: 10
+            mem_mb: 4960
+            walltime: 60
+    bbmap:
+        res:
+            threads: 14
+            mem_mb: 18000
+            walltime: 200
+            human_BBmapIX_dir: "/work_beegfs/sukmb552/resources/index/human/GRCh38/BBMap"
+
+    shortBRED_quant:
+        res:
+            threads: 20
+            mem_mb: 24000
+            walltime: 2160
+            usearch_path: "/home/sukmb552/software/usearch11.0.667_i86linux32"
+            markers: "/work_beegfs/sukmb552/resources/seqs/proteins/colibactin_and_T4SS_only/colibactin-T4SS-markers.faa"
