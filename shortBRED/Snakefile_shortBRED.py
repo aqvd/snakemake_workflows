@@ -11,6 +11,7 @@ import re
 configfile: "/work_beegfs/sukmb552/snakemake_workflows/shortBRED/config.yaml"
 
 TABLE_NAME = config["tableName"]
+TABLE_SEP= config["tableSep"]
 
 # Outpur directories
 FASTQDIR = config["fastqdir"]
@@ -41,7 +42,7 @@ def tryMkdir(path):
 def rep_undersc(col, rep = ":"):
 	return [str(i).replace("_", rep) for i in col.tolist()]
 
-data = pd.read_csv(TABLE_NAME,sep="\t")
+data = pd.read_csv(TABLE_NAME,sep=TABLE_SEP)
 
 ## R1.fasq.gz filename maped to Sample metadata is what we require from metadata
 ## mate2 we will repalce from gf
@@ -200,9 +201,10 @@ rule shortBRED_quant:
 		tmpdir = lambda wildcards: RESDIR + f"{wildcards.sample}_tmp"
 	log:
 		LOGDIR + "{sample}_shortBREDquant.log"
+	conda:
+		"biobakery"
 	shell:
 		'''
-		conda activate biobakery && \
 		shortbred_quantify.py \
         --markers {params.markers} \
         --wgs {input.fa} \
