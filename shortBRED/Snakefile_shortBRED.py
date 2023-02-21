@@ -3,13 +3,12 @@ import pandas as pd
 import numpy as np
 import glob
 import re
-from utils_snakemake_workflows.utils import *
 
 ##################################################
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "/home/aquevedo/snakemake_workflows/shortBRED/config.yaml"
+configfile: "/work_beegfs/sukmb552/snakemake_workflows/shortBRED/config.yaml"
 
 TABLE_NAME = config["tableName"]
 
@@ -21,7 +20,6 @@ LOGDIR = config["logdir"]
 
 # Software directories
 BBTOOLS_FOLDER = config["bbtools_folder"]
-HUMAN_BBMAPIX_DIR = config["human_BBmapIX_dir"]
 
 # Dir with Conda ennvironment .yaml definintions and tmporary folder
 TMP_FOLDER = config["tmp_folder"]
@@ -60,7 +58,7 @@ data.to_csv(metadata_saved, sep = "\t", index = False)
 # chenck unique sample names
 _, c = np.unique(data["SampleName"], return_counts=True)
 
-assert all(c==2), f"Duplicated Samples!\nCheck Snamekemale used metadata file: {metadata_saved}" 
+assert all(c==1), f"Duplicated Samples!\nCheck Snamekemale used metadata file: {metadata_saved}" 
 
 
 ##################################################
@@ -95,10 +93,10 @@ def get_readPair(pairID, fq_list):
 
 rule bbduk_trim_adapt:
 	input:
-		R1 = lambda wildcards: expand(FASTQDIR + '{R1}',
-			R1 = data.fqR1[data.sample == wildcards.sample].values),
-		R2 = lambda wildcards: expand(FASTQDIR + '{R2}',
-			R2 = data.fqR2[data.sample == wildcards.sample].values)
+		R1 = lambda wildcards: expand('{R1}',
+			R1 = data.fqR1[data.SampleName == wildcards.sample].values),
+		R2 = lambda wildcards: expand('{R2}',
+			R2 = data.fqR2[data.SampleName == wildcards.sample].values)
 	output:
 		trim1 = temp( DATADIR + "{sample}_trim_R1.fq.gz"),
 		trim2 = temp( DATADIR + "{sample}_trim_R2.fq.gz")
@@ -121,7 +119,7 @@ rule bbduk_trim_adapt:
         ktrim=r k=23 mink=11 hdist=1 tpe tbo \
         qtrim=r trimq=10 \
         maq=10 \
-        pigz=t unpigz=t | tee {log}
+        pigz=t unpigz=t |& tee {log}
 		'''
 
 rule bbduk_phiX:
@@ -150,7 +148,7 @@ rule bbduk_phiX:
         ref={params.phiX} \
         ktrim=r k=23 mink=11 hdist=1 tpe tbo \
         k=31 hdist=1 stats={params.stats} \
-        pigz=t unpigz=t" | tee -a {log}
+        pigz=t unpigz=t" |& tee {log}
 		'''
 
 rule bbmap_host:
@@ -158,31 +156,31 @@ rule bbmap_host:
 		in1 = DATADIR + "{sample}_trim_noPhix_R1.fq.gz",
 		in2 = DATADIR + "{sample}_trim_noPhix_R2.fq.gz"
 	output:
-		out = DATADIR + "{sample}_trim_noPhix_noHost_inlv.fasta.gz"
+		DATADIR + "{sample}_trim_noPhix_noHost_inlv.fasta.gz"
 	log:
 		LOGDIR + '{sample}_bbmap_host.log'
 	threads:
-		get_resource("bbduk_map", "threads")
+		get_resource("bbmap", "threads")
 	resources:
-		mem_mb = get_resource("bbduk_map", "mem_mb"),
-		walltime = get_resource("bbduk_map", "walltime")
+		mem_mb = get_resource("bbmap", "mem_mb"),
+		walltime = get_resource("bbmap", "walltime")
 	params:
 		bbt_folder = BBTOOLS_FOLDER,
-		ix= BBTOOLS_FOLDER + "/resources/phix174_ill.ref.fa.gz",
+		ix = get_resource("bbmap", "human_BBmapIX_dir"),
 		stats=LOGDIR + '/{sample}_bbmap_host_stats.txt'
 	shell:
 		'''
-		{params.bbt_folder}/bbmap.sh -Xmx${mem_mb}M \
+		{params.bbt_folder}/bbmap.sh -Xmx${resources.mem_mb}M \
         fast \
         threads={threads} \
         minratio=0.9 maxindel=3 bwr=0.16 bw=12 minhits=2 qtrim=r trimq=10 \
         untrim idtag printunmappedcount kfilter=25 maxsites=1 k=14 \
-        in1={in1} \
-        in2={in2} \
-        outu={out} \
+        in1={input.in1} \
+        in2={input.in2} \
+        outu={output} \
         outm=/dev/null \
         path={params.ix} \
-        pigz=t unpigz=t"
+        pigz=t unpigz=t" |& tee {log}
 		'''
 
 
@@ -196,8 +194,6 @@ rule shortBRED_quant:
 	resources:
 		mem_mb = get_resource("bbduk_map", "mem_mb"),
 		walltime = get_resource("bbduk_map", "walltime")
-	conda:
-        "biobakery"
 	params:
 		markers=get_resource("shortBRED_quant", "markers"),
 		usearch_path=get_resource("shortBRED_quant", "usearch_path"),
@@ -206,10 +202,11 @@ rule shortBRED_quant:
 		LOGDIR + "{sample}_shortBREDquant.log"
 	shell:
 		'''
+		conda activate biobakery && \
 		shortbred_quantify.py \
         --markers {params.markers} \
         --wgs {input.fa} \
         --usearch {params.usearch_path} \
         --threads {threads} \
-        --results {output.counts} --tmp {params.tmpdir}
+        --results {output.counts} --tmp {params.tmpdir} |& tee {log}
 		'''

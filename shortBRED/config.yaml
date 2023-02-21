@@ -1,14 +1,14 @@
 ## Directory hierarchy
 # Directories must end with "/" !!!!
-tableName: "/work_beegfs/sukmb552/projects/test_shortBREDsnake/table_test.txt"
+tableName: "/work_beegfs/sukmb552/snakemake_workflows/shortBRED/metadata_test.tsv"
 condadir: "/work_beegfs/sukmb552/snakemake_workflows/shortBRED/env/"
 
 fastqdir: "/work_beegfs/sukmb552/fastq/PD_IKMB/"
-datadir: "/work_beegfs/sukmb552/projects/PD_IKMB/data/"
-resdir: "/work_beegfs/sukmb552/projects/PD_IKMB/res/"
-logdir: "/work_beegfs/sukmb552/projects/PD_IKMB/log/"
+datadir: "/work_beegfs/sukmb552/projects/PD_IKMB/snk_shortBRED_test/data/"
+resdir: "/work_beegfs/sukmb552/projects/PD_IKMB/snk_shortBRED_test/res/"
+logdir: "/work_beegfs/sukmb552/projects/PD_IKMB/snk_shortBRED_test/log/"
 
-tmp_folder: "/work_beegfs/sukmb552/projects/PD_IKMB/data/tmp/"
+tmp_folder: "/work_beegfs/sukmb552/projects/PD_IKMB/snk_shortBRED_test/data/tmp/"
 
 conda_dir: "/home/sukmb552/mambaforge/envs/biobakery"
 
