@@ -8,7 +8,7 @@ import re
 ##				Configutation					##
 ##################################################
 ## write .yaml configuration filename
-configfile: "/work_beegfs/sukmb552/snakemake_workflows/shortBRED/config.yaml"
+configfile: "/work_beegfs/sukmb552/projects/clb_metagenome_PD_IKMB/config.yaml"
 
 TABLE_NAME = config["tableName"]
 TABLE_SEP= config["tableSep"]
@@ -42,16 +42,34 @@ def tryMkdir(path):
 def rep_undersc(col, rep = ":"):
 	return [str(i).replace("_", rep) for i in col.tolist()]
 
-data = pd.read_csv(TABLE_NAME,sep=TABLE_SEP)
+def has_cols(df, col_l):
+	return [col in data.columns for col in col_l]
 
-## R1.fasq.gz filename maped to Sample metadata is what we require from metadata
-## mate2 we will repalce from gf
-data["fqR2"] = [re.sub(r"_R1_001","_R2_001", f) for f in data["fqR1"]]
+data = pd.read_csv(TABLE_NAME, sep= f"{TABLE_SEP}")
+data['FqDir'] = FASTQDIR
 
-data[["SampleName1","SampleName2","SampleName3"]] = data[["SampleName1","SampleName2","SampleName3"]].apply(rep_undersc, axis = 0)
+# Sample name provided in metadata or created if data doenloaded with SnakemakeFastqDump
+# If proveided sample name and fqR1 FILENAME! without fasqdir added
+if not all(has_cols(data, ["SampleName", 'fqR1', 'fqR2'])):
+	# if we have used Snakefile_fastqDump, we can recreate fqR1
+	if "fqR1" not in data.columns and all(has_cols(data, ["Protein", 'Condition', 'Rep', 'Run'])):
+		data["fqR1"] = [f"{fq_d}{prot}_{cond}_{rep}_{run}_R1.fastq.gz" for fq_d, prot,cond,rep,run in zip(data.FqDir, data.Protein, data.Condition, data.Rep, data.Run) ]
 
-data["SampleName"] = data.SampleName1+"-"+ data.SampleName2 + "-"+ data.SampleName3
+	## R1.fasq.gz filename maped to Sample metadata is what we require from metadata
+	## mate2 we will repalce from gf
+	data["fqR2"] = [re.sub(r"(^.+)/([^/]+)_R1([_.].+$)",r"\g<1>/\g<2>_R2\g<3>", f) for f in data["fqR1"]]
 
+	data[["SampleName1","SampleName2","SampleName3"]] = data[["SampleName1","SampleName2","SampleName3"]].apply(rep_undersc, axis = 0)
+
+	data["SampleName"] = data.SampleName1+"-"+ data.SampleName2 + "-"+ data.SampleName3
+else:
+	# paste fastq dir
+	fqdir_fqR1 = [os.path.join(FASTQDIR, fq1) for fq1 in data.fqR1]
+	data['fqR1'] = fqdir_fqR1
+	fqdir_fqR2 = [os.path.join(FASTQDIR, fq2) for fq2 in data.fqR2]
+	data['fqR2'] = fqdir_fqR2
+
+print(data.head())
 # save metadata used
 metadata_saved = os.path.join(DATADIR, "metadata_used_by_snakemake.csv")
 data.to_csv(metadata_saved, sep = "\t", index = False)
@@ -107,7 +125,7 @@ rule bbduk_trim_adapt:
 		get_resource("bbduk_trim", "threads")
 	resources:
 		mem_mb = get_resource("bbduk_trim", "mem_mb"),
-		walltime = get_resource("bbduk_trim", "walltime")
+		runtime = get_resource("bbduk_trim", "runtime")
 	params:
 		adapters=BBTOOLS_FOLDER + "/resources/adapters.fa",
 		bbt_folder = BBTOOLS_FOLDER
@@ -136,7 +154,7 @@ rule bbduk_phiX:
 		get_resource("bbduk_trim", "threads")
 	resources:
 		mem_mb = get_resource("bbduk_trim", "mem_mb"),
-		walltime = get_resource("bbduk_trim", "walltime")
+		runtime = get_resource("bbduk_trim", "runtime")
 	params:
 		bbt_folder = BBTOOLS_FOLDER,
 		phiX= BBTOOLS_FOLDER + "/resources/phix174_ill.ref.fa.gz",
@@ -149,7 +167,7 @@ rule bbduk_phiX:
         ref={params.phiX} \
         ktrim=r k=23 mink=11 hdist=1 tpe tbo \
         k=31 hdist=1 stats={params.stats} \
-        pigz=t unpigz=t" |& tee {log}
+        pigz=t unpigz=t |& tee {log}
 		'''
 
 rule bbmap_host:
@@ -164,14 +182,14 @@ rule bbmap_host:
 		get_resource("bbmap", "threads")
 	resources:
 		mem_mb = get_resource("bbmap", "mem_mb"),
-		walltime = get_resource("bbmap", "walltime")
+		runtime = get_resource("bbmap", "runtime")
 	params:
 		bbt_folder = BBTOOLS_FOLDER,
 		ix = get_resource("bbmap", "human_BBmapIX_dir"),
-		stats=LOGDIR + '/{sample}_bbmap_host_stats.txt'
+		stats=LOGDIR + '{sample}_bbmap_host_stats.txt'
 	shell:
 		'''
-		{params.bbt_folder}/bbmap.sh -Xmx${resources.mem_mb}M \
+		{params.bbt_folder}/bbmap.sh -Xmx{resources.mem_mb}M \
         fast \
         threads={threads} \
         minratio=0.9 maxindel=3 bwr=0.16 bw=12 minhits=2 qtrim=r trimq=10 \
@@ -181,7 +199,7 @@ rule bbmap_host:
         outu={output} \
         outm=/dev/null \
         path={params.ix} \
-        pigz=t unpigz=t" |& tee {log}
+        pigz=t unpigz=t |& tee {log}
 		'''
 
 
@@ -193,16 +211,17 @@ rule shortBRED_quant:
 	threads:
 		get_resource("shortBRED_quant", "threads")
 	resources:
-		mem_mb = get_resource("bbduk_map", "mem_mb"),
-		walltime = get_resource("bbduk_map", "walltime")
+		mem_mb = get_resource("shortBRED_quant", "mem_mb"),
+		runtime = get_resource("shortBRED_quant", "runtime")
+	conda:
+		"biobakery"
 	params:
 		markers=get_resource("shortBRED_quant", "markers"),
 		usearch_path=get_resource("shortBRED_quant", "usearch_path"),
-		tmpdir = lambda wildcards: RESDIR + f"{wildcards.sample}_tmp"
+		tmpdir = lambda wildcards: RESDIR + f"{wildcards.sample}_tmp",
+		res_out = lambda wildcards: RESDIR + f"{wildcards.sample}" 
 	log:
 		LOGDIR + "{sample}_shortBREDquant.log"
-	conda:
-		"biobakery"
 	shell:
 		'''
 		shortbred_quantify.py \
@@ -210,5 +229,5 @@ rule shortBRED_quant:
         --wgs {input.fa} \
         --usearch {params.usearch_path} \
         --threads {threads} \
-        --results {output.counts} --tmp {params.tmpdir} |& tee {log}
+        --results {params.res_out} --tmp {params.tmpdir} |& tee {log}
 		'''

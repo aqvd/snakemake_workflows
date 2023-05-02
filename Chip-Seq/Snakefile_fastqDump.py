@@ -3,9 +3,12 @@ import pandas as pd
 import glob
 
 ## Directories must end with "/" !!!!!
-FASTQDIR="/data_genome2/aquevedo/fastq/p53_ARID1A_DKO-GSE164179/"
-ACC_TABLE="/data_genome2/aquevedo/projects/p53_ARID1A_DKO-GSE164179/SraRunTable.csv"
-SCRIPTDIR="/home/aquevedo/snakemake_workflows/Chip-Seq/scripts/"
+configfile: "/work_beegfs/sukmb552/projects/metagenome_PD_wallen2022_natCom/config.yaml"
+
+FASTQDIR="/work_beegfs/sukmb552/fastq/metagenome_PD_wallen2022_natCom/"
+ACC_TABLE="/work_beegfs/sukmb552/projects/metagenome_PD_wallen2022_natCom/PRJNA834801_SRAmetadta-PDnatComms.csv"
+SCRIPTDIR=config["scriptdir"]
+
 ##Function to create directories unless they already exist
 def tryMkdir(path):
 	try:
